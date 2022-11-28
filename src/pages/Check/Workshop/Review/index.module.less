@@ -1,0 +1,60 @@
+.stepHeader {
+  background-color: #fff;
+  margin-bottom: 10px;
+  .upHeader {
+    border-bottom: 1px solid #f0f0f0;
+    padding: 12px;
+  }
+}
+.stepContent {
+  background-color: #fff;
+  min-height: 50vh;
+}
+.reviewStepHeader {
+  padding: 16px 24px;
+  font-size: 16px;
+  font-weight: 500;
+  color: rgba(0, 0, 0, 0.85);
+  line-height: 24px;
+  :global {
+    .ant-btn {
+      float: right;
+      top: -5px;
+    }
+  }
+}
+
+@headerHeight: 56px;
+.main {
+  display: flex;
+  width: 100%;
+  max-height: calc(100vh - 210px);
+  min-height: 700px;
+  height: calc(100vh - 210px);
+  flex-direction: column;
+  overflow: hidden;
+  .header {
+    height: @headerHeight;
+    background-color: #fff;
+    border-bottom: 1px solid #d9d9d9;
+  }
+  .workshop {
+    background: #fafafa;
+    flex: 1;
+    overflow: hidden;
+    display: flex;
+  }
+  .treeWork {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background: #fff;
+  }
+  .toolbox {
+    width: @headerHeight;
+    padding-top: 16px;
+    border-left: 1px solid #d9d9d9;
+    background: #fafafa;
+  }
+}

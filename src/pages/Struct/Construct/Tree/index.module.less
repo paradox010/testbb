@@ -1,0 +1,221 @@
+.treeTool {
+  flex: 0 0 56px;
+  border-bottom: 1px solid #d9d9d9;
+  padding: 10px 20px;
+  :global {
+    .ant-btn {
+      margin-right: 10px;
+    }
+  }
+}
+
+@treeLineHeight: 24px;
+
+.yTree {
+  flex: 1;
+  padding: 10px 0 10px 20px;
+  background-color: #fff;
+  height: calc(100% - 76px);
+  :global {
+    .rc-tree {
+      height: 100%;
+      border: none;
+      .rc-tree-list {
+        height: 100%;
+        .rc-tree-list-holder {
+          height: 100%;
+          overflow: auto;
+        }
+      }
+    }
+
+    .rc-tree .rc-tree-treenode {
+      display: flex;
+      align-items: flex-start;
+      padding: 0 0 4px;
+      outline: none;
+    }
+
+    .rc-tree .rc-tree-treenode span.rc-tree-switcher {
+      background-image: url('@/assets/tree.png');
+      background-size: 113px;
+      width: 24px;
+      height: 24px;
+    }
+
+    .rc-tree .rc-tree-treenode span.rc-tree-switcher.rc-tree-switcher_open {
+      background-position: 3px -35px;
+    }
+    .rc-tree .rc-tree-treenode span.rc-tree-switcher.rc-tree-switcher_close {
+      background-position: -20px -35px;
+    }
+
+    .rc-tree-indent {
+      align-self: stretch;
+      white-space: nowrap;
+      height: auto;
+    }
+    .rc-tree-indent-unit {
+      position: relative;
+      height: 100%;
+      width: 16px;
+      &:before {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 4px;
+        bottom: -4px;
+        border-right: 1px dashed #d9d9d9;
+      }
+    }
+    .rc-tree-indent-unit-end:before {
+      display: none;
+    }
+    .rc-tree .rc-tree-treenode span.rc-tree-switcher.rc-tree-switcher-noop {
+      width: 24px;
+      height: 24px;
+      background: none;
+    }
+
+    .rc-tree-switcher-noop {
+      position: relative;
+      &:before {
+        position: absolute;
+        top: 0;
+        right: 12px;
+        bottom: -4px;
+        margin-left: -1px;
+        border-right: 1px dashed #d9d9d9;
+        content: ' ';
+      }
+      &:after {
+        position: absolute;
+        left: 12px;
+        width: 10px;
+        height: 14px;
+        border-bottom: 1px dashed #d9d9d9;
+        content: ' ';
+      }
+    }
+    .rc-tree-treenode:first-child .rc-tree-switcher-noop:before {
+      height: 50%;
+      top: 54%;
+    }
+
+    .rc-tree .rc-tree-treenode-leaf-last .rc-tree-switcher-noop:before {
+      top: auto !important;
+      bottom: auto !important;
+      height: 14px !important;
+    }
+
+    .rc-tree-node-selected {
+      box-shadow: none;
+      background-color: #bae7ff;
+    }
+
+    .rc-tree-node-content-wrapper:hover {
+      background-color: #e3f1ff;
+    }
+
+    .rc-tree .rc-tree-treenode .rc-tree-node-content-wrapper {
+      line-height: @treeLineHeight;
+      height: auto;
+      min-width: 100px;
+      padding-right: 10px;
+      transition: background-color 0.3s;
+    }
+
+    .rc-tree .rc-tree-treenode span.rc-tree-iconEle {
+      display: none;
+    }
+
+    // draggble
+    .ds_draggeble.dragover {
+      background: #c5c5e3;
+    }
+    .ant-tree-list-holder {
+      height: 800px;
+      overflow: auto;
+    }
+  }
+
+  .opeItem {
+    margin: 0 4px;
+    padding: 0;
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    background-image: url('@/assets/tree.png');
+    background-repeat: no-repeat;
+    background-attachment: scroll;
+    background-size: 113px;
+    vertical-align: text-bottom;
+  }
+  // .opeItem:first-child {
+  //   margin-left: 50px;
+  // }
+  .editOpe {
+    background-position: 0 0;
+    &:hover {
+      background-position: 0 -20px;
+    }
+  }
+  .addOpe {
+    background-position: -24px 0;
+    &:hover {
+      background-position: -24px -20px;
+    }
+  }
+  .detailOpe {
+    background-position: -48px 0;
+    &:hover {
+      background-position: -48px -20px;
+    }
+  }
+  .moveOpe {
+    background-position: -72px 0px;
+    &:hover {
+      background-position: -72px -20px;
+    }
+  }
+  .deleteOpe {
+    background-position: -96px 0px;
+    &:hover {
+      background-position: -96px -20px;
+    }
+  }
+
+  :global(.rc-tree-node-content-wrapper) .opeItem {
+    visibility: hidden;
+    pointer-events: none;
+  }
+  :global(.rc-tree-node-content-wrapper):hover .opeItem {
+    visibility: visible;
+    pointer-events: inherit;
+  }
+  :global(.rc-tree-node-selected.rc-tree-node-content-wrapper) .opeItem {
+    visibility: visible;
+    pointer-events: inherit;
+  }
+
+  .nodeTitle {
+    pointer-events: none;
+    padding-right: 50px;
+  }
+
+  .icon {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    margin-right: 2px;
+    line-height: 16px;
+    background-color: transparent;
+    background-image: url('@/assets/favicon.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-attachment: scroll;
+    border: 0 none;
+    outline: none;
+    cursor: pointer;
+  }
+}

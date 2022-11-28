@@ -1,0 +1,70 @@
+
+.flexContent {
+  display: flex;
+  flex: auto;
+  height: 800px;
+  background-color: #fff;
+}
+.left {
+  flex: auto;
+}
+
+.flexCollapse(@value; @type:width) {
+  flex: 0 0 @value;
+  /* stylelint-disable-next-line */
+  @{type}: @value;
+  max-@{type}: @value;
+  min-@{type}: @value;
+}
+@rightWidth: 300px;
+@colIconWidth: 20px;
+.right {
+  .flexCollapse(@colIconWidth,width);
+  padding-left: @colIconWidth;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s;
+  &.open {
+    .flexCollapse(@rightWidth+@colIconWidth,width);
+  }
+}
+
+.collapseIcon {
+  position: absolute;
+  width: @colIconWidth;
+  left: 1px;
+  top: 50%;
+  transform: translate(0, -50%);
+  cursor: pointer;
+  color: cadetblue;
+}
+.collapseTrashIcon {
+  white-space: nowrap;
+  cursor: pointer;
+  color: cadetblue;
+}
+
+.colFlexContent {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  .historyWrap {
+    flex: 1;
+    width: @rightWidth;
+    overflow: auto;
+  }
+  .trashTreeWrap {
+    position: relative;
+    width: @rightWidth;
+  }
+
+  .down {
+    .flexCollapse(40px,height);
+    overflow: hidden;
+    transition: all 0.3s;
+    &.open {
+      .flexCollapse(300px,height);
+    }
+  }
+}

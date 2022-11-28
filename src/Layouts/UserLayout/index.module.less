@@ -1,0 +1,77 @@
+.container {
+  background: #464a54;
+  display: flex;
+  min-height: 100vh;
+  align-items: center;
+  justify-content: center;
+  .content {
+    min-width: 900px;
+    min-height: 500px;
+    height: 50vh;
+    background: #fff;
+    border-radius: 10px;
+    display: flex;
+    & > img {
+      width: 64%;
+      flex: 1;
+      object-fit: cover;
+    }
+  }
+  .loginWrap {
+    // flex: 1;
+    width: 400px;
+    padding: 40px 32px 40px 40px;
+    :global {
+      .ant-form {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+      }
+      .ant-input {
+        background: #f2f5f9;
+        border: none;
+      }
+      .ant-input-password {
+        background: #f2f5f9;
+        border: none;
+      }
+      .ant-input-status-error:not(.ant-input-disabled):not(.ant-input-borderless).ant-input {
+        background: #f2f5f9;
+      }
+      /* stylelint-disable-next-line max-line-length */
+      .ant-input-affix-wrapper-status-error:not(.ant-input-affix-wrapper-disabled):not(.ant-input-affix-wrapper-borderless).ant-input-affix-wrapper {
+        background: #f2f5f9;
+      }
+    }
+  }
+}
+.captchaWrap {
+  :global {
+    .ant-input-group-addon {
+      padding: 0;
+      border: 0;
+      img {
+        cursor: pointer;
+        height: 38px;
+      }
+    }
+  }
+}
+.formTitle {
+  font-size: 32px;
+  font-weight: 600;
+  color: #333;
+  line-height: 45px;
+}
+.linkOpe {
+  color: #666;
+  display: flex;
+  justify-content: space-between;
+  a {
+    color: #666;
+    &:hover,
+    &:active {
+      color: #1890ff;
+    }
+  }
+}

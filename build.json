@@ -1,0 +1,39 @@
+{
+  "vite": true,
+  "outputDir": "dist",
+  "define": {
+    "process.env.ANTD_VERSION": "4.24.1"
+  },
+  "proxy": {
+    "/api": {
+      "enable": true,
+      "target": "http://121.37.179.208:8001/"
+    },
+    "/api/websocket": {
+      "enable": true,
+      "ws": true,
+      "target": "http://121.37.179.208:8001/"
+    }
+  },
+  "plugins": [
+    [
+      "build-plugin-moment-locales",
+      {
+        "locales": ["zh-cn"]
+      }
+    ],
+    [
+      "build-plugin-ignore-style",
+      {
+        "libraryName": "antd"
+      }
+    ],
+    [
+      "build-plugin-antd",
+      {
+        "disableModularImport": true,
+        "themeConfig": {}
+      }
+    ]
+  ]
+}

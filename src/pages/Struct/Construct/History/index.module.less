@@ -1,0 +1,58 @@
+.historyList {
+  overflow-x: hidden;
+}
+.listHeader {
+  background: #fbfbfb;
+  display: flex;
+  min-height: 48px;
+  padding: 10px 24px;
+  border-bottom: 1px solid #eee;
+  color: #000;
+}
+.item {
+  display: flex;
+  min-height: 40px;
+  padding: 10px 24px;
+  border-bottom: 1px solid #eee;
+}
+.date {
+  flex: 0 0 126px;
+  white-space: nowrap;
+}
+.ope {
+  display: flex;
+  flex-direction: column;
+  padding-left: 10px;
+  cursor: pointer;
+  &:hover {
+    color: #1890ff;
+  }
+  .man {
+    font-weight: bold;
+    :global {
+      .ds_history_tag {
+        background-image: url('@/assets/tree.png');
+        background-size: 113px;
+        background-repeat: no-repeat;
+        background-attachment: scroll;
+        vertical-align: text-bottom;
+        display: inline-block;
+        width: 18px;
+        height: 18px;
+        background-position: 0px -59px;
+      }
+      .add_tag {
+        background-position: -24px -59px;
+      }
+      .update_tag {
+        background-position: 0px -59px;
+      }
+      .move_tag {
+        background-position: -48px -59px;
+      }
+      .delete_tag {
+        background-position: -72px -59px;
+      }
+    }
+  }
+}

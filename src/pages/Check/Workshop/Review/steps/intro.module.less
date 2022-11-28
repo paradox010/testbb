@@ -1,0 +1,89 @@
+.introContent {
+  padding: 24px;
+  overflow: auto;
+  .roleItem {
+    margin-bottom: 8px;
+    &:after {
+      content: '';
+      width: 100%;
+      height: 1px;
+      display: block;
+      background: linear-gradient(90deg, #e9e9e9, transparent 80%);
+    }
+  }
+  .roleItem:last-child {
+    margin-bottom: 0;
+    &:after {
+      display: none;
+    }
+  }
+  .roleTitle {
+    margin-bottom: 8px;
+  }
+  .userItem {
+    display: flex;
+    width: 200px;
+    margin-right: 20px;
+    margin-bottom: 18px;
+  }
+  .userPic {
+    flex: 0 0 64px;
+    width: 64px;
+    height: 64px;
+    margin-right: 8px;
+    background: #eef2fe;
+  }
+  .userName {
+    font-weight: 500;
+    color: rgba(0, 0, 0, 0.85);
+    line-height: 22px;
+    font-size: 14px;
+    margin-bottom: 5px;
+  }
+  .userDes {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+
+    color: rgba(0, 0, 0, 0.45);
+    line-height: 17px;
+    font-size: 12px;
+  }
+}
+.versionWrap {
+  display: flex;
+}
+.versionItem {
+  width: 200px;
+  margin-right: 16px;
+  border-radius: 2px;
+  border: 1px solid #d9d9d9;
+  display: flex;
+  flex-direction: column;
+  .titleWrap {
+    padding: 16px 16px 12px;
+    font-weight: 500;
+    flex: 1;
+  }
+  .subTitle {
+    padding: 0 16px 16px;
+    color: rgba(0, 0, 0, 0.45);
+    font-weight: 400;
+    border-bottom: 1px solid #d9d9d9;
+  }
+  .subItem {
+    flex: 0 0 50%;
+    padding: 16px;
+    font-size: 20px;
+    color: #000;
+  }
+  .subItem:first-child {
+    border-right: 1px solid #d9d9d9;
+  }
+  .desLabel {
+    font-size: 12px;
+    color: rgba(0, 0, 0, 0.45);
+  }
+}
