@@ -172,18 +172,18 @@ const MyTree: React.FC<TreeProps> = ({ treeMsg$, yTree }) => {
     event.preventDefault();
   };
   const onDragEnter = (event) => {
-    if (event.target.classList.contains('ds_draggeble')) {
+    if (event.target.classList.contains('ds-draggeble')) {
       event.target.classList.add('dragover');
     }
   };
   const onDragLeave = (event) => {
-    if (event.target.classList.contains('ds_draggeble')) {
+    if (event.target.classList.contains('ds-draggeble')) {
       event.target.classList.remove('dragover');
     }
   };
   const onDrop = (event) => {
     event.preventDefault();
-    if (!event.target?.classList?.contains('ds_draggeble')) {
+    if (!event.target?.classList?.contains('ds-draggeble')) {
       return;
     }
     event.target.classList.remove('dragover');
@@ -279,7 +279,7 @@ const MyTree: React.FC<TreeProps> = ({ treeMsg$, yTree }) => {
               onDragStart={onDragStart}
               onDragEnd={onDragEnd}
               data-index={nodeData.id}
-              className="ds_draggeble"
+              className="ds-draggeble"
               draggable={nodeData.editStatus !== -1}
             >
               <span className="ds-nodeTitle">{nodeData.name}</span>

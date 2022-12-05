@@ -1,35 +1,58 @@
 module.exports = {
+  // '/api/standard/domain/list': {
+  //   body: [
+  //     {
+  //       title: '标准1',
+  //       type: 1,
+  //       id: 1001,
+  //     },
+  //     {
+  //       title: '标准2',
+  //       type: 2,
+  //       id: 1000,
+  //     },
+  //   ],
+  //   header: { code: 200 },
+  // },
   '/api/getbasic': {
     header: { code: 200 },
     body: {
-      userType: '1',
       name: '评审详情',
-      userList: [
+      member: [
         {
-          name: 'aaa',
-          role: '主持人',
+          userName: 'aaa',
+          userId: 100001,
+          userRole: '1',
         },
         {
-          name: 'bbb',
-          role: '演讲人',
+          userName: 'bbb',
+          userId: 100002,
+          userRole: '2',
         },
         {
-          name: 'ccc',
-          role: '演讲人',
+          userName: 'ccc',
+          userId: 100003,
+          userRole: '2',
         },
         {
-          name: 'ddd',
-          role: '评审人',
+          userName: 'ddd',
+          userId: 100004,
+          userRole: '3',
         },
         {
-          name: 'eee',
-          role: '听证人',
+          userName: 'eee',
+          userId: 100005,
+          userRole: '4',
         },
       ],
       versionList: [
         {
-          name: 'sdfsdfsddf',
-          id: '12321',
+          name: '提议标准1',
+          id: '1',
+        },
+        {
+          name: '提议标准12',
+          id: '2',
         },
       ],
     },

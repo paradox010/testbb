@@ -1,8 +1,10 @@
 import ProTable from '@ant-design/pro-table';
 import type { ActionType, ProColumns } from '@ant-design/pro-table';
-import { Button, Space } from 'antd';
-import { request } from 'ice';
+import { Tag } from 'antd';
+import { request, history } from 'ice';
 import { useRef } from 'react';
+
+import { domainTypeEnum } from '@/dataType';
 
 type GithubIssueItem = {
   url: string;
@@ -18,25 +20,70 @@ type GithubIssueItem = {
 
 const columns: ProColumns<GithubIssueItem>[] = [
   {
-    title: '标题',
-    dataIndex: 'title',
+    title: '标准名称',
+    dataIndex: 'name',
   },
   {
-    title: '状态',
-    dataIndex: 'state',
+    title: '域类型',
+    tooltip: 'tooltip',
+    dataIndex: 'type',
+    hideInSearch: true,
+    render: (text) => {
+      const item = domainTypeEnum.find((v) => v.value === text);
+      if (!item) return null;
+      return <Tag color={item.color}>{item.label}</Tag>;
+    },
+  },
+  {
+    title: '最新版本',
+    dataIndex: 'lastRelease',
     hideInSearch: true,
   },
   {
-    title: '时间',
+    title: '产品类目',
+    dataIndex: 'count',
+    hideInSearch: true,
+  },
+  {
+    title: '产品属性',
+    dataIndex: 'vcount',
+    hideInSearch: true,
+  },
+  {
+    title: '状态',
+    dataIndex: 'statu',
+    valueType: 'select',
+    valueEnum: {
+      all: { text: '全部', status: 'Default' },
+      process: {
+        text: '构建中',
+        status: 'Process',
+      },
+      run: {
+        text: '构建中',
+        status: 'Success',
+      },
+      merge: {
+        text: '融合中',
+        status: 'purple',
+      },
+      interrupt: {
+        text: '暂停运行',
+        status: 'Default',
+      },
+    },
+  },
+  {
+    title: '创建时间',
     key: 'showTime',
-    dataIndex: 'created_at',
+    dataIndex: 'createTime',
     valueType: 'date',
     sorter: true,
     hideInSearch: true,
   },
   {
-    title: '时间',
-    dataIndex: 'created_at',
+    title: '创建时间',
+    dataIndex: 'createTime',
     valueType: 'dateRange',
     hideInTable: true,
     search: {
@@ -55,53 +102,49 @@ const columns: ProColumns<GithubIssueItem>[] = [
     render: (text, record, _, action) => {
       return [
         <a
-          key="e"
+          key="view"
           onClick={() => {
-            console.log(action);
+            history?.push({
+              pathname: '/kstruct/kbuild',
+              search: `?domainId=${record.id}`,
+            });
           }}
         >
-          action
+          构建
         </a>,
-        <a key="view">view</a>,
       ];
     },
   },
 ];
 
 const getTableData = async (params = {}, sort, filter) => {
-  console.log(params, sort, filter);
-  return request({
-    url: 'https://proapi.azurewebsites.net/github/issues',
+  const data = await request({
+    url: '/api/standard/domain/list',
     method: 'get',
-    params,
   });
+  return {
+    total: 2,
+    data,
+    success: true,
+  };
 };
 export default () => {
   const actionRef = useRef<ActionType>();
+
   return (
-    <ProTable
-      actionRef={actionRef}
-      columns={columns}
-      rowKey="id"
-      request={getTableData}
-      search={{
-        labelWidth: 'auto',
-      }}
-      form={{
-        syncToUrl: (values, type) => {
-          if (type === 'get') {
-            return {
-              ...values,
-              created_at: [values.startTime, values.endTime],
-            };
-          }
-          return values;
-        },
-      }}
-      pagination={{
-        pageSize: 5,
-      }}
-      headerTitle="sss"
-    />
+    <div>
+      <ProTable
+        actionRef={actionRef}
+        columns={columns}
+        rowKey="id"
+        request={getTableData}
+        search={{
+          labelWidth: 'auto',
+        }}
+        pagination={{
+          pageSize: 10,
+        }}
+      />
+    </div>
   );
 };

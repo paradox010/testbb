@@ -1,4 +1,4 @@
-import styles from './index.module.less';
+import styles from '../index.module.less';
 
 const Panel = ({ children }) => {
   return (

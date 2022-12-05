@@ -1,27 +1,16 @@
-import { Button, Checkbox, Descriptions } from 'antd';
 import styles from './index.module.less';
 
-import VoteModal from './Modal';
+import DiscussTitle from './DiscussTitle';
+import Domains from './Domains';
 
-const Sign = ({ stepMsg$, msgData }) => {
+import { StepProps, StepCompType } from '../../msg.d';
+
+const Step: React.FC<StepProps> = ({ stepMsg$, msgData }) => {
   return <div className={styles.content}>discuss</div>;
 };
 
-Sign.Title = ({ stepMsg$, msgData }) => {
-  return (
-    <>
-      提议讨论
-      <Button type="primary">编辑结束</Button>
-      <Button>发起投票</Button>
-      <VoteModal />
-    </>
-  );
-};
-Sign.Tool = ({ stepMsg$, msgData }) => {
-  return (
-    <>
-      <div>other</div>
-    </>
-  );
-};
-export default Sign;
+const TypedStep = Step as StepCompType;
+
+TypedStep.Title = DiscussTitle;
+TypedStep.Tool = Domains;
+export default TypedStep;

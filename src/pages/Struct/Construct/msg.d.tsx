@@ -1,5 +1,5 @@
 import type { RTreeNode, HistoryItem, OpeItem, UserItem } from './Tree/node';
-// 服务器通信
+// 服务器通信 接受到的服务器消息
 interface SocketInit {
   mesType: 'init';
   content: {
@@ -28,21 +28,30 @@ interface SocketUser {
   mesType: 'user';
   content: UserItem;
 }
+interface SocketMoreLog {
+  mesType: 'moreLog';
+  content: {
+    logs: HistoryItem[];
+  };
+}
 
-export type SocketMsgType = SocketInit | SocketUser | SocketOpe | SocketLoc | SocketLog;
+export type SocketMsgType = SocketInit | SocketUser | SocketOpe | SocketLoc | SocketLog | SocketMoreLog;
 
 // 组件之间通信
 interface refreshTree {
   type: 'refreshTree';
   autoExpand?: boolean;
+  ifInit?: boolean;
 }
 interface refreshHistory {
   type: 'refreshHistory';
+  ifInit?: boolean;
 }
 // 属性内接受外部节点的内容
 interface refreshCategory {
   type: 'refreshCategory';
   content: RTreeNode;
+  ifInit?: boolean;
 }
 
 interface treePos {
@@ -81,4 +90,20 @@ interface user {
   type: 'user';
   content: Partial<UserItem>;
 }
-export type MsgType = refreshTree | refreshHistory | refreshCategory | treePos | ope | modal | route | user;
+// morelog
+interface moreLogRes {
+  type: 'moreLogRes';
+  content: {
+    list: HistoryItem[];
+  };
+}
+export type MsgType =
+  | refreshTree
+  | refreshHistory
+  | refreshCategory
+  | treePos
+  | ope
+  | modal
+  | route
+  | user
+  | moreLogRes;

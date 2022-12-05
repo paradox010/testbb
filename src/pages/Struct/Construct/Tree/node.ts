@@ -487,11 +487,11 @@ class History {
     this.init(list);
   }
   init(list: HistoryItem[]) {
-    this.list = list.sort((a, b) => b.id - a.id);
+    this.list = list.sort((a, b) => b.receiveTime - a.receiveTime);
   }
   mergeItems(items: HistoryItem[]) {
     this.list = [...items, ...this.list];
-    this.list = this.list.sort((a, b) => a.id - b.id);
+    this.list = this.list.sort((a, b) => b.receiveTime - a.receiveTime);
   }
   push(item: HistoryItem) {
     if (!item) return;
@@ -519,6 +519,9 @@ class History {
   }
   getList() {
     return this.list;
+  }
+  getLastItem() {
+    return this.list[this.list.length - 1];
   }
 }
 
@@ -707,12 +710,12 @@ export class YTree {
       keys.push(v.id);
       v?.children?.forEach((vc) => {
         keys.push(vc.id);
-        vc?.children?.forEach((vcc) => {
-          keys.push(vcc.id);
-          vcc?.children?.forEach((vccc) => {
-            keys.push(vccc.id);
-          });
-        });
+        // vc?.children?.forEach((vcc) => {
+        //   keys.push(vcc.id);
+        //   vcc?.children?.forEach((vccc) => {
+        //     keys.push(vccc.id);
+        //   });
+        // });
       });
     });
     return keys;

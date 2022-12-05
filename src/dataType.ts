@@ -1,5 +1,19 @@
+// 域的类型
+export const domainTypeEnum = [
+  {
+    label: '通用域',
+    value: 1,
+    color: 'success',
+  },
+  {
+    label: '私有域',
+    value: 2,
+    color: 'processing',
+  },
+];
+
 // 评审的用户类型
-export const reviewUserTypeEnum = [
+export const reviewUserRoleTypeEnum = [
   {
     label: '主持人',
     value: '1',

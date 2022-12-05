@@ -1,27 +1,41 @@
-import { runApp, IAppConfig, request } from 'ice';
+import { runApp, IAppConfig, request, history } from 'ice';
 import { message } from 'antd';
 // const delay = (time) => new Promise((resolve) => setTimeout(() => resolve(1), time));
 
 const appConfig: IAppConfig = {
   app: {
-    rootId: 'ice-container',
+    rootId: 'ds-root',
     title: '浙江省',
     getInitialData: async () => {
-      const token = localStorage.getItem('token');
-      if (token) {
-        const resData = await request({
-          url: '/api/sys/sysUser/userInfo',
-          headers: {
-            Token: token,
-          },
-        });
-        return {
-          initialStates: {
-            user: { ...resData, token },
-          },
-        };
+      let token;
+      if (process.env.NODE_ENV === 'development') {
+        token = sessionStorage.getItem('token');
+      } else {
+        token = localStorage.getItem('token');
       }
-
+      if (token) {
+        try {
+          const resData = await request({
+            url: '/api/sys/sysUser/userInfo',
+            headers: {
+              Token: token,
+            },
+          });
+          return {
+            initialStates: {
+              user: { ...resData, token },
+            },
+          };
+        } catch (error) {
+          history?.push({
+            pathname: '/user/login',
+          });
+          console.log(error);
+        }
+      }
+      history?.push({
+        pathname: '/user/login',
+      });
       // await delay(1000);
       return {
         // initialStates 是约定好的字段，会透传给 store 的初始状态
@@ -43,6 +57,13 @@ const appConfig: IAppConfig = {
       request: {
         onConfig: (config) => {
           // eslint-disable-next-line no-param-reassign
+          const token = sessionStorage.getItem('token');
+          if (token) {
+            config.headers = {
+              ...(config.headers || {}),
+              Token: token,
+            };
+          }
           // config.headers = { a: 1 };
           return config;
         },

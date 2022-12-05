@@ -1,10 +1,20 @@
+import React from 'react';
+import { YTree } from '@/pages/Struct/Construct/Tree/node';
+// import type UsersCenter from './socketClass/UsersCenter';
+import type VoteCenter from './socketClass/VoteCenter';
+
+import { EventEmitter } from 'ahooks/lib/useEventEmitter';
+import type { BasicDataNode } from 'rc-tree';
+
 // 是否需要记录自己的一些信息？
-interface User {
+export interface User {
   userName: string;
   userId: string;
+  userRole: string; // 0:系统
   isOnline?: boolean;
   isCheck?: boolean; // 快捷签到
   company?: string;
+  token?: string;
 }
 interface Vote {
   title: string; // 投票的内容
@@ -18,114 +28,221 @@ interface Pos {
   ifInAttr?: boolean;
   attrLocation?: string;
 }
-// 到场签到
-interface Step1 {
-  step: 1;
+
+// 接受到的服务器端消息
+// init
+interface SocketBasicContent {
+  isFreeze?: boolean;
+  record: any[];
+  member: User[];
+  proposalDomainId?: string;
+}
+interface SocketInitStep12Type extends SocketBasicContent {
+  processState: 1 | 2;
+}
+interface SocketInitStep3Type extends SocketBasicContent {
+  processState: 3;
+}
+interface SocketInitStep4Type extends SocketBasicContent {
+  processState: 4;
+  currentTree: any[];
+  recycleTree: any[];
+  unfinishedLog: any[];
+  isVote: boolean;
+  reviewVote: VoteBasicType;
+}
+interface SocketInitStep5Type extends SocketBasicContent {
+  isFreeze?: boolean;
+  processState: 5;
+  record: any[];
+  member: User[];
+  isVote: boolean;
+  reviewVote: VoteBasicType;
+}
+interface SocketInitStep6Type extends SocketBasicContent {
+  processState: 6;
+}
+interface SocketInitStep7Type extends SocketBasicContent {
+  processState: 7;
+  version?: string;
 }
 
-// request baseConfig of the version
-interface Step2 {
-  step: 2;
+interface SocketInitStepType {
+  mesType: 'init';
+  content:
+    | SocketInitStep12Type
+    | SocketInitStep3Type
+    | SocketInitStep4Type
+    | SocketInitStep5Type
+    | SocketInitStep6Type
+    | SocketInitStep7Type;
 }
 
-interface Step3 {
-  step: 3;
+// 上线/离线
+interface SocketOnlineType {
+  mesType: 'user';
   content: {
-    user: User;
-    startTime: number;
-    pos: Pos;
+    userId: string;
+    isOnline: boolean;
+  };
+}
+// 签到
+interface SocketCheckType {
+  mesType: 'check';
+  content: {
+    userId: string;
+    isCheck: boolean;
+  };
+}
+// 会议消息
+interface RecordOnlineType extends User {
+  recordType: 'system';
+  receiveTime: number;
+  content: string;
+}
+interface RecordOpeType extends User {
+  recordType: 'operation';
+  content: string;
+  id?: string;
+}
+interface SocketRecordType {
+  mesType: 'record';
+  date: number;
+  content: RecordOnlineType;
+}
+
+interface SocketStepType {
+  mesType: 'stage';
+  content:
+    | {
+        processState: 1 | 2 | 4 | 5 | 6;
+      }
+    | {
+        processState: 3;
+        isFirstProposal?: boolean;
+        proposalDomainId: string;
+      }
+    | {
+        processState: 7;
+        version?: string;
+      };
+}
+
+interface VoteBasicType {
+  id: string;
+  content: string;
+  isFinished?: boolean;
+  createTime: number;
+  voteResult?:  UserVoteRes[];
+}
+interface VoteStartType extends VoteBasicType {
+  // 创建投票 / 结束投票
+  type: 1;
+}
+export interface UserVoteRes {
+  userId: string;
+  isAgree: boolean;
+}
+interface VoteEndType extends VoteBasicType {
+  // 创建投票 / 结束投票
+  type: 2;
+  isFinished: true;
+  createTime: number;
+  voteResult: UserVoteRes[];
+}
+interface VoteUserType extends VoteBasicType {
+  // 用户投票的行为
+  userId: string;
+  isAgree: boolean;
+  type: 3;
+}
+export type SocketVoteItem = VoteStartType | VoteEndType | VoteUserType;
+interface SocketVoteType {
+  mesType: 'vote';
+  content: SocketVoteItem;
+}
+
+export type SocketMsgType =
+  | SocketInitStepType
+  | SocketCheckType
+  | SocketOnlineType
+  | SocketRecordType
+  | SocketStepType
+  | SocketVoteType;
+
+// 组件通信
+interface RefreshType {
+  type: 'refreshAll' | 'refreshRecord' | 'refreshUsers' | 'refreshStep' | 'refreshProposal' | 'refreshVote';
+}
+// checkin
+interface UserCheckType {
+  type: 'check';
+  content: {
+    userId: string;
+    isCheck: true;
+  };
+}
+// go next
+interface ProcessType {
+  type: 'process';
+  content: SocketStepType['content'];
+}
+
+// 查看详情，页面切换
+interface RouteType {
+  type: 'route';
+  path: 'tree' | 'attr';
+  ifModal?: boolean; // 是否以弹框模式
+  content?: {
+    id?: string; // attr id
+    name?: string;
   };
 }
 
-// 本步骤中的操作记录在localStorage中，方便断开重连后定位自己的上一次操作
-interface Step4 {
-  step: 4;
-  pos: Pos;
-  filePos?: Pos;
-  vote?: Vote;
+interface CompVoteType {
+  type: 'compVote';
+  content: Omit<VoteStartType, 'createTime' | 'id'> | Omit<VoteEndType, 'voteResult'> | VoteUserType;
 }
 
-interface Step5 {
-  step: 5;
-  voteContent: {};
+export type CompMsgType = RefreshType | UserCheckType | ProcessType | RouteType | CompVoteType;
+
+// stepState 存储全局的状态
+export interface StepStateType {
+  record: any[];
+  member: User[];
+  processState: number;
+  proposalDomainId?: string;
+  isFreeze: boolean;
+  version?: string;
+  isVote?: boolean;
+  reviewVote?: VoteBasicType;
 }
 
-interface Step6 {
-  step: 6;
-  signContent: {};
+// stepComp & msgData
+export interface MsgDataType {
+  yTree: YTree;
+  // usersCenter: UsersCenter;
+  voteCenter: VoteCenter;
+  record: any[];
+  self: User;
 }
 
-interface Step7 {
-  step: 7;
-  releaseContent: {};
+export interface StepProps {
+  msgData: MsgDataType;
+  stepMsg$: EventEmitter<CompMsgType>;
 }
 
-type Step = Step1 | Step2 | Step3 | Step4 | Step5 | Step6 | Step7;
-
-interface MeetSocketInit {
-  mesType: 'init';
-  role: 'auto' | 'user' | 'checker';
-  step: Step; // 签到/介绍/提议介绍/提议讨论/投票/签字/发布
-  meetRecord: []; // 会议直播记录
-  userList: User[];
+interface StepSubCompType {
+  Title: React.FC<StepProps>;
+  Tool?: React.FC<StepProps>;
 }
 
-// 接受到的信息
-interface MeetSocketLog {
-  mesType: 'meetLog';
-  content: {}; // meetLog has many type!!
+export type StepCompType = React.FC<StepProps> & StepSubCompType;
+
+interface RTreeNode extends BasicDataNode {
+  id: string;
+  name: string;
+  editStatus?: number;
+  children?: RTreeNode[];
+  isLeaf?: boolean;
 }
-
-interface MeetSocketOpe {
-  mesType: 'operation';
-}
-
-interface MeetSocketUser {
-  mesType: 'user';
-}
-
-// 需要后台记录的信息
-// interface MeetSocketRecord {
-
-// }
-
-export type MeetSocketMsgType = MeetSocketInit;
-
-// 发送消息的格式
-// user: 上线，签到 record
-interface SendUser {
-  msgType: 'user';
-  step: number;
-  user: User;
-}
-
-// 投票类
-interface SendVote {
-  msgType: 'vote';
-  voteType: 'create' | 'vote_is' | 'vote_no' | 'recommend' | 'force';
-  user: User;
-  vote: Vote;
-}
-
-// 控制流程 & 定位的信息记录/发送 & 投票的发起/发送 msgType: 'step'
-type SendStep = Step1 | Step2 | Step3 | Step4 | Step5 | Step6 | Step7;
-
-// 操作类
-interface SendOpe {
-  msgType: 'operation';
-  user: User;
-}
-
-interface SendBro {
-  msgType: 'self_broadcast';
-}
-
-type SendMsgType = SendUser | SendVote | SendStep | SendBro;
-
-// 组件内通信
-
-interface dontkown {
-  msgType: 'process';
-  step: number;
-}
-type CompMsgType = dontkown;

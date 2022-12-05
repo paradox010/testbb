@@ -19,7 +19,7 @@ interface GithubIssueItem {
 const columns: Array<ProColumns<GithubIssueItem>> = [
   {
     title: '标准名称',
-    dataIndex: 'title',
+    dataIndex: 'domainName',
   },
   {
     title: '标准版次',
@@ -28,7 +28,7 @@ const columns: Array<ProColumns<GithubIssueItem>> = [
   },
   {
     title: '负责行业专家小组',
-    dataIndex: 'team',
+    dataIndex: 'teamName',
     valueType: 'select',
   },
   {
@@ -85,14 +85,14 @@ const columns: Array<ProColumns<GithubIssueItem>> = [
 
 const getTableData = async (params) => {
   const res = await request({
-    url: '/api/getList',
+    url: '/api/review/review/list',
     method: 'get',
     params,
   });
   return {
-    data: res.list,
+    data: res,
     success: true,
-    total: res.total,
+    total: 5,
   };
 };
 export default () => {

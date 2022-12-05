@@ -15,7 +15,7 @@ const defaultOpt: YWebSocketOpt = {
 export default class YWebSocket {
   url: string;
   protocols?: string;
-  ws: WebSocket;
+  ws?: WebSocket;
   opt: YWebSocketOpt;
 
   lockReconnect = false;
@@ -38,16 +38,29 @@ export default class YWebSocket {
     this.initEventHandle();
   }
 
+  reset(url: string, protocols?: string, opt: YWebSocketOpt = defaultOpt) {
+    if (!this.isClose) {
+      this.close();
+    }
+    this.url = url;
+    this.protocols = protocols;
+    this.opt = opt;
+    this.lockReconnect = false;
+    this.repeatTimes = 0;
+    this.init();
+  }
+
   createWebSocket() {
     try {
       this.ws = new WebSocket(this.url, this.protocols);
+      this.isClose = false;
     } catch (e) {
       this.reconnect();
-      console.error(e);
     }
   }
 
   initEventHandle() {
+    if (!this.ws) return;
     this.ws.onclose = (e) => {
       this.onclose(e);
       this.reconnect();
@@ -63,6 +76,7 @@ export default class YWebSocket {
       this.heartCheck();
     };
     this.ws.onmessage = (e) => {
+      if (this.isClose) return;
       this.onmessage(e);
       // 如果获取到消息，心跳检测重置
       // 拿到任何消息都说明当前连接是正常的
@@ -94,10 +108,11 @@ export default class YWebSocket {
   }
   heartStart() {
     if (this.isClose) return;
+    if (!this.ws) return;
     this.pingTimeoutId = window.setTimeout(() => {
-      this.ws.send(this.opt.pingMsg || '{type:"ping"}');
+      this.ws?.send(this.opt.pingMsg || '{type:"ping"}');
       this.pongTimeoutId = window.setTimeout(() => {
-        this.ws.close();
+        this.ws?.close();
       }, this.opt.pongTimeout);
     }, this.opt.pingTimeout);
   }
@@ -106,12 +121,14 @@ export default class YWebSocket {
     clearTimeout(this.pongTimeoutId);
   }
   close() {
-    this.isClose = true;
     this.heartReset();
-    this.ws.close();
+    this.ws?.close();
+    this.ws = undefined;
+    this.isClose = true;
   }
   // extends websocket
   send(msg) {
+    if (!this.ws) return;
     this.ws.send(msg);
   }
   onclose(e) {}

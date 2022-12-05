@@ -18,8 +18,9 @@ import History from '../History';
 import { AppstoreOutlined, DeleteOutlined, FileTextOutlined, LeftOutlined } from '@ant-design/icons';
 
 import styles from './index.module.less';
+import { getParams } from '@/utils/location';
 
-const url = `ws://${window.location.host}/api/websocket/product/feature?domainId=1001`;
+const url = `ws://${window.location.host}/api/websocket/product/feature`;
 
 const style = document.createElement('style');
 style.type = 'text/css';
@@ -39,13 +40,15 @@ export default function Content({ id, back }) {
       }),
     [],
   );
-  const ws = useCreation(() => new YWebSocket(`${url}&categoryId=${id}`, user.userId), []);
+  const ws = useCreation(
+    () => new YWebSocket(`${url}?domainId=${getParams()?.domainId}&categoryId=${id}`, user?.token),
+    [],
+  );
 
   useEffect(() => {
     // const ws = new YWebSocket(url);
     ws.init();
     ws.onmessage = ({ data }) => {
-      console.log('attrws');
       const socketData = JSON.parse(data) as SocketMsgType;
       if (socketData.mesType === 'init') {
         // construct tree new YTree(tree)
@@ -62,9 +65,11 @@ export default function Content({ id, back }) {
         }
         attrMsg$.emit({
           type: 'refreshTree',
+          ifInit: true,
         });
         attrMsg$.emit({
           type: 'refreshHistory',
+          ifInit: true,
         });
         attrMsg$.emit({
           type: 'refreshCategory',
@@ -108,15 +113,6 @@ export default function Content({ id, back }) {
     }
   });
 
-  const onRefresh = () => {
-    attrMsg$.emit({
-      type: 'refreshTree',
-    });
-    attrMsg$.emit({
-      type: 'refreshHistory',
-    });
-  };
-
   return (
     <Panel>
       <span className={styles.headerTitle}>
@@ -138,7 +134,7 @@ export default function Content({ id, back }) {
           noPadding
           title={'修订历史'}
         >
-          <History treeMsg$={attrMsg$} yTree={yAttr} />
+          <History treeMsg$={attrMsg$} yTree={yAttr} categoryId={id} />
         </RND>
         <RND
           text={

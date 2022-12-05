@@ -1,32 +1,37 @@
-import { useEffect } from 'react';
-import { useCreation, useEventEmitter } from 'ahooks';
 import AttrRoute from './AttrRoute';
 import Panel from './Panel';
 import RND from './RND';
 import TrashTree from './TrashTree';
 import History from './History';
 import Tree from './Tree';
-
+import DomainSelect from './DomainSelect';
 import store from '@/store';
 
 // import { generateData } from './Tree/utils/dataUtils';
 import YModal from './Modal';
 import { YTree } from './Tree/node';
 import YWebSocket from '@/components/websocket';
-
 import type { MsgType, SocketMsgType } from './msg.d';
 
-import styles from './index.module.less';
+import { useEffect, useState } from 'react';
 import { DeleteOutlined, FileTextOutlined, QuestionCircleOutlined } from '@ant-design/icons';
 
-// const tree = generateData();
-const url = `ws://${window.location.host}/api/websocket/product/category?domainId=1001`;
+import { useLocation } from 'ice';
+import { useCreation, useEventEmitter, useMount } from 'ahooks';
+
+import { getParams } from '@/utils/location';
+
+import styles from './index.module.less';
+import { Spin } from 'antd';
+
+const url = `ws://${window.location.host}/api/websocket/product/category`;
 // const url = 'ws://localhost:3333/api/websocket/product/category?domainId=1001';
 
 // style的资源会浪费，所以在最外层维护,如果不定义则用全局的style维护
 const style = document.createElement('style');
 style.type = 'text/css';
 
+let domainId = '';
 export default function Stand() {
   const [user] = store.useModel('user');
 
@@ -39,58 +44,119 @@ export default function Stand() {
       }),
     [],
   );
-  const ws = useCreation(() => new YWebSocket(url, user.userId), []);
 
+  // useEffect(() => {
+  //   // const ws = new YWebSocket(url);
+  //   ws.init();
+  //   ws.onmessage = ({ data }) => {
+  //     console.log('ws');
+  //     const socketData = JSON.parse(data) as SocketMsgType;
+  //     if (socketData.mesType === 'init') {
+  //       // construct tree new YTree(tree)
+  //       yTree.init(socketData?.content?.currentTree, socketData?.content?.recycleTree);
+  //       yTree.history.init([...(socketData?.content?.operationLog || [])]);
+  //       // 执行服务器未完成的操作记录 除了未完成的新增操作之外
+  //       const opeLists = socketData?.content?.unfinishedLog || [];
+  //       for (let i = opeLists.length - 1; i >= 0; i--) {
+  //         yTree.history.push(opeLists[i]);
+  //         if (opeLists[i].operationType === 'add' && !opeLists[i].isFinished) {
+  //           continue;
+  //         }
+  //         yTree.operation.add(JSON.parse(opeLists[i].param));
+  //       }
+  //       treeMsg$.emit({
+  //         type: 'refreshTree',
+  //         autoExpand: true,
+  //       });
+  //       treeMsg$.emit({
+  //         type: 'refreshHistory',
+  //       });
+  //     }
+  //     if (socketData.mesType === 'operation') {
+  //       yTree.operation.add(socketData.content);
+  //       treeMsg$.emit({
+  //         type: 'refreshTree',
+  //       });
+  //     }
+  //     if (socketData.mesType === 'opeLog') {
+  //       yTree.history.push(socketData.content);
+  //       treeMsg$.emit({
+  //         type: 'refreshHistory',
+  //       });
+  //     }
+  //     if (socketData.mesType === 'user') {
+  //       yTree.users.push(socketData.content);
+  //     }
+  //   };
+  //   ws.onclose = () => {
+  //     yTree.onDestory();
+  //   };
+  //   return () => {
+  //     ws.close?.();
+  //   };
+  // }, []);
+
+  const ws = useCreation(() => new YWebSocket(url, user?.token), []);
+
+  const location = useLocation();
+
+  useMount(() => {
+    domainId = '';
+  });
   useEffect(() => {
-    // const ws = new YWebSocket(url);
-    ws.init();
-    ws.onmessage = ({ data }) => {
-      console.log('ws');
-      const socketData = JSON.parse(data) as SocketMsgType;
-      if (socketData.mesType === 'init') {
-        // construct tree new YTree(tree)
-        yTree.init(socketData?.content?.currentTree, socketData?.content?.recycleTree);
-        yTree.history.init([...(socketData?.content?.operationLog || [])]);
-        // 执行服务器未完成的操作记录 除了未完成的新增操作之外
-        const opeLists = socketData?.content?.unfinishedLog || [];
-        for (let i = opeLists.length - 1; i >= 0; i--) {
-          yTree.history.push(opeLists[i]);
-          if (opeLists[i].operationType === 'add' && !opeLists[i].isFinished) {
-            continue;
+    if (getParams()?.domainId !== domainId) {
+      domainId = getParams()?.domainId;
+      ws.reset(`${url}?domainId=${domainId}`, user?.token);
+      ws.onmessage = ({ data }) => {
+        console.log('ws');
+        const socketData = JSON.parse(data) as SocketMsgType;
+        if (socketData.mesType === 'init') {
+          // construct tree new YTree(tree)
+          yTree.init(socketData?.content?.currentTree, socketData?.content?.recycleTree);
+          yTree.history.init([...(socketData?.content?.operationLog || [])]);
+          // 执行服务器未完成的操作记录 除了未完成的新增操作之外
+          const opeLists = socketData?.content?.unfinishedLog || [];
+          for (let i = opeLists.length - 1; i >= 0; i--) {
+            yTree.history.push(opeLists[i]);
+            if (opeLists[i].operationType === 'add' && !opeLists[i].isFinished) {
+              continue;
+            }
+            yTree.operation.add(JSON.parse(opeLists[i].param));
           }
-          yTree.operation.add(JSON.parse(opeLists[i].param));
+          treeMsg$.emit({
+            type: 'refreshTree',
+            autoExpand: true,
+            ifInit: true,
+          });
+          treeMsg$.emit({
+            type: 'refreshHistory',
+            ifInit: true,
+          });
         }
-        treeMsg$.emit({
-          type: 'refreshTree',
-          autoExpand: true,
-        });
-        treeMsg$.emit({
-          type: 'refreshHistory',
-        });
-      }
-      if (socketData.mesType === 'operation') {
-        yTree.operation.add(socketData.content);
-        treeMsg$.emit({
-          type: 'refreshTree',
-        });
-      }
-      if (socketData.mesType === 'opeLog') {
-        yTree.history.push(socketData.content);
-        treeMsg$.emit({
-          type: 'refreshHistory',
-        });
-      }
-      if (socketData.mesType === 'user') {
-        yTree.users.push(socketData.content);
-      }
-    };
-    ws.onclose = () => {
-      yTree.onDestory();
-    };
+        if (socketData.mesType === 'operation') {
+          yTree.operation.add(socketData.content);
+          treeMsg$.emit({
+            type: 'refreshTree',
+          });
+        }
+        if (socketData.mesType === 'opeLog') {
+          yTree.history.push(socketData.content);
+          treeMsg$.emit({
+            type: 'refreshHistory',
+          });
+        }
+        if (socketData.mesType === 'user') {
+          yTree.users.push(socketData.content);
+        }
+      };
+      ws.onclose = () => {
+        yTree.onDestory();
+      };
+    }
     return () => {
-      ws.close?.();
+      ws?.close?.();
     };
-  }, []);
+  }, [location]);
 
   treeMsg$.useSubscription((msg) => {
     if (msg.type === 'operation') {
@@ -105,20 +171,14 @@ export default function Stand() {
     }
   });
 
-  const onRefresh = () => {
-    treeMsg$.emit({
-      type: 'refreshTree',
-    });
-    treeMsg$.emit({
-      type: 'refreshHistory',
-    });
-  };
-
   return (
     <>
       <AttrRoute treeMsg$={treeMsg$}>
         <Panel>
-          <span className={styles.headerTitle}>运维版本信息</span>
+          <span className={styles.headerTitle}>
+            运维版本信息
+            <DomainSelect />
+          </span>
           <Tree treeMsg$={treeMsg$} yTree={yTree} />
           <div>
             <RND

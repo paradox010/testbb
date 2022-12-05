@@ -20,7 +20,11 @@ const Login = () => {
   const { run } = useRequest(loginUp, {
     manual: true,
     onSuccess: (data) => {
-      localStorage.setItem('token', data?.tokenValue);
+      if (process.env.NODE_ENV === 'development') {
+        sessionStorage.setItem('token', data?.tokenValue);
+      } else {
+        localStorage.setItem('token', data?.tokenValue);
+      }
     },
   });
 

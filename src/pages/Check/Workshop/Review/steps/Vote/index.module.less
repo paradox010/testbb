@@ -7,6 +7,7 @@
   text-align: center;
 }
 .messagePic {
+  display: block;
   width: 64px;
   height: 64px;
   background-image: url('@/assets/message.png');
@@ -111,7 +112,7 @@
   padding: 8px;
   border-radius: 6px;
   flex: 0 0 47%;
-  margin-right: 23px;
+  // margin-right: 23px;
 }
 
 .vote2 {
@@ -130,7 +131,7 @@
   border-radius: 6px;
 }
 
-.upVote {
+.reviewUpVote {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -145,13 +146,19 @@
   }
 }
 
+.modalUpVote {
+  .vote1 {
+    // nothing
+  }
+}
+
 .percent {
   font-size: 30px;
   color: rgba(0, 0, 0, 0.85);
   line-height: 38px;
 }
 
-.downVote {
+.reviewDownVote {
   padding: 20px;
   .td1 {
     display: flex;
@@ -164,6 +171,27 @@
     & > div:nth-child(3) {
       padding: 0 24px;
       border-left: 1px solid #d8d8d8;
+    }
+  }
+}
+
+.modalDownVote {
+  padding: 20px;
+  :global(.ant-progress-text) {
+    display: none;
+  }
+  .td1 {
+    max-width: 200px;
+    display: flex;
+    flex-wrap: wrap;
+    white-space: nowrap;
+    align-items: center;
+    & > div:nth-child(2) {
+      padding: 0px 12px;
+      margin: 0 12px;
+    }
+    & > div:nth-child(3) {
+      padding: 20px 0 0;
     }
   }
 }

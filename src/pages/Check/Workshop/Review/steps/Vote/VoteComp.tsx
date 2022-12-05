@@ -1,61 +1,59 @@
 import { Button, Descriptions, Progress } from 'antd';
-import React from 'react';
+import React, { useContext } from 'react';
 
 import styles from './index.module.less';
 
-interface VoteType {
-  voteId: string;
-  voteName: string;
-}
+import type { VoteItem } from '../../socketClass/VoteCenter';
+import BasicContext from '../../basicContext';
 
-type VoteList = Array<{ userId: string; isVote?: boolean; isPositive?: boolean }>;
-
-type VoteModalType = 'vote_start' | 'vote_end';
-
+type ModalType = 'modal' | 'review';
 export interface VoteCompProps {
-  vote?: VoteType;
-  voteList?: VoteList;
-  isVote?: boolean;
-  voteType?: VoteModalType;
   userType: string;
-  type?: 'modal' | 'review';
+  modalType?: ModalType;
+  vote?: VoteItem;
+  onForcePass?: (v: VoteItem) => void;
+  onVote: (v: any) => void;
 }
-const VoteComp: React.FC<VoteCompProps> = ({
-  userType,
-  vote,
-  voteList,
-  isVote,
-  voteType = 'vote_start',
-  type = 'modal',
-}) => {
+const VoteComp: React.FC<VoteCompProps> = ({ userType, modalType = 'modal', vote, onVote, onForcePass }) => {
+  if (!vote) return <span>暂无投票</span>;
   if (userType === '1' || userType === '2' || userType === '3') {
-    if (voteType === 'vote_start') {
-      if (!isVote) {
-        return <VoteStart data={vote} type={type} />;
+    if (!vote.isFinished) {
+      if (!vote.isVote) {
+        return <VoteStart data={vote} modalType={modalType} onVote={onVote} />;
       }
-
-      return <VoteOk type={type} />;
+      return <VoteOk modalType={modalType} />;
     }
-    return <Witness data={voteList} type={type} userType={userType} />;
+    return <Witness data={vote} modalType={modalType} userType={userType} />;
   }
   if (userType === '4') {
-    return <Witness data={voteList} type={type} userType={userType} />;
+    return <Witness onForcePass={onForcePass} data={vote} modalType={modalType} userType={userType} />;
   }
   return null;
 };
 
-const VoteStart = ({ data, type }) => {
+const VoteStart: React.FC<{
+  data: VoteItem;
+  modalType: ModalType;
+  onVote: (v: any) => void;
+}> = ({ data, modalType, onVote }) => {
+  const onInnerVote = (isAgree) => {
+    onVote({
+      id: data.id,
+      createTime: data.createTime,
+      isAgree,
+    });
+  };
   return (
     <div style={{ padding: 80 }}>
-      {type === 'review' && <div className={styles.messagePic} />}
-      <div className={styles.voteName}>
-        {type === 'modal' ? `对于提议“${data?.voteName}”，您是否同意` : '对本次修改版本，是否通过'}
+      {modalType === 'review' && <span className={styles.messagePic} />}
+      <div className={styles.content}>
+        {modalType === 'modal' ? `对于提议“${data?.content}”，您是否同意` : '对本次修改版本，是否通过'}
       </div>
       <div style={{ textAlign: 'center' }}>
-        <Button type="primary" className="ds-green-btn" style={{ marginRight: 16 }}>
+        <Button type="primary" className="ds-green-btn" style={{ marginRight: 16 }} onClick={() => onInnerVote(true)}>
           通过
         </Button>
-        <Button type="primary" danger>
+        <Button type="primary" danger onClick={() => onInnerVote(false)}>
           拒绝
         </Button>
       </div>
@@ -63,25 +61,35 @@ const VoteStart = ({ data, type }) => {
   );
 };
 
-const VoteOk = ({ type }) => {
+const VoteOk = ({ modalType }) => {
   return (
     <div style={{ padding: 80 }}>
-      {type === 'review' && <div className={styles.waittingPic} />}
-      <div className={styles.voteName}>您已投票成功，请等待投票结果...</div>
+      {modalType === 'review' && <div className={styles.waittingPic} />}
+      <div className={styles.content}>您已投票成功，请等待投票结果...</div>
     </div>
   );
 };
 
-export const Witness = ({ data, type, userType = '1' }) => {
+export const Witness: React.FC<{
+  data: VoteItem;
+  modalType: ModalType;
+  userType?: string;
+  noTitle?: boolean;
+  onForcePass?: (v: VoteItem) => void;
+}> = ({ data, modalType, userType = '1', noTitle = false, onForcePass }) => {
+  const basic = useContext(BasicContext);
+  const onForce = () => {
+    onForcePass && onForcePass(data);
+  };
   return (
     <>
-      {type === 'modal' && userType !== '4' && <div className={styles.voteResTitle}>投票信息</div>}
-      {type === 'review' && userType !== '4' && (
+      {modalType === 'modal' && !noTitle && <div className={styles.voteResTitle}>投票信息</div>}
+      {modalType === 'review' && !noTitle && userType !== '4' && (
         <div className={styles.voteResTitle} style={{ textAlign: 'center', margin: '40px 0 0' }}>
           投票结果
         </div>
       )}
-      <div className={type ? styles.upVote : ''}>
+      <div className={modalType === 'review' ? styles.reviewUpVote : styles.modalUPVote}>
         <div className={styles.vote1}>
           <div className={styles.posiRes}>
             <div>投票通过人员</div>
@@ -102,20 +110,28 @@ export const Witness = ({ data, type, userType = '1' }) => {
               <div>投票通过率</div>
               <div className={styles.percent}>100%</div>
             </div>
-            <div className={styles.forceWrap}>
-              <Button type="primary">强制通过</Button>
-            </div>
+            {userType === '4' && (
+              <div className={styles.forceWrap}>
+                <Button type="primary" onClick={onForce} disabled={data.isFinished}>
+                  强制通过
+                </Button>
+              </div>
+            )}
           </div>
         </div>
       </div>
-      {type === 'review' && userType === '4' && (
-        <Descriptions layout="vertical" className={styles.downVote} bordered>
-          <Descriptions.Item label="投票信息">
+      {userType === '4' && (
+        <Descriptions
+          layout="vertical"
+          className={modalType === 'review' ? styles.reviewDownVote : styles.modalDownVote}
+          bordered
+        >
+          <Descriptions.Item label={<div style={modalType === 'modal' ? { maxWidth: 200 } : {}}>投票信息</div>}>
             <div className={styles.td1}>
               <Progress strokeLinecap="butt" strokeWidth={14} type="circle" percent={75} width={53} />
               <div style={{ padding: '0 12px' }}>
                 <div>投票总人数</div>
-                <div className={styles.percent}>100</div>
+                <div className={styles.percent}>{basic.member.length - 1}</div>
               </div>
               <div>
                 <div>已投票人员 34</div>
@@ -123,7 +139,15 @@ export const Witness = ({ data, type, userType = '1' }) => {
               </div>
             </div>
           </Descriptions.Item>
-          <Descriptions.Item label="未投票人员">1,23,4</Descriptions.Item>
+          <Descriptions.Item
+            label={
+              <div style={{ lineHeight: '32px' }}>
+                未投票人员<Button style={{ float: 'right' }}>一键提醒</Button>
+              </div>
+            }
+          >
+            <div>1,23,41,23</div>
+          </Descriptions.Item>
         </Descriptions>
       )}
     </>

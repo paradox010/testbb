@@ -88,7 +88,7 @@ const routerConfig: DRouterConfig[] = [
           },
           {
             path: '/',
-            redirect: '/kstruct/kbuild',
+            redirect: '/kstruct/kmanage',
           },
         ],
       },

@@ -21,7 +21,12 @@ const Login = () => {
   const { run } = useRequest(loginUp, {
     manual: true,
     onSuccess: (data) => {
-      localStorage.setItem('token', data?.tokenValue);
+      if (process.env.NODE_ENV === 'development') {
+        sessionStorage.setItem('token', data?.tokenValue);
+      } else {
+        localStorage.setItem('token', data?.tokenValue);
+      }
+      window.location.assign('/');
     },
   });
 
@@ -33,7 +38,6 @@ const Login = () => {
   const goPassword = () => {
     history?.push('/user/newPassword');
   };
-
   return (
     <LoginWrap>
       <Form name="login" layout="vertical" initialValues={{ remember: true }} onFinish={onFinish} autoComplete="off">

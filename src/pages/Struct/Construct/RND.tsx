@@ -45,7 +45,16 @@ const findOtherDrag = (ele: HTMLElement) => {
   }
   return res;
 };
-const RndWrap = ({ text, title, children, noPadding = false, defaultPosY = -28 }) => {
+const RndWrap = ({
+  text,
+  title,
+  children,
+  noPadding = false,
+  defaultPosX = -240,
+  defaultPosY = -28,
+  defaultWidth = 450,
+  defaultHeight = 500,
+}) => {
   const rndRef = useRef<Rnd>(null);
   const [open, setOpen] = useState(false);
   const onClickLayerUp = () => {
@@ -69,10 +78,10 @@ const RndWrap = ({ text, title, children, noPadding = false, defaultPosY = -28 }
       </div>
       <Rnd
         default={{
-          x: -240,
+          x: defaultPosX,
           y: defaultPosY,
-          width: 450,
-          height: 500,
+          width: defaultWidth,
+          height: defaultHeight,
         }}
         ref={rndRef}
         style={onOpenStyle()}

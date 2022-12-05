@@ -6,5 +6,7 @@ module.exports = getESLintConfig('react-ts', {
     '@iceworks/best-practices/no-http-url': 'off',
     '@iceworks/best-practices/no-js-in-ts-project': 'warn',
     'no-console': 'off',
+    'valtio/state-snapshot-rule': 'off',
   },
+  extends: ['prettier', 'plugin:valtio/recommended'],
 });
