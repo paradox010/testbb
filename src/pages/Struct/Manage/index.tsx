@@ -51,18 +51,18 @@ const columns: ProColumns<GithubIssueItem>[] = [
   },
   {
     title: '状态',
-    dataIndex: 'statu',
+    dataIndex: 'isValid',
     valueType: 'select',
     valueEnum: {
-      all: { text: '全部', status: 'Default' },
-      process: {
+      0: { text: '全部', status: 'Default' },
+      1: {
         text: '构建中',
         status: 'Process',
       },
-      run: {
-        text: '构建中',
-        status: 'Success',
-      },
+      // run: {
+      //   text: '构建中',
+      //   status: 'Success',
+      // },
       merge: {
         text: '融合中',
         status: 'purple',
@@ -138,6 +138,7 @@ export default () => {
         columns={columns}
         rowKey="id"
         request={getTableData}
+        onRequestError={()=>{}}
         search={{
           labelWidth: 'auto',
         }}

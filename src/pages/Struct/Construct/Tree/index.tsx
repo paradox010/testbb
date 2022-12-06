@@ -14,6 +14,7 @@ import {
   FileOutlined,
   FormOutlined,
   PlusSquareOutlined,
+  UndoOutlined,
 } from '@ant-design/icons';
 
 import Search from './Search';
@@ -242,7 +243,6 @@ const MyTree: React.FC<TreeProps> = ({ treeMsg$, yTree }) => {
         <Button icon={<FormOutlined />} onClick={() => onOutOpe()}>
           编辑
         </Button>
-        <Button icon={<ExportOutlined />}>导入</Button>
         <Button icon={<PlusSquareOutlined />} onClick={() => onOutOpe('add')}>
           增子节点
         </Button>
@@ -255,6 +255,8 @@ const MyTree: React.FC<TreeProps> = ({ treeMsg$, yTree }) => {
         <Button icon={<DeleteOutlined />} onClick={() => onOutOpe('delete')}>
           删除
         </Button>
+        <Button icon={<ExportOutlined />} disabled>导入</Button>
+        <Button icon={<UndoOutlined />} disabled>重置</Button>
       </div>
       <div className="dsTree" style={{ height: 'calc(100% - 76px)' }}>
         <RcTree<RTreeNode>

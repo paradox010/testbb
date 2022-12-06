@@ -13,7 +13,7 @@ import { YTree } from './Tree/node';
 import YWebSocket from '@/components/websocket';
 import type { MsgType, SocketMsgType } from './msg.d';
 
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { DeleteOutlined, FileTextOutlined, QuestionCircleOutlined } from '@ant-design/icons';
 
 import { useLocation } from 'ice';
@@ -22,7 +22,6 @@ import { useCreation, useEventEmitter, useMount } from 'ahooks';
 import { getParams } from '@/utils/location';
 
 import styles from './index.module.less';
-import { Spin } from 'antd';
 
 const url = `ws://${window.location.host}/api/websocket/product/category`;
 // const url = 'ws://localhost:3333/api/websocket/product/category?domainId=1001';
@@ -103,8 +102,9 @@ export default function Stand() {
   useMount(() => {
     domainId = '';
   });
+
   useEffect(() => {
-    if (getParams()?.domainId !== domainId) {
+    if (getParams()?.domainId && getParams()?.domainId !== domainId) {
       domainId = getParams()?.domainId;
       ws.reset(`${url}?domainId=${domainId}`, user?.token);
       ws.onmessage = ({ data }) => {

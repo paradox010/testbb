@@ -67,6 +67,9 @@ export default function Stand() {
             });
           }
         }
+        // if(st===4){
+
+        // }
       }
       if (socketData.mesType === 'user' || socketData.mesType === 'check') {
         const { userId, ...rest } = socketData.content;

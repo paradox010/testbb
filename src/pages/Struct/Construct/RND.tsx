@@ -50,7 +50,7 @@ const RndWrap = ({
   title,
   children,
   noPadding = false,
-  defaultPosX = -240,
+  defaultPosX = -340,
   defaultPosY = -28,
   defaultWidth = 450,
   defaultHeight = 500,

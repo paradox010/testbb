@@ -4,6 +4,7 @@
   "define": {
     "process.env.ANTD_VERSION": "4.24.1"
   },
+  "hash": true,
   "proxy": {
     "/api": {
       "enable": true,

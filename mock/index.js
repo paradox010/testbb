@@ -1,19 +1,8 @@
 module.exports = {
-  // '/api/standard/domain/list': {
-  //   body: [
-  //     {
-  //       title: '标准1',
-  //       type: 1,
-  //       id: 1001,
-  //     },
-  //     {
-  //       title: '标准2',
-  //       type: 2,
-  //       id: 1000,
-  //     },
-  //   ],
-  //   header: { code: 200 },
-  // },
+  '/api/review/review/list': {
+    body: null,
+    header: { code: 500 },
+  },
   '/api/getbasic': {
     header: { code: 200 },
     body: {

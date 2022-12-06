@@ -103,6 +103,7 @@ export default () => {
       columns={columns}
       rowKey="id"
       request={getTableData}
+      onRequestError={()=>{}}
       search={{
         labelWidth: 'auto',
       }}

@@ -64,12 +64,15 @@ TypedStep.Title = ({ stepMsg$, msgData }) => {
       },
     });
   };
+  const { userRole } = msgData.self;
   return (
     <>
       到场签到
-      <Button type="primary" onClick={goNext}>
-        会议开始
-      </Button>
+      {userRole === '1' ? (
+        <Button type="primary" onClick={goNext}>
+          会议开始
+        </Button>
+      ) : null}
     </>
   );
 };

@@ -4,6 +4,9 @@ import { Link } from 'ice';
 import { asideMenuConfig } from './menuConfig';
 import { Avatar } from 'antd';
 import store from '@/store';
+import { UserOutlined } from '@ant-design/icons';
+
+import styles from './index.module.less';
 
 const loopMenuItem = (menus) =>
   menus.map(({ icon, children, ...item }) => ({
@@ -17,14 +20,18 @@ export default function BasicLayout({ children, location }) {
 
   return (
     <ProLayout
+      className={styles.header}
       title="浙江省工业产品主数据管理平台专家系统"
+      headerTitleRender={(...params) => <a>{params[1]}</a>}
       style={{
         minHeight: '100vh',
       }}
-      layout="top"
+      layout="mix"
       location={{
         pathname: location.pathname,
       }}
+      navTheme="light"
+      headerTheme="light"
       menuDataRender={() => loopMenuItem(asideMenuConfig)}
       menuItemRender={(item, defaultDom) => {
         if (!item.path) {
@@ -33,7 +40,12 @@ export default function BasicLayout({ children, location }) {
         return <Link to={item.path}>{defaultDom}</Link>;
       }}
       logo={false}
-      rightContentRender={() => <><Avatar shape="square" size="small" />{user?.userName}</>}
+      rightContentRender={() => (
+        <div>
+          <Avatar icon={<UserOutlined />} />
+          <span style={{ margin: '0 5px' }}>{user?.userName}</span>
+        </div>
+      )}
       // footerRender={() => (
       //   <DefaultFooter
       //     links={[

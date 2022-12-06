@@ -93,7 +93,7 @@ const TT: React.FC<TreeProps> = ({ attrMsg$, yAttr }) => {
     {
       title: '操作',
       valueType: 'option',
-      tooltip: '继承属性在该节点下无法操作',
+      tooltip: '继承自上位节点的通用属性无法在此节点修改；如需修改请至上位属性进行',
       width: 200,
       render: (text, record, _, action) => {
         if (record.editStatus === -1) {
