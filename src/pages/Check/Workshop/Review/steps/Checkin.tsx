@@ -1,6 +1,7 @@
 import { Button, Checkbox, Descriptions } from 'antd';
 import { reviewUserRoleTypeEnum } from '@/dataType';
-import styles from './sign.module.less';
+import styles from './checkin.module.less';
+import checkImgUrl from '@/assets/checkIn.png';
 
 import { StepProps, StepCompType } from '../msg.d';
 
@@ -21,12 +22,17 @@ const Step: React.FC<StepProps> = ({ stepMsg$, msgData }) => {
   const { member } = useSnapshot(stepState);
 
   return (
-    <div className={styles.signContent}>
-      <div className={styles.signPic}>
-        线上签到
+    <div className={styles.checkContent}>
+      <div className={styles.checkPic}>
+        <img src={checkImgUrl} />
+        <div className={styles.checkText}>
+          <div className={styles.upText}>线上签到</div>
+          <div>请点击右侧按钮进行签到</div>
+        </div>
         <Button
           type="primary"
           onClick={onCheck}
+          style={{ float: 'right' }}
           disabled={member.find((v) => v.userId === msgData.self.userId)?.isCheck}
         >
           快捷签到

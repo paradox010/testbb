@@ -12,9 +12,10 @@ export interface CreateFormProps {
   onCancel: () => void;
   modalData?: AddModalData;
   yTree: YTreeType;
+  type?: 'move' | 'sync' | 'cover';
 }
 
-const CreateForm: React.FC<CreateFormProps> = ({ open, onOk, onCancel, modalData, yTree }) => {
+const CreateForm: React.FC<CreateFormProps> = ({ open, onOk, onCancel, modalData, yTree, type = 'move' }) => {
   const [select, setSelect] = useState('');
   const onChange = (key) => {
     setSelect(key);
@@ -36,10 +37,17 @@ const CreateForm: React.FC<CreateFormProps> = ({ open, onOk, onCancel, modalData
   };
 
   return (
-    <Modal open={open} title="移动节点" okText="确定" cancelText="取消" onCancel={onCancel} onOk={beforeOk}>
+    <Modal
+      open={open}
+      title={type === 'cover' ? '覆盖节点' : '移动节点'}
+      okText="确定"
+      cancelText="取消"
+      onCancel={onCancel}
+      onOk={beforeOk}
+    >
       <div>你选择的节点:{modalData?.name}</div>
       <div>
-        目标节点:
+        {type === 'cover' ? '覆盖节点' : '目标节点'}:
         <TreeSelect
           showSearch
           treeNodeFilterProp="name"

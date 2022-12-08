@@ -1,8 +1,8 @@
 module.exports = {
-  '/api/review/review/list': {
-    body: null,
-    header: { code: 500 },
-  },
+  // '/api/review/review/list': {
+  //   body: null,
+  //   header: { code: 500 },
+  // },
   '/api/getbasic': {
     header: { code: 200 },
     body: {

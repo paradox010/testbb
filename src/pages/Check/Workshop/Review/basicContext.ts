@@ -13,6 +13,8 @@ export const stepState = proxy<StepStateType>({
   version: '',
   isVote: false,
   // reviewVote:
+  specialOpes: [],
+  sign: '',
 });
 
 export function useMember({ watch }: { watch?: (v: StepStateType['member']) => void } = {}) {
@@ -27,6 +29,7 @@ export function useMember({ watch }: { watch?: (v: StepStateType['member']) => v
 export interface BasicContextProps {
   id: string;
   name: string;
+  domainId: string;
   member: User[];
   process: any[];
   domain: any[];

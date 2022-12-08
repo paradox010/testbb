@@ -4,6 +4,7 @@ import { useRef, useState } from 'react';
 
 import VoteModal from './Modal';
 import { StepProps } from '../../msg.d';
+import { useUpdate } from 'ahooks';
 
 const DiscussTitle: React.FC<StepProps> = ({ stepMsg$, msgData }) => {
   const [click, setClicked] = useState(false);
@@ -23,6 +24,13 @@ const DiscussTitle: React.FC<StepProps> = ({ stepMsg$, msgData }) => {
     setValue('');
     setClicked(false);
   };
+  const update = useUpdate();
+
+  stepMsg$.useSubscription((msg) => {
+    if (msg.type === 'refreshVote') {
+      update();
+    }
+  });
   const onCreateVote = () => {
     stepMsg$.emit({
       type: 'compVote',
@@ -95,8 +103,9 @@ const DiscussTitle: React.FC<StepProps> = ({ stepMsg$, msgData }) => {
         placement="bottomRight"
         content={content}
         trigger="click"
+        className="ds-pop ds-right"
       >
-        <Button>发起投票</Button>
+        <Button disabled={!(msgData?.voteCenter?.getLatest() || { isFinished: true }).isFinished}>发起投票</Button>
       </Popover>
       <VoteModal stepMsg$={stepMsg$} msgData={msgData} />
     </>

@@ -11,7 +11,7 @@ async function getAttr(params) {
   return resData;
 }
 
-function Show({ id, back }) {
+function Show({ id, back, type = 'page' }) {
   const { data } = useRequest(() =>
     getAttr({
       categoryPubId: id,
@@ -19,9 +19,9 @@ function Show({ id, back }) {
   );
   return (
     <>
-      <div onClick={back}>返回</div>
-      <Header data={{}} />
-      <ShowTable data={{ featureInfo: { '1': data || [] } }} />
+      {type === 'page' ? <div onClick={back}>返回</div> : null}
+      <Header data={data?.category || {}} />
+      <ShowTable data={data?.currentFeature || []} />
     </>
   );
 }

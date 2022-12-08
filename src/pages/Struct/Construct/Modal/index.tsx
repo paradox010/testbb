@@ -10,6 +10,7 @@ import AddModal from './AddModal';
 import UpdateModal from './UpdateModal';
 import MoveModal from './MoveModal';
 import DeleteModal from './DeleteModal';
+import ReviewMoveModal from './ReviewMoveModal';
 
 interface TreeProps {
   yTree: YTreeType;
@@ -22,22 +23,29 @@ interface ModalData {
   editStatus?: number;
   parentId?: string;
   parentName?: string;
+  dropId?: string;
+  dragId?: string;
+  domainPubId?: string;
 }
 const MyModal: React.FC<TreeProps> = ({ treeMsg$, yTree }) => {
-  const [modal, setModal] = useState({
+  const [modal, setModal] = useState<{
+    open: string;
+    modalData?: ModalData;
+  }>({
     open: '',
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    modalData: {} as ModalData,
+    modalData: {},
   });
   const closeModal = () => {
-    setModal({ open: '', modalData: {} as any });
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+    setModal({ open: '', modalData: {} });
   };
 
   treeMsg$.useSubscription((msg) => {
     if (msg.type === 'modal') {
       setModal({
         open: msg.open,
-        modalData: msg.modalData || {},
+        modalData: msg.modalData,
       });
     }
   });
@@ -94,7 +102,7 @@ const MyModal: React.FC<TreeProps> = ({ treeMsg$, yTree }) => {
     closeModal();
   };
   const onMoveConfirm = () => {
-    const { id, parentId, name } = modal.modalData;
+    const { id, parentId, name } = modal.modalData || {};
     if (!id || !parentId) return;
     treeMsg$.emit({
       type: 'operation',
@@ -113,6 +121,34 @@ const MyModal: React.FC<TreeProps> = ({ treeMsg$, yTree }) => {
   //   console.log(index);
   // };
 
+  const onSyncOk = () => {
+    const { id, parentId, domainPubId } = modal.modalData || {};
+    if (!id || !parentId || !domainPubId) return;
+    treeMsg$.emit({
+      type: 'operation',
+      content: {
+        id: new Date().valueOf(),
+        opeType: 'sync',
+        newNodes: [{ id, parentId, domainPubId }],
+      },
+    });
+    closeModal();
+  };
+
+  const onCoverOk  = () => {
+    const { id, parentId, domainPubId } = modal.modalData || {};
+    if (!id || !parentId || !domainPubId) return;
+    treeMsg$.emit({
+      type: 'operation',
+      content: {
+        id: new Date().valueOf(),
+        opeType: 'cover',
+        newNodes: [{ id, parentId, domainPubId }],
+      },
+    });
+    closeModal();
+  };
+
   return (
     <>
       <AddModal open={modal.open === 'add'} onCancel={closeModal} onOk={onAdd} modalData={modal.modalData} />
@@ -124,6 +160,22 @@ const MyModal: React.FC<TreeProps> = ({ treeMsg$, yTree }) => {
         modalData={modal.modalData}
         yTree={yTree}
       />
+      <MoveModal
+        open={modal.open === 'sync'}
+        onCancel={closeModal}
+        onOk={onSyncOk}
+        modalData={modal.modalData}
+        yTree={yTree}
+        type = 'sync'
+      />
+      <MoveModal
+        open={modal.open === 'cover'}
+        onCancel={closeModal}
+        onOk={onCoverOk}
+        modalData={modal.modalData}
+        yTree={yTree}
+        type = 'cover'
+      />
       <DeleteModal open={modal.open === 'delete'} onCancel={closeModal} onOk={onDelete} modalData={modal.modalData} />
       <Modal title={null} open={modal.open === 'move_confirm'} onCancel={closeModal} onOk={onMoveConfirm}>
         <div style={{ fontSize: 16 }}>
@@ -131,6 +183,14 @@ const MyModal: React.FC<TreeProps> = ({ treeMsg$, yTree }) => {
           <span style={{ background: '#c5c5e3', padding: '5px 10px' }}>{modal.modalData?.parentName}</span>下吗？
         </div>
       </Modal>
+      {/* 提议树 */}
+      <ReviewMoveModal
+        open={modal.open === 'domain_drag_confirm'}
+        onCancel={closeModal}
+        onSyncOk={onSyncOk}
+        onCoverOk={onCoverOk}
+        modalData={modal.modalData}
+      />
     </>
   );
 };

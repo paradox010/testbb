@@ -1,7 +1,9 @@
 import React from 'react';
-import { YTree } from '@/pages/Struct/Construct/Tree/node';
+import { UserItem, YTree } from '@/pages/Struct/Construct/Tree/node';
 // import type UsersCenter from './socketClass/UsersCenter';
 import type VoteCenter from './socketClass/VoteCenter';
+
+import type { OpeItem, CompModalType } from '@/pages/Struct/Construct/msg.d';
 
 import { EventEmitter } from 'ahooks/lib/useEventEmitter';
 import type { BasicDataNode } from 'rc-tree';
@@ -15,6 +17,8 @@ export interface User {
   isCheck?: boolean; // 快捷签到
   company?: string;
   token?: string;
+  isSign?: boolean; // 签名
+  sign?: string;
 }
 interface Vote {
   title: string; // 投票的内容
@@ -61,6 +65,7 @@ interface SocketInitStep5Type extends SocketBasicContent {
 }
 interface SocketInitStep6Type extends SocketBasicContent {
   processState: 6;
+  sign?: string;
 }
 interface SocketInitStep7Type extends SocketBasicContent {
   processState: 7;
@@ -115,13 +120,15 @@ interface SocketStepType {
   mesType: 'stage';
   content:
     | {
-        processState: 1 | 2 | 4 | 5 | 6;
+        processState: 1 | 2 | 6;
       }
     | {
         processState: 3;
         isFirstProposal?: boolean;
         proposalDomainId: string;
       }
+    | SocketInitStep4Type
+    | SocketInitStep5Type
     | {
         processState: 7;
         version?: string;
@@ -133,7 +140,7 @@ interface VoteBasicType {
   content: string;
   isFinished?: boolean;
   createTime: number;
-  voteResult?:  UserVoteRes[];
+  voteResult?: UserVoteRes[];
 }
 interface VoteStartType extends VoteBasicType {
   // 创建投票 / 结束投票
@@ -162,18 +169,48 @@ interface SocketVoteType {
   content: SocketVoteItem;
 }
 
+interface SocketOpeType {
+  mesType: 'operation';
+  content: OpeItem;
+}
+
+interface SocketFreezeType {
+  mesType: 'freeze';
+  content: {
+    isFreeze: boolean;
+  };
+}
+
+interface SocketSignType {
+  mesType: 'sign';
+  content: {
+    userId: string;
+    isSign: boolean;
+    sign: string;
+  };
+}
+
 export type SocketMsgType =
   | SocketInitStepType
   | SocketCheckType
   | SocketOnlineType
   | SocketRecordType
   | SocketStepType
-  | SocketVoteType;
+  | SocketVoteType
+  | SocketOpeType
+  | SocketFreezeType
+  | SocketSignType;
 
 // 组件通信
-interface RefreshType {
-  type: 'refreshAll' | 'refreshRecord' | 'refreshUsers' | 'refreshStep' | 'refreshProposal' | 'refreshVote';
-}
+type RefreshType =
+  | {
+      type: 'refreshAll' | 'refreshUsers' | 'refreshVote';
+    }
+  | {
+      type: 'refreshTree';
+      autoExpand?: boolean;
+      ifInit?: boolean;
+    };
 // checkin
 interface UserCheckType {
   type: 'check';
@@ -182,10 +219,17 @@ interface UserCheckType {
     isCheck: true;
   };
 }
+
+type MyPick<T, K extends keyof T> = {
+  [P in keyof K extends keyof T ? K : never]: T[P];
+};
+// type MyPick<T, K extends keyof T> = {
+//   [P in keyof T as P extends K ? P : never]: T[P];
+// };
 // go next
 interface ProcessType {
   type: 'process';
-  content: SocketStepType['content'];
+  content: MyPick<SocketStepType['content'], 'processState' | 'isFirstProposal' | 'proposalDomainId' | 'version'>;
 }
 
 // 查看详情，页面切换
@@ -204,9 +248,41 @@ interface CompVoteType {
   content: Omit<VoteStartType, 'createTime' | 'id'> | Omit<VoteEndType, 'voteResult'> | VoteUserType;
 }
 
-export type CompMsgType = RefreshType | UserCheckType | ProcessType | RouteType | CompVoteType;
+interface OpeType {
+  type: 'operation';
+  content: OpeItem;
+}
 
-// stepState 存储全局的状态
+interface CompFreezeType {
+  type: 'freeze';
+  content: {
+    isFreeze: boolean;
+  };
+}
+
+interface CompSignType {
+  type: 'sign';
+  content: {
+    sign: string;
+  };
+}
+
+export type CompMsgType =
+  | RefreshType
+  | UserCheckType
+  | ProcessType
+  | RouteType
+  | CompVoteType
+  | OpeType
+  | CompModalType
+  | CompFreezeType
+  | CompSignType;
+
+interface SpecialOpe {
+  id: number;
+  opeType: 'sync' | 'cover';
+}
+// stepState 存储全局的状态 proxy做双向数据绑定
 export interface StepStateType {
   record: any[];
   member: User[];
@@ -216,6 +292,9 @@ export interface StepStateType {
   version?: string;
   isVote?: boolean;
   reviewVote?: VoteBasicType;
+  // 需要挂起的事件 内部维护
+  specialOpes: SpecialOpe[];
+  sign: string;
 }
 
 // stepComp & msgData
@@ -225,6 +304,8 @@ export interface MsgDataType {
   voteCenter: VoteCenter;
   record: any[];
   self: User;
+  attrMsg$?: EventEmitter<CompMsgType>;
+  attrMsgData?: MsgDataType;
 }
 
 export interface StepProps {

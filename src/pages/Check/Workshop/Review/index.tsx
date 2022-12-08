@@ -27,7 +27,6 @@ const Review = () => {
   const id = useParams<{ id: string }>()?.id;
   const [user] = store.useModel('user');
   const { data, loading } = useRequest(() => getBasic({ reviewId: id }));
-
   return transData(data, user) ? (
     <BasicContext.Provider value={transData(data, user) as BasicContextProps}>
       <MsgCenter />

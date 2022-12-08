@@ -24,8 +24,9 @@ import styles from './index.module.less';
 interface TreeProps {
   yTree: YTreeType;
   treeMsg$: EventEmitter<MsgType>;
+  type?: 'build' | 'review';
 }
-const MyTree: React.FC<TreeProps> = ({ treeMsg$, yTree }) => {
+const MyTree: React.FC<TreeProps> = ({ treeMsg$, yTree, type = 'build' }) => {
   const [expandedKeys, setExpandedKeys] = useState([] as any[]);
   const [selectedKeys, setSelectedKeys] = useState([] as any[]);
   const [locKey, setLocKey] = useState(['', '']);
@@ -64,13 +65,15 @@ const MyTree: React.FC<TreeProps> = ({ treeMsg$, yTree }) => {
   }, [locKey]);
 
   useEffect(() => {
-    treeMsg$.emit({
-      type: 'user',
-      content: {
-        location: selectedKeys[0] || '',
-        isOnline: true,
-      },
-    });
+    if (type !== 'review') {
+      treeMsg$.emit({
+        type: 'user',
+        content: {
+          location: selectedKeys[0] || '',
+          isOnline: true,
+        },
+      });
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedKeys]);
 
@@ -193,8 +196,23 @@ const MyTree: React.FC<TreeProps> = ({ treeMsg$, yTree }) => {
     }
     const dragkey = event.dataTransfer.getData('drag_id');
     const dropKey = event.target.dataset.index;
-    const dragNode = yTree.getNode(dragkey);
+    // 提议树那边移动过来的点
     const dropNode = yTree.getNode(dropKey);
+    if (event.dataTransfer.getData('drag_from') === 'domain') {
+      const oth = JSON.parse(event.dataTransfer.getData('drag_content'));
+      treeMsg$.emit({
+        type: 'modal',
+        open: 'domain_drag_confirm',
+        modalData: {
+          id: dragkey,
+          parentId: dropKey,
+          parentName: dropNode?.name,
+          ...oth,
+        },
+      });
+      return;
+    }
+    const dragNode = yTree.getNode(dragkey);
     if (dragNode?.editStatus === -1) {
       message.warn('该节点无法编辑');
       return;
@@ -255,8 +273,16 @@ const MyTree: React.FC<TreeProps> = ({ treeMsg$, yTree }) => {
         <Button icon={<DeleteOutlined />} onClick={() => onOutOpe('delete')}>
           删除
         </Button>
-        <Button icon={<ExportOutlined />} disabled>导入</Button>
-        <Button icon={<UndoOutlined />} disabled>重置</Button>
+        {type === 'build' && (
+          <Button icon={<ExportOutlined />} disabled>
+            导入
+          </Button>
+        )}
+        {type === 'build' && (
+          <Button icon={<UndoOutlined />} disabled>
+            重置
+          </Button>
+        )}
       </div>
       <div className="dsTree" style={{ height: 'calc(100% - 76px)' }}>
         <RcTree<RTreeNode>

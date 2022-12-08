@@ -1,5 +1,5 @@
-.voteName {
-  font-size: 24px;
+.textContent {
+  font-size: 22px;
   font-weight: 500;
   color: #000;
   line-height: 40px;
@@ -133,12 +133,12 @@
 
 .reviewUpVote {
   display: flex;
-  justify-content: center;
+  justify-content: space-around;
   align-items: center;
-  flex-wrap: wrap;
-  padding: 20px 0;
+  padding: 20px;
+  white-space: nowrap;
   .vote1 {
-    flex: 0 0 650px;
+    flex: 1;
     margin-right: 23px;
   }
   .vote2 {
@@ -182,6 +182,7 @@
   }
   .td1 {
     max-width: 200px;
+    min-width: 200px;
     display: flex;
     flex-wrap: wrap;
     white-space: nowrap;

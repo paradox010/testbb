@@ -33,7 +33,7 @@
     "stylelint-config-recommended-less": "^1.0.4"
   },
   "scripts": {
-    "start": "icejs start",
+    "start": "icejs start --port=3334",
     "build": "icejs build",
     "restart": "icejs start -- --force",
     "anyalyzer": "icejs build --  --analyzer",

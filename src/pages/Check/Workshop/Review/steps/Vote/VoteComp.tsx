@@ -46,7 +46,7 @@ const VoteStart: React.FC<{
   return (
     <div style={{ padding: 80 }}>
       {modalType === 'review' && <span className={styles.messagePic} />}
-      <div className={styles.content}>
+      <div className={styles.textContent}>
         {modalType === 'modal' ? `对于提议“${data?.content}”，您是否同意` : '对本次修改版本，是否通过'}
       </div>
       <div style={{ textAlign: 'center' }}>
@@ -65,7 +65,7 @@ const VoteOk = ({ modalType }) => {
   return (
     <div style={{ padding: 80 }}>
       {modalType === 'review' && <div className={styles.waittingPic} />}
-      <div className={styles.content}>您已投票成功，请等待投票结果...</div>
+      <div className={styles.textContent}>您已投票成功，请等待投票结果...</div>
     </div>
   );
 };
@@ -76,11 +76,17 @@ export const Witness: React.FC<{
   userType?: string;
   noTitle?: boolean;
   onForcePass?: (v: VoteItem) => void;
-}> = ({ data, modalType, userType = '1', noTitle = false, onForcePass }) => {
+}> = ({ data, modalType, userType = '1', onForcePass, noTitle = false }) => {
   const basic = useContext(BasicContext);
   const onForce = () => {
     onForcePass && onForcePass(data);
   };
+
+  const vote = data?.voteResult?.length;
+  const total = basic.member.length - 1;
+  const pass = data?.voteResult?.reduce((num, v) => num + (v.isAgree ? 1 : 0), 0) || 0;
+  const passPercent = vote ? (pass / total) * 100 : 0;
+  const refuse = data?.voteResult?.reduce((num, v) => num + (v.isAgree ? 0 : 1), 0) || 0;
   return (
     <>
       {modalType === 'modal' && !noTitle && <div className={styles.voteResTitle}>投票信息</div>}
@@ -93,22 +99,22 @@ export const Witness: React.FC<{
         <div className={styles.vote1}>
           <div className={styles.posiRes}>
             <div>投票通过人员</div>
-            <div className={styles.resPeople}>23人</div>
+            <div className={styles.resPeople}>{pass}人</div>
           </div>
           <div className={styles.vsWrap}>V&nbsp;S</div>
           <div className={styles.negaRes}>
             <div>投票不通过人员</div>
-            <div className={styles.resPeople}>23人</div>
+            <div className={styles.resPeople}>{refuse}人</div>
           </div>
         </div>
         <div className={styles.vote2}>
           <div className={styles.vote21}>
             <div className={styles.progressWrap}>
-              <Progress strokeLinecap="butt" strokeWidth={14} type="circle" percent={75} width={64} />
+              <Progress strokeLinecap="butt" strokeWidth={14} type="circle" percent={passPercent} width={64} />
             </div>
             <div style={{ padding: '0 12px' }}>
               <div>投票通过率</div>
-              <div className={styles.percent}>100%</div>
+              <div className={styles.percent}>{passPercent}%</div>
             </div>
             {userType === '4' && (
               <div className={styles.forceWrap}>
@@ -128,14 +134,14 @@ export const Witness: React.FC<{
         >
           <Descriptions.Item label={<div style={modalType === 'modal' ? { maxWidth: 200 } : {}}>投票信息</div>}>
             <div className={styles.td1}>
-              <Progress strokeLinecap="butt" strokeWidth={14} type="circle" percent={75} width={53} />
+              <Progress strokeLinecap="butt" strokeWidth={14} type="circle" percent={(vote / total) * 100} width={53} />
               <div style={{ padding: '0 12px' }}>
                 <div>投票总人数</div>
-                <div className={styles.percent}>{basic.member.length - 1}</div>
+                <div className={styles.percent}>{total}</div>
               </div>
               <div>
-                <div>已投票人员 34</div>
-                <div>已投票人员 34</div>
+                <div>已投票人员 {vote}人</div>
+                <div>未投票人员 {total - vote}人</div>
               </div>
             </div>
           </Descriptions.Item>
@@ -146,7 +152,13 @@ export const Witness: React.FC<{
               </div>
             }
           >
-            <div>1,23,41,23</div>
+            <div>
+              {basic.member
+                .filter((v) => !data?.voteResult?.find((k) => k.userId === v.userId))
+                .filter((v) => v.userRole !== '4')
+                ?.map((v) => v.userName)
+                .join('；')}
+            </div>
           </Descriptions.Item>
         </Descriptions>
       )}

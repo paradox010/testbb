@@ -54,6 +54,7 @@ const RndWrap = ({
   defaultPosY = -28,
   defaultWidth = 450,
   defaultHeight = 500,
+  style = {},
 }) => {
   const rndRef = useRef<Rnd>(null);
   const [open, setOpen] = useState(false);
@@ -68,12 +69,12 @@ const RndWrap = ({
   };
   const onOpenStyle = () => {
     onClickLayerUp();
-    return open ? {} : { display: 'none' };
+    return open ? { ...style } : { display: 'none', ...style };
   };
 
   return (
     <>
-      <div className={styles.rndIconTitle} onClick={() => setOpen(!open)}>
+      <div className={styles.rndIconTitle} style={style} onClick={() => setOpen(!open)}>
         {text}
       </div>
       <Rnd

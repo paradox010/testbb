@@ -32,8 +32,7 @@
     [
       "build-plugin-antd",
       {
-        "disableModularImport": true,
-        "themeConfig": {}
+        "disableModularImport": true
       }
     ]
   ]

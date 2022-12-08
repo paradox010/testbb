@@ -128,12 +128,12 @@ export default class SignaturePad {
     this._isEmpty = false;
   }
 
-  public toDataURL(type = 'image/png', encoderOptions?: number) {
+  public toDataURL(type = 'image/svg+xml', encoderOptions?: number) {
     switch (type) {
-      case 'image/svg+xml':
-        return this._toSVG();
-      default:
+      case 'image/png':
         return this.canvas.toDataURL(type, encoderOptions);
+      default:
+        return this._toSVG();
     }
   }
 

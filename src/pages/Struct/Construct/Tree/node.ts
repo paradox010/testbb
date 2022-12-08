@@ -25,13 +25,15 @@ export interface OpeNode {
   parentId?: string;
   oldPIDWhenMove?: string;
   oldPID?: string; // 废弃 --只有当老节点和父节点一致的时候才会执行移动操作?
+  domainPubId?: string;
+  children?: RTreeNode[];
 }
 // 操作记录原子化 move是特殊的修改(parentId) 需要记录原信息做特殊处理
 export interface OpeItem {
   id: number; // 时间戳
   newNodes?: OpeNode[]; // 这个list的用法暂定是错误的。只支持1个节点，多个节点的shouldReComputeWhenAdd状态无法界定
   // oldNodes?: OpeNode[];
-  opeType?: 'add' | 'update' | 'delete' | 'move';
+  opeType?: 'add' | 'update' | 'delete' | 'move' | 'sync' | 'cover';
   // isServe?: boolean; // 是否由服务器主动发送
   before?: OpeItem;
   after?: OpeItem;
@@ -95,7 +97,7 @@ class Operation {
     const locNode = this.findLoc(opeItem);
     this.split(opeItem, locNode);
 
-    if (locNode === this.last.before || opeItem.opeType === 'update') {
+    if (locNode === this.last.before || opeItem.opeType === 'update' || opeItem.opeType === 'cover') {
       this.computeNewState(opeItem);
       return;
     }
@@ -109,7 +111,8 @@ class Operation {
       nowLoc = nowLoc.after as OpeItem;
     }
 
-    if (opeItem.opeType === 'add') {
+    // sync 相当于特殊的add操作
+    if (opeItem.opeType === 'add' || opeItem.opeType === 'sync') {
       // 如果后续有和该节点相关的move 或者 shouldwhenadd的move时 则需要重新执行所有的move
       // 否则的话只执行跟add相关的操作
       if (
@@ -169,7 +172,7 @@ class Operation {
 
   // addstore 简单的append
   computeNewState(opeItem: OpeItem, outOrder?: boolean, isUndo?: boolean) {
-    if (opeItem.opeType === 'add') {
+    if (opeItem.opeType === 'add' || opeItem.opeType === 'sync') {
       opeItem?.newNodes?.forEach((n) => {
         if (this.store[n.id]) {
           // error 无视处理
@@ -201,7 +204,9 @@ class Operation {
             pNode.children = [...(pNode.children || []), n as RTreeNode];
           }
         }
-
+        if (n.children) {
+          this.addNodeWithChildren(n as RTreeNode);
+        }
         // 修改state和store
         this.store[n.id] = {
           state: n as RTreeNode,
@@ -210,7 +215,7 @@ class Operation {
         opeItem.shouldReComputeWhenAdd = false;
       });
     }
-    if (opeItem.opeType === 'update') {
+    if (opeItem.opeType === 'update' || opeItem.opeType === 'cover') {
       opeItem?.newNodes?.forEach((n) => {
         const { state: node, opes = [] } = this.checkNodeWithEditPipeline(n.id, opeItem) || {};
         if (!node) {
@@ -228,7 +233,7 @@ class Operation {
         if (outOrder) {
           // 重新执行已经执行过的update操作来计算更新包
           for (let i = locIndex + 2; i < opes.length; i++) {
-            if (opes[i].opeType === 'update') {
+            if (opes[i].opeType === 'update' || opes[i].opeType === 'cover') {
               const middleNode = opes[i].newNodes?.find((x) => x.id === n.id);
               if (!middleNode) {
                 continue;
@@ -353,6 +358,10 @@ class Operation {
     }
   }
 
+  addNodeWithChildren(node: RTreeNode) {
+    node?.children?.forEach((v) => loopNode(v, this.store));
+  }
+
   // 判断移动的行为是否会造成环结构 newPid是否是node的祖先
   checkIfLoop(node: RTreeNode, newPID) {
     // 找pid
@@ -475,7 +484,7 @@ function loopNode(node, nodeMap: Store, parentNode?: any) {
 export interface HistoryItem {
   id: number; // 时间戳
   categoryId: string;
-  operationType: 'add' | 'update' | 'move' | 'delete';
+  operationType: 'add' | 'update' | 'move' | 'delete' | 'sync' | 'cover';
   receiveTime: number;
   isComplete: boolean;
   content: string;

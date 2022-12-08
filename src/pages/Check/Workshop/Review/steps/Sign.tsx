@@ -1,21 +1,14 @@
 import { Button, Checkbox, Descriptions } from 'antd';
-import { RoleType } from '@/dataType';
-import styles from './sign.module.less';
+import { reviewUserRoleTypeEnum } from '@/dataType';
 import Signature from '@/components/Signature/signature_pad';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useContext } from 'react';
 
 import { StepProps, StepCompType } from '../msg.d';
 
-const pp = [
-  {
-    userId: '1',
-    userName: 'a',
-  },
-  {
-    userId: '2',
-    userName: 'b',
-  },
-];
+import BasicContext, { stepState } from '../basicContext';
+import { useSnapshot } from 'valtio';
+
+import styles from './sign.module.less';
 
 const Step: React.FC<StepProps> = ({ stepMsg$, msgData }) => {
   const signRef = useRef<Signature>(null as any);
@@ -42,27 +35,47 @@ const Step: React.FC<StepProps> = ({ stepMsg$, msgData }) => {
   const clear = () => {
     signRef.current?.clear();
   };
-
+  const submit = () => {
+    stepMsg$.emit({
+      type: 'sign',
+      content: {
+        sign: signRef.current?.toDataURL(),
+      },
+    });
+  };
+  const { member } = useSnapshot(stepState);
+  const { self } = useContext(BasicContext);
   return (
     <div className={styles.signContent}>
       <Descriptions bordered column={1}>
-        {RoleType.map((v) => (
+        {reviewUserRoleTypeEnum.map((v) => (
           <Descriptions.Item
             key={v.value}
             label={v.label}
             labelStyle={{ width: 150, fontWeight: 500, borderRight: 'none' }}
           >
-            {pp.map((u) => (
-              <Checkbox key={u.userId}>{u.userName}</Checkbox>
-            ))}
+            {member
+              ?.filter((u) => u.userRole === v.value)
+              ?.map((u) => (
+                <Checkbox checked={!!u?.isSign} key={u.userId}>
+                  {u.userName}
+                </Checkbox>
+              ))}
           </Descriptions.Item>
         ))}
       </Descriptions>
-      <div>已确认流程规范，请签名</div>
-      <Button onClick={clear}>清除</Button>
+      <div>
+        已确认流程规范，请签名
+        <Button onClick={clear}>清除</Button>
+        <Button onClick={submit} type="primary">
+          提交
+        </Button>
+      </div>
       <div className={styles.signWrapper}>
         <canvas ref={canvasRef} />
       </div>
+      <div>上次提交的签名</div>
+      <img width={200} src={member.find((v) => v.userId === self.userId)?.sign} />
     </div>
   );
 };
@@ -70,10 +83,29 @@ const Step: React.FC<StepProps> = ({ stepMsg$, msgData }) => {
 const TypedStep = Step as StepCompType;
 
 TypedStep.Title = ({ stepMsg$, msgData }) => {
+  const goNext = () => {
+    stepMsg$.emit({
+      type: 'process',
+      content: {
+        processState: 7,
+      },
+    });
+  };
+  const goBefore = () => {
+    stepMsg$.emit({
+      type: 'process',
+      content: {
+        processState: 5,
+      },
+    });
+  };
   return (
     <>
-      到场签到
-      <Button type="primary">会议开始</Button>
+      电子签名
+      <Button type="primary" onClick={goNext}>
+        定时发布
+      </Button>
+      <Button onClick={goBefore}>上一步</Button>
     </>
   );
 };

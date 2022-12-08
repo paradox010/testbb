@@ -1,7 +1,8 @@
-import { useState } from 'react';
+/* eslint-disable no-nested-ternary */
+import React, { useState } from 'react';
 import Attr from '../steps/Attr/Show';
 
-const AttrRoute = ({ stepMsg$, children, style = {} }) => {
+const AttrRoute = ({ stepMsg$, children, style = {}, type = 'view' }) => {
   const [tab, setTab] = useState('tree');
   const [id, setId] = useState('');
 
@@ -22,8 +23,19 @@ const AttrRoute = ({ stepMsg$, children, style = {} }) => {
 
   return (
     <>
-      <div style={tab === 'tree' ? { display: 'block', ...style } : { display: 'none', ...style }}>{children}</div>
-      {tab === 'attr' ? <Attr id={id} back={back} /> : null}
+      <div style={tab === 'tree' ? { display: 'block', ...style } : { display: 'none', ...style }}>
+        {type === 'view' ? children : children[0]}
+      </div>
+      {tab === 'attr' ? (
+        type === 'view' ? (
+          <Attr id={id} back={back} />
+        ) : (
+          React.cloneElement(children[1], {
+            id,
+            back,
+          })
+        )
+      ) : null}
     </>
   );
 };

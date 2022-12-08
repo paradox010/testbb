@@ -21,6 +21,7 @@ interface SocketOpe {
   mesType: 'operation';
   content: OpeItem;
 }
+export { OpeItem };
 interface SocketLoc {
   mesType: 'location';
 }
@@ -65,17 +66,19 @@ interface ope {
   content: OpeItem;
 }
 // 弹窗
-interface modal {
+
+export type CompModalType = {
   type: 'modal';
-  open: 'add' | 'update' | 'move' | 'delete' | 'move_confirm';
+  open: 'add' | 'update' | 'move' | 'delete' | 'move_confirm' | 'sync' | 'cover' | 'domain_drag_confirm';
   modalData?: {
     id?: string;
     name?: string;
     parentId?: string;
     parentName?: string;
     description?: string;
+    domainPubId?: string;
   };
-}
+};
 // router
 interface route {
   type: 'route';
@@ -97,13 +100,14 @@ interface moreLogRes {
     list: HistoryItem[];
   };
 }
+
 export type MsgType =
   | refreshTree
   | refreshHistory
   | refreshCategory
   | treePos
   | ope
-  | modal
+  | CompModalType
   | route
   | user
   | moreLogRes;

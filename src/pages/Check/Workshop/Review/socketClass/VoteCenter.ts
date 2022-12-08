@@ -52,24 +52,14 @@ class Vote {
         if (item.isFinished) {
           return; // 通过后不做任何处理
         }
-        const idx = item.voteResult.findIndex((v) => v.userId === vote.userId);
-        if (idx !== -1) {
-          item.voteResult[idx] = { ...item.voteResult[idx], ...newVote };
-        } else {
-          item.voteResult.push(newVote);
+        // update vote basic config
+        // eslint-disable-next-line guard-for-in
+        for (const k in newVote) {
+          item[k] = newVote[k];
         }
-        item.isVote = true;
+        // item.isVote = true;
       } else {
-        this.voteList.push({
-          id: newVote.id,
-          voteResult: [
-            {
-              userId: newVote.userId,
-              isAgree: newVote.isAgree,
-            },
-          ],
-          createTime: newVote.createTime,
-        });
+        this.voteList.push(newVote as VoteItem);
       }
     } else {
       const { type, ...newVote } = vote;
@@ -85,11 +75,29 @@ class Vote {
         }
       } else {
         this.voteList.push({
-          ...newVote,
           voteResult: [],
+          ...newVote,
         });
       }
     }
+  }
+
+  push(reviewVote: VoteBasicType | SocketVoteItem, isVote: boolean = false, userId, ifInit: boolean = true) {
+    if (!reviewVote || !reviewVote.id) return;
+    if (ifInit) {
+      this.pushReview(
+        reviewVote,
+        isVote
+          ? {
+              userId,
+              isAgree: true,
+            }
+          : undefined,
+      );
+    } else {
+      this.pushOpe(reviewVote as SocketVoteItem);
+    }
+    return true;
   }
 
   // 获取最近一次的投票信息, 顺便删除其他的投票 只能返回副本
@@ -103,7 +111,7 @@ class Vote {
         latest = v;
       }
     });
-    this.voteList = [latest];
+    // this.voteList = [latest];
     return { ...latest };
   }
 }
