@@ -16,6 +16,9 @@ const store = createStore({
           ...payload,
         };
       },
+      cover(prevState, payload) {
+        return payload;
+      },
     },
   },
 });

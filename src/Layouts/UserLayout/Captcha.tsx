@@ -20,12 +20,15 @@ interface captchaValue {
 interface CaptchaInputProps {
   value?: captchaValue;
   onChange?: (value: captchaValue) => void;
+  updateImage?: number;
 }
 
-const Captcha: React.FC<CaptchaInputProps> = ({ value = {}, onChange }) => {
+const Captcha: React.FC<CaptchaInputProps> = ({ value = {}, onChange, updateImage = 1 }) => {
   const [code, setCode] = useState('');
 
-  const { data, run } = useRequest(getImage);
+  const { data, run } = useRequest(getImage, {
+    refreshDeps: [updateImage],
+  });
 
   const triggerChange = (changedValue) => {
     onChange?.({ ...value, ...changedValue });

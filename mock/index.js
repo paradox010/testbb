@@ -3,6 +3,12 @@ module.exports = {
   //   body: null,
   //   header: { code: 500 },
   // },
+  '/api/upload': {
+    body: {
+      id: 'sdfsd'
+    },
+    header: { code: 200 ,message: 'error'},
+  },
   '/api/getbasic': {
     header: { code: 200 },
     body: {

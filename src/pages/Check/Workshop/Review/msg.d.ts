@@ -14,7 +14,7 @@ export interface User {
   userId: string;
   userRole: string; // 0:系统
   isOnline?: boolean;
-  isCheck?: boolean; // 快捷签到
+  isCheck?: boolean; // 一键签到
   company?: string;
   token?: string;
   isSign?: boolean; // 签名

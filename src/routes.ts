@@ -11,6 +11,7 @@ const Standard = lazy(() => import('@/pages/Standard'));
 const Build = lazy(() => import('@/pages/Struct/Construct'));
 const Api = lazy(() => import('@/pages/Struct/KApi'));
 const Manage = lazy(() => import('@/pages/Struct/Manage'));
+const NewBase = lazy(() => import('@/pages/Struct/Manage/New'));
 const Ope = lazy(() => import('@/pages/Operation'));
 
 const CreateProcess = lazy(() => import('@/pages/Check/CreateProcess'));
@@ -84,11 +85,25 @@ const routerConfig: DRouterConfig[] = [
           },
           {
             path: '/kmanage',
-            component: Manage,
+            component: BLayout,
+            children: [
+              {
+                path: '/klist',
+                component: Manage,
+              },
+              {
+                path: '/knew',
+                component: NewBase,
+              },
+              {
+                path: '/',
+                redirect: '/kstruct/kmanage/klist',
+              },
+            ],
           },
           {
             path: '/',
-            redirect: '/kstruct/kmanage',
+            redirect: '/kstruct/kmanage/klist',
           },
         ],
       },

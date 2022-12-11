@@ -7,6 +7,9 @@ import { useRequest } from 'ahooks';
 import { history, request } from 'ice';
 
 import styles from './index.module.less';
+import { useState } from 'react';
+import { getParams } from '@/utils/location';
+import { setToken } from '@/utils/auth';
 
 async function loginUp(params) {
   const resData = await request({
@@ -18,15 +21,20 @@ async function loginUp(params) {
 }
 
 const Login = () => {
+  const [updateImage, setU] = useState(1);
   const { run } = useRequest(loginUp, {
     manual: true,
     onSuccess: (data) => {
-      if (process.env.NODE_ENV === 'development') {
-        sessionStorage.setItem('token', data?.tokenValue);
-      } else {
-        localStorage.setItem('token', data?.tokenValue);
-      }
-      window.location.assign('/');
+      setToken(data?.tokenValue);
+      // const redirect = getParams()?.redirect;
+      // if (redirect) {
+      //   window.location.assign(redirect);
+      // } else {
+        window.location.assign('/');
+      // }
+    },
+    onError: () => {
+      setU(Math.random());
     },
   });
 
@@ -54,7 +62,7 @@ const Login = () => {
         </Form.Item>
 
         <Form.Item name="captcha" rules={[{ required: true, message: '请输入密码!' }]}>
-          <Captcha />
+          <Captcha updateImage={updateImage} />
         </Form.Item>
 
         {/* <Form.Item name="remember" valuePropName="checked">

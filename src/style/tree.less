@@ -1,3 +1,4 @@
+/* stylelint-disable max-line-length */
 @treeLineHeight: 24px;
 
 .dsTree {
@@ -24,6 +25,37 @@
     align-items: flex-start;
     padding: 0 0 4px;
     outline: none;
+  }
+
+  .rc-tree .rc-tree-treenode span.rc-tree-checkbox {
+    background-image: url('@/assets/tree.png');
+    background-size: 113px;
+    width: 24px;
+    height: 24px;
+    flex: 0 0 24px;
+    margin: 0;
+    background-position: 0px -96px;
+    &:hover {
+      background-position: 0px -116px;
+    }
+  }
+  .rc-tree .rc-tree-treenode span.rc-tree-checkbox-disabled {
+    background-position: -24px -96px;
+    &:hover {
+      background-position: -24px -96px;
+    }
+  }
+  .rc-tree .rc-tree-treenode span.rc-tree-checkbox-checked {
+    background-position: -48px -116px;
+    &:hover {
+      background-position: -48px -116px;
+    }
+  }
+  .rc-tree .rc-tree-treenode span.rc-tree-checkbox.rc-tree-checkbox-checked.rc-tree-checkbox-disabled {
+    background-position: -48px -96px;
+    &:hover {
+      background-position: -48px -96px;
+    }
   }
 
   .rc-tree .rc-tree-treenode span.rc-tree-switcher {

@@ -27,7 +27,7 @@ const columns: Array<ProColumns<GithubIssueItem>> = [
     hideInSearch: true,
   },
   {
-    title: '负责行业专家小组',
+    title: '专家小组',
     dataIndex: 'teamName',
     valueType: 'select',
   },

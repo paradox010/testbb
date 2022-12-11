@@ -254,6 +254,12 @@ const MyTree: React.FC<TreeProps> = ({ treeMsg$, yTree, type = 'build' }) => {
     });
   };
 
+  const onReset = ()=>{
+    treeMsg$.emit({
+      type: 'reset',
+    })
+  }
+
   return (
     <>
       <div className={styles.treeTool}>
@@ -262,7 +268,7 @@ const MyTree: React.FC<TreeProps> = ({ treeMsg$, yTree, type = 'build' }) => {
           编辑
         </Button>
         <Button icon={<PlusSquareOutlined />} onClick={() => onOutOpe('add')}>
-          增子节点
+          增下位节点
         </Button>
         <Button icon={<FileOutlined />} onClick={() => onOutOpe('detail')}>
           查看详情
@@ -279,7 +285,7 @@ const MyTree: React.FC<TreeProps> = ({ treeMsg$, yTree, type = 'build' }) => {
           </Button>
         )}
         {type === 'build' && (
-          <Button icon={<UndoOutlined />} disabled>
+          <Button icon={<UndoOutlined />} onClick={onReset}>
             重置
           </Button>
         )}
@@ -312,7 +318,7 @@ const MyTree: React.FC<TreeProps> = ({ treeMsg$, yTree, type = 'build' }) => {
             >
               <span className="ds-nodeTitle">{nodeData.name}</span>
               <span title="编辑节点" className="ds-opeItem ds-editOpe" onClick={onUpdate} data-index={nodeData.id} />
-              <span title="新增子节点" className="ds-opeItem ds-addOpe" onClick={onAdd} data-index={nodeData.id} />
+              <span title="新增下位节点" className="ds-opeItem ds-addOpe" onClick={onAdd} data-index={nodeData.id} />
               <span title="查看详情" className="ds-opeItem ds-detailOpe" onClick={onDetail} data-index={nodeData.id} />
               <span title="移动节点" className="ds-opeItem ds-moveOpe" onClick={onMove} data-index={nodeData.id} />
               <span title="删除节点" className="ds-opeItem ds-deleteOpe" onClick={onDelete} data-index={nodeData.id} />

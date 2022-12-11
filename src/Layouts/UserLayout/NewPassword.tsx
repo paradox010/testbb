@@ -3,9 +3,10 @@ import { Form, Input, Button } from 'antd';
 import LoginWrap from './LoginWrap';
 
 import { useRequest } from 'ahooks';
-import { request } from 'ice';
+import { request, history } from 'ice';
 
 import styles from './index.module.less';
+import { getParams } from '@/utils/location';
 
 async function loginUp(params) {
   const resData = await request({
@@ -19,11 +20,12 @@ async function loginUp(params) {
 const Login = () => {
   const { run } = useRequest(loginUp, {
     manual: true,
-    onSuccess: (data) => {
-      if (process.env.NODE_ENV === 'development') {
-        sessionStorage.setItem('token', data?.tokenValue);
+    onSuccess: () => {
+      const redirect = getParams()?.redirect;
+      if (redirect) {
+        history?.push(redirect);
       } else {
-        localStorage.setItem('token', data?.tokenValue);
+        history?.push('/');
       }
     },
   });
@@ -36,7 +38,7 @@ const Login = () => {
     <LoginWrap>
       <Form name="newWord" layout="vertical" onFinish={onFinish} autoComplete="off">
         <Form.Item style={{ marginBottom: 54 }}>
-          <div className={styles.formTitle}>找回密码</div>
+          <div className={styles.formTitle}>修改密码</div>
         </Form.Item>
 
         <Form.Item name="username" rules={[{ required: true, message: '请输入用户名!' }]}>

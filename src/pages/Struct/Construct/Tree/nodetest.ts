@@ -1,4 +1,4 @@
-// 新增子节点，新增子节点的子节点，
+// 新增下位节点，新增下位节点的子节点，
 // ytree.operation.add({
 //   id: 12,
 //   newNodes: [{ title: '0-0-0-0-8-key', key: '0-0-0-0-8-key', id: '0-0-0-0-8-key', pId: '0-0-0-0-key' }],
@@ -10,7 +10,7 @@
 //   opeType: 'add',
 // });
 
-// 新增子节点 乱序
+// 新增下位节点 乱序
 // ytree.operation.add({
 //   id: 14,
 //   newNodes: [{ title: '0-0-0-0-0-8-key', key: '0-0-0-0-0-8-key', id: '0-0-0-0-0-8-key', pId: '0-0-0-0-8-key' }],

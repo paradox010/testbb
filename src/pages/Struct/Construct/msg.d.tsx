@@ -1,4 +1,15 @@
 import type { RTreeNode, HistoryItem, OpeItem, UserItem } from './Tree/node';
+
+interface SpecialOpe {
+  id: number;
+  opeType: 'sync' | 'cover';
+}
+
+export interface StepStateType {
+  // 需要挂起的事件 内部维护
+  specialOpes: SpecialOpe[];
+  isFreeze?: boolean;
+}
 // 服务器通信 接受到的服务器消息
 interface SocketInit {
   mesType: 'init';
@@ -10,6 +21,7 @@ interface SocketInit {
     currentFeature: any[];
     recycleFeature: any[];
     category: RTreeNode;
+    isFreeze: boolean;
   };
 }
 
@@ -29,14 +41,18 @@ interface SocketUser {
   mesType: 'user';
   content: UserItem;
 }
+// 废弃
 interface SocketMoreLog {
   mesType: 'moreLog';
   content: {
     logs: HistoryItem[];
   };
 }
+interface SocketReset {
+  mesType: 'reset';
+}
 
-export type SocketMsgType = SocketInit | SocketUser | SocketOpe | SocketLoc | SocketLog | SocketMoreLog;
+export type SocketMsgType = SocketInit | SocketUser | SocketOpe | SocketLoc | SocketLog | SocketMoreLog | SocketReset;
 
 // 组件之间通信
 interface refreshTree {
@@ -101,6 +117,10 @@ interface moreLogRes {
   };
 }
 
+interface CompReset {
+  type: 'reset'
+}
+
 export type MsgType =
   | refreshTree
   | refreshHistory
@@ -110,4 +130,5 @@ export type MsgType =
   | CompModalType
   | route
   | user
-  | moreLogRes;
+  | moreLogRes
+  | CompReset;

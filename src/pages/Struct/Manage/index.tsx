@@ -1,73 +1,76 @@
 import ProTable from '@ant-design/pro-table';
 import type { ActionType, ProColumns } from '@ant-design/pro-table';
-import { Tag } from 'antd';
-import { request, history } from 'ice';
+import { Button, Tag } from 'antd';
+import { request, history, Link } from 'ice';
 import { useRef } from 'react';
 
-import { domainTypeEnum } from '@/dataType';
+// import { domainTypeEnum } from '@/dataType';
 
-type GithubIssueItem = {
+interface GithubIssueItem {
   url: string;
   id: number;
   number: number;
-  title: string;
+  name: string;
   state: string;
   comments: number;
   created_at: string;
   updated_at: string;
   closed_at?: string;
+  isLock?: boolean;
+  isInit?: boolean;
 };
 
-const columns: ProColumns<GithubIssueItem>[] = [
+const columns: Array<ProColumns<GithubIssueItem>> = [
   {
     title: '标准名称',
     dataIndex: 'name',
   },
-  {
-    title: '域类型',
-    tooltip: 'tooltip',
-    dataIndex: 'type',
-    hideInSearch: true,
-    render: (text) => {
-      const item = domainTypeEnum.find((v) => v.value === text);
-      if (!item) return null;
-      return <Tag color={item.color}>{item.label}</Tag>;
-    },
-  },
+  // {
+  //   title: '域类型',
+  //   tooltip: 'tooltip',
+  //   dataIndex: 'type',
+  //   hideInSearch: true,
+  //   render: (text) => {
+  //     const item = domainTypeEnum.find((v) => v.value === text);
+  //     if (!item) return null;
+  //     return <Tag color={item.color}>{item.label}</Tag>;
+  //   },
+  // },
   {
     title: '最新版本',
-    dataIndex: 'lastRelease',
+    dataIndex: 'version',
     hideInSearch: true,
   },
   {
     title: '产品类目',
-    dataIndex: 'count',
+    dataIndex: 'categoryCount',
     hideInSearch: true,
   },
   {
     title: '产品属性',
-    dataIndex: 'vcount',
+    dataIndex: 'featureCount',
     hideInSearch: true,
   },
   {
     title: '状态',
-    dataIndex: 'isValid',
+    dataIndex: 'status',
+    hideInSearch: true,
     valueType: 'select',
     valueEnum: {
       0: { text: '全部', status: 'Default' },
-      1: {
-        text: '构建中',
+      '1': {
+        text: '正常运行',
         status: 'Process',
       },
       // run: {
       //   text: '构建中',
       //   status: 'Success',
       // },
-      merge: {
-        text: '融合中',
+      '3': {
+        text: '构建中',
         status: 'purple',
       },
-      interrupt: {
+      '2': {
         text: '暂停运行',
         status: 'Default',
       },
@@ -100,19 +103,38 @@ const columns: ProColumns<GithubIssueItem>[] = [
     key: 'option',
     valueType: 'option',
     render: (text, record, _, action) => {
-      return [
-        <a
-          key="view"
-          onClick={() => {
-            history?.push({
-              pathname: '/kstruct/kbuild',
-              search: `?domainId=${record.id}`,
-            });
-          }}
-        >
-          构建
-        </a>,
-      ];
+      return (
+        <>
+          {!record.isInit && (
+            <Button
+              onClick={() => {
+                history?.push({
+                  pathname: '/kstruct/kmanage/knew',
+                  search: `?domainId=${record.id}&domainName=${record.name}`,
+                });
+              }}
+              disabled={!!record.isLock}
+              type="link"
+            >
+              构建
+            </Button>
+          )}
+          {record.isInit && (
+            <Button
+              type="link"
+              onClick={() => {
+                history?.push({
+                  pathname: '/kstruct/kbuild',
+                  search: `?domainId=${record.id}`,
+                });
+              }}
+              disabled={!!record.isLock}
+            >
+              运维
+            </Button>
+          )}
+        </>
+      );
     },
   },
 ];
@@ -138,7 +160,7 @@ export default () => {
         columns={columns}
         rowKey="id"
         request={getTableData}
-        onRequestError={()=>{}}
+        onRequestError={() => {}}
         search={{
           labelWidth: 'auto',
         }}

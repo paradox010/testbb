@@ -35,7 +35,7 @@ const Step: React.FC<StepProps> = ({ stepMsg$, msgData }) => {
           style={{ float: 'right' }}
           disabled={member.find((v) => v.userId === msgData.self.userId)?.isCheck}
         >
-          快捷签到
+         一键签到
         </Button>
       </div>
       <Descriptions bordered column={1}>

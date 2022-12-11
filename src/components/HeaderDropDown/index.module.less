@@ -1,0 +1,69 @@
+@import 'antd/lib/style/themes/default';
+
+// .container > * {
+//   background-color: @popover-bg;
+//   border-radius: 4px;
+//   box-shadow: @shadow-1-down;
+// }
+
+// @media screen and (max-width: @screen-xs) {
+//   .container {
+//     width: 100% !important;
+//   }
+//   .container > * {
+//     border-radius: 0 !important;
+//   }
+// }
+
+.menu {
+  :global(.anticon) {
+    margin-right: 8px;
+  }
+  :global(.ant-dropdown-menu-item) {
+    min-width: 160px;
+  }
+}
+
+.name {
+  width: 70px;
+  height: 48px;
+  overflow: hidden;
+  line-height: 48px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.action {
+  display: flex;
+  align-items: center;
+  height: 48px;
+  padding: 0 12px;
+  cursor: pointer;
+  transition: all 0.3s;
+  margin-right: 10px;
+  > span {
+    vertical-align: middle;
+  }
+  :global(.ant-avatar) {
+    margin-right: 10px;
+  }
+  // &:hover {
+  //   background: @header-hover-bg;
+  // }
+  // &:global(.opened) {
+  //   background: @header-hover-bg;
+  // }
+}
+.search {
+  padding: 0 12px;
+  &:hover {
+    background: transparent;
+  }
+}
+.account {
+  .avatar {
+    margin-right: 8px;
+    color: @primary-color;
+    vertical-align: top;
+    background: rgba(255, 255, 255, 0.85);
+  }
+}

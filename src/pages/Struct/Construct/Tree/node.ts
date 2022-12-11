@@ -17,6 +17,9 @@ export interface RTreeNode extends BasicDataNode {
   editStatus: number; // -1无法编辑 0 1 2 3
   description?: string;
   type?: number; // 节点状态：新增/删除/更改中
+  _isChecked?: boolean;
+  // _parentIds?: string;
+  path?: string;
 }
 export interface OpeNode {
   id: string;
@@ -466,9 +469,10 @@ class Operation {
   }
 }
 
-function loopNode(node, nodeMap: Store, parentNode?: any) {
+export function loopNode(node, nodeMap: Store, parentNode?: any) {
   if (parentNode) {
     node.parentId = parentNode.id;
+    // node._parentIds = `${parentNode._parentIds?`${parentNode._parentIds}|`:''}${parentNode.id}`;
   }
   nodeMap[node.id] = {
     state: node,
@@ -733,6 +737,25 @@ export class YTree {
     this.users.onDestroy();
   }
 
+  findParentIds(index?: string) {
+    const node = this.getNode(index);
+    if (!node) return;
+    if (!node.parentId) return [];
+    let ancestor = node;
+    const pIds: any[] = [];
+    while (ancestor.id && ancestor.parentId) {
+      if (ancestor.parentId === 'trash') {
+        return pIds;
+      }
+      if (!this.store[ancestor.parentId]) {
+        return;
+      }
+      ancestor = this.store[ancestor.parentId]?.state;
+      ancestor?.id && pIds.push(ancestor.id);
+    }
+    return pIds;
+  }
+
   findIfInOriginTree(index?: string): boolean {
     const node = this.getNode(index);
     if (!node) return false;
@@ -750,5 +773,13 @@ export class YTree {
       ancestor = this.store[ancestor.parentId]?.state;
     }
     return true;
+  }
+
+  addChildren(index, n: RTreeNode[]) {
+    const item = this.store[index];
+    if (!item) return;
+    if (item.state?.children && item.state.children.length > 0) return;
+    n.forEach((v) => loopNode(v, this.store, item));
+    item.state.children = n;
   }
 }

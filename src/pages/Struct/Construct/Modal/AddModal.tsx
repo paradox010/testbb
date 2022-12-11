@@ -21,7 +21,7 @@ const CreateForm: React.FC<CreateFormProps> = ({ open, onOk, onCancel, modalData
   return (
     <Modal
       open={open}
-      title="新增子节点"
+      title="新增下位节点"
       okText="新增"
       cancelText="取消"
       onCancel={onCancel}

@@ -40,7 +40,6 @@ function initSpecialOpes(socketData, state: StepStateType) {
   const opeLists = socketData?.content?.unfinishedLog || [];
   state.specialOpes = [];
   for (let i = opeLists.length - 1; i >= 0; i--) {
-    // msgData.yTree.history.push(opeLists[i]);
     const opeliopt = opeLists[i].operationType;
     if (opeliopt === 'sync' || opeliopt === 'cover') {
       const iii = JSON.parse(opeLists[i]?.param).id;

@@ -1,6 +1,6 @@
 import { Select, Tag } from 'antd';
 import { history, request } from 'ice';
-import { domainTypeEnum } from '@/dataType';
+// import { domainTypeEnum } from '@/dataType';
 import { useRequest } from 'ahooks';
 
 import { getParams, appendSearch } from '@/utils/location';

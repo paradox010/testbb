@@ -8,6 +8,8 @@ import { UserOutlined } from '@ant-design/icons';
 
 import styles from './index.module.less';
 
+import AvatarDropDown from '@/components/HeaderDropDown/AvatarDropDown';
+
 const loopMenuItem = (menus) =>
   menus.map(({ icon, children, ...item }) => ({
     ...item,
@@ -41,10 +43,11 @@ export default function BasicLayout({ children, location }) {
       }}
       logo={false}
       rightContentRender={() => (
-        <div>
-          <Avatar icon={<UserOutlined />} />
-          <span style={{ margin: '0 5px' }}>{user?.userName}</span>
-        </div>
+        <AvatarDropDown />
+        // <div>
+        //   <Avatar icon={<UserOutlined />} />
+        //   <span style={{ margin: '0 5px' }}>{user?.userName}</span>
+        // </div>
       )}
       // footerRender={() => (
       //   <DefaultFooter
