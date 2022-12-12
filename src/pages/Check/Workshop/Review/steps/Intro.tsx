@@ -11,7 +11,7 @@ const Step: React.FC<StepProps> = ({ stepMsg$, msgData }) => {
   const basic = useContext(BasicContext);
   return (
     <div className={styles.introContent}>
-      <Collapse defaultActiveKey={['1','2','3','4']}>
+      <Collapse defaultActiveKey={['1', '2', '3', '4']}>
         <Collapse.Panel header="与会人员介绍" key="1">
           {reviewUserRoleTypeEnum.map((v) => (
             <div className={styles.roleItem} key={v.value}>
@@ -109,12 +109,21 @@ TypedStep.Title = ({ stepMsg$, msgData }) => {
       },
     });
   };
+  const goBefore = () => {
+    stepMsg$.emit({
+      type: 'process',
+      content: {
+        processState: 1,
+      },
+    });
+  };
   return (
     <>
       开场介绍
       <Button type="primary" onClick={goNext}>
         开始提议介绍
       </Button>
+      <Button onClick={goBefore}>上一步</Button>
     </>
   );
 };

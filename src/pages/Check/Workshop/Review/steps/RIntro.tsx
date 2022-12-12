@@ -126,6 +126,14 @@ TypedStep.Title = ({ stepMsg$, msgData }) => {
       },
     });
   };
+  const goBefore = () => {
+    stepMsg$.emit({
+      type: 'process',
+      content: {
+        processState: 2,
+      },
+    });
+  };
   return (
     <>
       提议介绍
@@ -135,6 +143,7 @@ TypedStep.Title = ({ stepMsg$, msgData }) => {
       <Button onClick={goNextProp} disabled={!findNext(basic.domain, proposalDomainId)}>
         下一位演讲人
       </Button>
+      <Button onClick={goBefore}>上一步</Button>
     </>
   );
 };

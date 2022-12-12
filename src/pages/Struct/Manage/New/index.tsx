@@ -62,7 +62,11 @@ const New = () => {
             {state.name}
           </Typography.Paragraph>
           {(state.step === 'import' || state.step === 'importView') && (
-            <Button style={{ float: 'right' }}>模板下载</Button>
+            <Button style={{ float: 'right' }}>
+              <a download href="https://file.dvolution.com/file/product-knowledge-management/template/%E5%AF%BC%E5%85%A5%E6%A8%A1%E6%9D%BFv1.0.xlsx">
+                模板下载
+              </a>
+            </Button>
           )}
         </div>
         {state.step === 'name' && <StepFirst />}

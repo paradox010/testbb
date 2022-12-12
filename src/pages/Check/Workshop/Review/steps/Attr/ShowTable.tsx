@@ -76,7 +76,7 @@ const AttrTable = ({ data }) => {
       <Table
         className="attr-60-40"
         pagination={false}
-        dataSource={data?.map((v) => v.featureDomain === radio) || []}
+        dataSource={data?.filter((v) => v.featureDomain === radio) || []}
         rowKey="id"
         columns={columns}
         bordered

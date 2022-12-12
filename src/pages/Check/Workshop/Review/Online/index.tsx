@@ -13,11 +13,11 @@ const Online: React.FC<StepProps> = ({ stepMsg$, msgData }) => {
       <div className={styles.header}>
         <span>
           <Badge status="success" />
-          在线人员(7)
+          在线人员({member?.filter((v) => v.isOnline).length})
         </span>
         <span>
           <Badge status="error" />
-          离线人员(2)
+          离线人员({member?.filter((v) => !v.isOnline).length})
         </span>
       </div>
       <div style={{ padding: '0 12px' }}>

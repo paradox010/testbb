@@ -132,6 +132,8 @@ interface SocketStepType {
     | {
         processState: 7;
         version?: string;
+        reviewVote: VoteBasicType;
+        isVote: boolean;
       };
 }
 
@@ -267,6 +269,13 @@ interface CompSignType {
   };
 }
 
+interface CompTreePosType {
+  type: 'treePos';
+  content: {
+    id: string;
+  };
+}
+
 export type CompMsgType =
   | RefreshType
   | UserCheckType
@@ -276,7 +285,8 @@ export type CompMsgType =
   | OpeType
   | CompModalType
   | CompFreezeType
-  | CompSignType;
+  | CompSignType
+  | CompTreePosType;
 
 interface SpecialOpe {
   id: number;

@@ -14,7 +14,7 @@ import { YTree } from '@/pages/Struct/Construct/Tree/node';
 import BasicContext, { stepState } from './basicContext';
 
 // 中转站接受服务端消息并转换成组件内部消息通知
-const url = `ws://${window.location.host}/api/websocket/review?reviewId=1&domainId=1`;
+const url = `ws://${window.location.host}/api/websocket/review`;
 
 // style的资源会浪费，所以在最外层维护,如果不定义则用全局的style维护
 const style = document.createElement('style');
@@ -69,7 +69,10 @@ export default function Stand() {
     }),
     [],
   );
-  const ws = useCreation(() => new YWebSocket(url, basic.self?.token), []);
+  const ws = useCreation(
+    () => new YWebSocket(`${url}?reviewId=${basic.id}&domainId=${basic.domainId}`, basic.self?.token),
+    [],
+  );
 
   useEffect(() => {
     ws.init();
@@ -131,7 +134,7 @@ export default function Stand() {
             });
           });
         }
-        if (socketData.content.processState === 5) {
+        if (socketData.content.processState === 5 || socketData.content.processState === 7) {
           if (socketData.content.reviewVote?.id) {
             msgData.voteCenter.push(socketData.content.reviewVote, socketData.content.isVote, basic.self.userId);
             setTimeout(() => {
@@ -167,7 +170,7 @@ export default function Stand() {
       }
     };
     ws.onclose = () => {
-      // yTree.onDestory();
+      msgData.yTree.onDestory();
     };
     return () => {
       ws.close?.();

@@ -148,7 +148,7 @@ export const Witness: React.FC<{
           <Descriptions.Item
             label={
               <div style={{ lineHeight: '32px' }}>
-                未投票人员<Button style={{ float: 'right' }}>一键提醒</Button>
+                未投票人员<Button style={{ float: 'right' }} disabled>一键提醒</Button>
               </div>
             }
           >

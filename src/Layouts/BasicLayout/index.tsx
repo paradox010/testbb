@@ -2,9 +2,7 @@ import { createElement } from 'react';
 import ProLayout, { DefaultFooter } from '@ant-design/pro-layout';
 import { Link } from 'ice';
 import { asideMenuConfig } from './menuConfig';
-import { Avatar } from 'antd';
 import store from '@/store';
-import { UserOutlined } from '@ant-design/icons';
 
 import styles from './index.module.less';
 

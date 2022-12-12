@@ -37,6 +37,8 @@ const EditMsg = React.forwardRef<
       yTree: new YTree([], [], {
         userId: basic.self.userId,
         style,
+        updateKeys: ['name', 'dataType', 'unit', 'value'],
+        reverseOrder: true,
       }),
     }),
     [],

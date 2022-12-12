@@ -3,8 +3,21 @@ import styles from './release.module.less';
 import { Witness } from './Vote/VoteComp';
 
 import { StepProps, StepCompType } from '../msg.d';
+import { useState } from 'react';
+import { VoteItem } from '../socketClass/VoteCenter';
 
 const Step: React.FC<StepProps> = ({ stepMsg$, msgData }) => {
+  const [data, setData] = useState<VoteItem | undefined>();
+
+  stepMsg$.useSubscription((msg) => {
+    if (msg.type === 'refreshVote') {
+      const v = msgData.voteCenter.getLatest();
+      if (v?.voteResult?.find((r) => r.userId === msgData.self.userId)) {
+        v.isVote = true;
+      }
+      setData(v ? { ...v } : v);
+    }
+  });
   return (
     <div className={styles.signContent}>
       <Descriptions bordered column={2}>
@@ -19,7 +32,7 @@ const Step: React.FC<StepProps> = ({ stepMsg$, msgData }) => {
           <DatePicker />
         </Descriptions.Item>
         <Descriptions.Item label="投票详情" span={2}>
-          <Witness userType="3" modalType="modal" data={{}} noTitle />
+          <Witness userType="3" modalType="modal" data={(data || {}) as VoteItem} noTitle />
         </Descriptions.Item>
       </Descriptions>
     </div>
@@ -40,12 +53,8 @@ TypedStep.Title = ({ stepMsg$, msgData }) => {
   return (
     <>
       定时发布
-      <Button type="primary">
-        确认
-      </Button>
-      <Button onClick={goBefore}>
-        上一步
-      </Button>
+      <Button type="primary">确认</Button>
+      <Button onClick={goBefore}>上一步</Button>
     </>
   );
 };

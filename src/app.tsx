@@ -1,5 +1,6 @@
 import { runApp, IAppConfig, request, history } from 'ice';
 import { message } from 'antd';
+import { getToken } from './utils/auth';
 // const delay = (time) => new Promise((resolve) => setTimeout(() => resolve(1), time));
 
 const appConfig: IAppConfig = {
@@ -7,12 +8,7 @@ const appConfig: IAppConfig = {
     rootId: 'ds-root',
     title: '浙江省',
     getInitialData: async () => {
-      let token;
-      if (process.env.NODE_ENV === 'development') {
-        token = sessionStorage.getItem('token');
-      } else {
-        token = localStorage.getItem('token');
-      }
+      const token = getToken();
       if (token) {
         try {
           const resData = await request({
@@ -33,6 +29,7 @@ const appConfig: IAppConfig = {
           console.log(error);
         }
       }
+      // 强制进入login
       history?.push({
         pathname: '/user/login',
       });

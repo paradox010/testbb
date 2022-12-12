@@ -10,13 +10,24 @@ import { Badge } from 'antd';
 const Record: React.FC<StepProps> = ({ stepMsg$, msgData }) => {
   const { record } = useSnapshot(stepState);
 
+  const loc = (item) => {
+    if (item.recordType === 'operation') {
+      stepMsg$.emit({
+        type: 'treePos',
+        content: {
+          id: item.categoryId,
+        },
+      });
+    }
+  };
+
   return (
     <div>
       {record?.map((v) => (
         <div className={styles.item} key={v.id}>
           <div className={styles.date}>{dayjs(v.createTime).format('HH:mm')}</div>
           <Badge color="blue" />
-          <div className={styles.ope} data-index={v.categoryId}>
+          <div className={styles.ope} onClick={() => loc(v)}>
             <div className={styles.man}>{v.userName}</div>
             <div>{v.content}</div>
           </div>

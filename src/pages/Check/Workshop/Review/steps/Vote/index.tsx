@@ -1,4 +1,4 @@
-import { Button, Checkbox, Descriptions } from 'antd';
+import { Button, Checkbox, Descriptions, message } from 'antd';
 import { useState, useContext } from 'react';
 import VoteComp from './VoteComp';
 
@@ -54,12 +54,17 @@ const TypedStep = Step as StepCompType;
 
 TypedStep.Title = ({ stepMsg$, msgData }) => {
   const goNext = () => {
-    stepMsg$.emit({
-      type: 'process',
-      content: {
-        processState: 6,
-      },
-    });
+    const v = msgData.voteCenter.getLatest();
+    if (v?.isFinished) {
+      stepMsg$.emit({
+        type: 'process',
+        content: {
+          processState: 6,
+        },
+      });
+    } else {
+      message.warn('投票未结束');
+    }
   };
   const goBefore = () => {
     stepMsg$.emit({
@@ -76,9 +81,7 @@ TypedStep.Title = ({ stepMsg$, msgData }) => {
       <Button type="primary" onClick={goNext}>
         进入签名
       </Button>
-      <Button onClick={goBefore}>
-        上一步
-      </Button>
+      <Button onClick={goBefore}>上一步</Button>
     </>
   );
 };
