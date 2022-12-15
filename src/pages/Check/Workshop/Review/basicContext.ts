@@ -10,7 +10,8 @@ const initState: StepStateType = {
   processState: 0,
   // proposalDomainId: undefined,
   isFreeze: false,
-  version: '',
+  // version: '',
+  // selectVersion: '',
   isVote: false,
   // reviewVote:
   specialOpes: [],

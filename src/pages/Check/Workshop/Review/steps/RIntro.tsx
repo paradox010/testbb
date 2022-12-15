@@ -159,7 +159,7 @@ TypedStep.Title = ({ stepMsg$, msgData }) => {
       content: {
         processState: 3,
         isFirstProposal: false,
-        proposalDomainId: item.id,
+        proposalDomainId: item.domainPubId,
       },
     });
   };

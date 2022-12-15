@@ -1,7 +1,6 @@
 import { createElement } from 'react';
-import ProLayout, { DefaultFooter } from '@ant-design/pro-layout';
+import ProLayout from '@ant-design/pro-layout';
 import { Link } from 'ice';
-import { asideMenuConfig } from './menuConfig';
 import store from '@/store';
 
 import styles from './index.module.less';
@@ -21,18 +20,17 @@ export default function BasicLayout({ children, location }) {
   return (
     <ProLayout
       className={styles.bLayout}
+      menuHeaderRender={(logo, title) => <a href="/">{title}</a>}
       title="浙江省工业产品主数据管理平台专家系统"
-      headerTitleRender={(...params) => <a>{params[1]}</a>}
       style={{
         minHeight: '100vh',
       }}
-      layout="mix"
+      layout="top"
       location={{
         pathname: location.pathname,
       }}
       navTheme="light"
       headerTheme="light"
-      menuDataRender={() => loopMenuItem(asideMenuConfig)}
       menuItemRender={(item, defaultDom) => {
         if (!item.path) {
           return defaultDom;
@@ -40,30 +38,8 @@ export default function BasicLayout({ children, location }) {
         return <Link to={item.path}>{defaultDom}</Link>;
       }}
       logo={false}
-      rightContentRender={() => (
-        <AvatarDropDown />
-        // <div>
-        //   <Avatar icon={<UserOutlined />} />
-        //   <span style={{ margin: '0 5px' }}>{user?.userName}</span>
-        // </div>
-      )}
-      // footerRender={() => (
-      //   <DefaultFooter
-      //     links={[
-      //       {
-      //         key: '道生',
-      //         title: '道生',
-      //         href: 'https://github.com/ice-lab/icejs',
-      //       },
-      //       {
-      //         key: '1',
-      //         title: '道生',
-      //         href: 'https://github.com/ant-design/ant-design',
-      //       },
-      //     ]}
-      //     copyright="by 道生"
-      //   />
-      // )}
+      rightContentRender={() => <AvatarDropDown />}
+      contentStyle={{ margin: 0 }}
     >
       <div style={{ minHeight: '60vh' }}>{children}</div>
     </ProLayout>

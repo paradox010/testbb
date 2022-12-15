@@ -70,12 +70,12 @@ const Login = () => {
           <Checkbox>Remember me</Checkbox>
         </Form.Item> */}
 
-        <Form.Item style={{ flex: '1' }}>
+        {/* <Form.Item style={{ flex: '1' }}>
           <div className={styles.linkOpe}>
             <a>尚未注册</a>
             <a onClick={goPassword}>忘记密码</a>
           </div>
-        </Form.Item>
+        </Form.Item> */}
         <Form.Item style={{ marginBottom: 0 }}>
           <Button type="primary" htmlType="submit" size="large" style={{ width: '100%' }}>
             登录

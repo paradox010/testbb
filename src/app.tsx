@@ -42,7 +42,7 @@ const appConfig: IAppConfig = {
       return {
         // initialStates 是约定好的字段，会透传给 store 的初始状态
         initialStates: {
-          user: { userId: `${Math.random()}` },
+          // user: { userId: `${Math.random()}` },
         },
       };
     },

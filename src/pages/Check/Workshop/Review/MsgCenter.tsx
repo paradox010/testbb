@@ -16,7 +16,7 @@ import BasicContext, { stepState } from './basicContext';
 import { specialOpesTypes } from '@/dataType';
 
 // 中转站接受服务端消息并转换成组件内部消息通知
-const url = `${process.env.BASEWS_PFX}://${window.location.host}${process.env.BASEWS||''}/api/websocket/review`;
+const url = `${process.env.BASEWS_PFX}://${window.location.host}${process.env.BASEWS || ''}/api/websocket/review`;
 
 // style的资源会浪费，所以在最外层维护,如果不定义则用全局的style维护
 const style = document.createElement('style');
@@ -89,6 +89,7 @@ export default function Stand() {
           'proposalDomainId',
           'proposalStartTime',
           'sign',
+          'version'
         ].forEach((k) => {
           stepState[k] = socketData.content[k];
         });
@@ -153,6 +154,11 @@ export default function Stand() {
                 type: 'refreshVote',
               });
             });
+          }
+        }
+        if (socketData.content.processState === 7) {
+          if (socketData.content.version) {
+            stepState.version = socketData.content.version;
           }
         }
       }

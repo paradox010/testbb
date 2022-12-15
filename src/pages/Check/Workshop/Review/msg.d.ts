@@ -315,6 +315,7 @@ export interface StepStateType {
   proposalStartTime?: number;
   isFreeze: boolean;
   version?: string;
+  selectVersion?: string;
   isVote?: boolean;
   reviewVote?: VoteBasicType;
   // 需要挂起的事件 内部维护

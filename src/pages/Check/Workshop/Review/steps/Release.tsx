@@ -48,17 +48,17 @@ const Step: React.FC<StepProps> = ({ stepMsg$, msgData }) => {
       <Descriptions bordered column={2}>
         <Descriptions.Item label="行业标准名称">{basic.domainName || '-'}</Descriptions.Item>
         <Descriptions.Item label="发布标准版本号">
-          {basic.userRole === '1' ? (
+          {basic.userRole === '1' && !state.version ? (
             <Select
               style={{ width: 200 }}
-              value={state.version}
+              value={state.selectVersion}
               onChange={(v) => {
-                stepState.version = v;
+                stepState.selectVersion = v;
               }}
-              options={selectOptions}
+              options={selectOptions?.map((v) => ({ label: v, value: v }))}
             />
           ) : (
-            state.version
+            state.version || '-'
           )}
         </Descriptions.Item>
         <Descriptions.Item label="投票详情" span={2}>
@@ -83,7 +83,7 @@ const Title: React.FC<StepProps> = ({ stepMsg$, msgData }) => {
   };
 
   const onSubmit = () => {
-    if (!state.version || state.version === '') {
+    if (!state.selectVersion || state.selectVersion === '') {
       message.error('请选择版本号');
       return;
     }
@@ -91,7 +91,7 @@ const Title: React.FC<StepProps> = ({ stepMsg$, msgData }) => {
       type: 'process',
       content: {
         processState: 7,
-        version: state.version,
+        version: state.selectVersion,
       },
     });
   };
@@ -99,11 +99,13 @@ const Title: React.FC<StepProps> = ({ stepMsg$, msgData }) => {
     <>
       定时发布
       {msgData.self.userRole === '1' && (
-        <Button type="primary" onClick={onSubmit}>
-          确认
-        </Button>
+        <>
+          <Button type="primary" onClick={onSubmit}>
+            确认
+          </Button>
+          <Button onClick={goBefore}>上一步</Button>
+        </>
       )}
-      <Button onClick={goBefore}>上一步</Button>
     </>
   );
 };

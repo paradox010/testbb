@@ -1,4 +1,4 @@
-import { Form, Input, Button } from 'antd';
+import { Form, Input, Button, Alert } from 'antd';
 
 import LoginWrap from './LoginWrap';
 
@@ -7,6 +7,7 @@ import { request, history } from 'ice';
 
 import styles from './index.module.less';
 import { getParams } from '@/utils/location';
+import store from '@/store';
 
 async function loginUp(params) {
   const resData = await request({
@@ -18,6 +19,7 @@ async function loginUp(params) {
 }
 
 const Login = () => {
+  const [user] = store.useModel('user');
   const { run } = useRequest(loginUp, {
     manual: true,
     onSuccess: () => {
@@ -37,8 +39,9 @@ const Login = () => {
   return (
     <LoginWrap>
       <Form name="newWord" layout="vertical" onFinish={onFinish} autoComplete="off">
-        <Form.Item style={{ marginBottom: 54 }}>
+      <Form.Item style={{ marginBottom: user.isFirstLogin ? 24 : 54 }}>
           <div className={styles.formTitle}>修改密码</div>
+          {user.isFirstLogin && <Alert message="首次登录，请修改密码" banner />}
         </Form.Item>
 
         <Form.Item name="username" rules={[{ required: true, message: '请输入用户名!' }]}>

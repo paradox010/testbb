@@ -1,7 +1,7 @@
 import { createStore } from 'ice';
 
 interface User {
-  userId: string;
+  userId?: string;
   userName?: string;
   token?: string;
   isFirstLogin?: boolean;
