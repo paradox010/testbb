@@ -90,23 +90,31 @@ const DiscussTitle: React.FC<StepProps> = ({ stepMsg$, msgData }) => {
   return (
     <>
       提议讨论
-      <Button type="primary" onClick={goNext}>
-        编辑结束
-      </Button>
-      <Button type="primary" onClick={goBefore}>
-        上一步
-      </Button>
-      <Popover
-        open={click}
-        onOpenChange={onOpenChange}
-        overlayStyle={{ width: 300 }}
-        placement="bottomRight"
-        content={content}
-        trigger="click"
-        className="ds-pop ds-right"
-      >
-        <Button disabled={!(msgData?.voteCenter?.getLatest() || { isFinished: true }).isFinished}>发起投票</Button>
-      </Popover>
+      {msgData.self.userRole === '1' && (
+        <>
+          <Button type="primary" onClick={goNext}>
+            编辑结束
+          </Button>
+          <Button type="primary" onClick={goBefore}>
+            上一步
+          </Button>
+        </>
+      )}
+      {msgData.self.userRole === '4' && (
+        <>
+          <Popover
+            open={click}
+            onOpenChange={onOpenChange}
+            overlayStyle={{ width: 300 }}
+            placement="bottomRight"
+            content={content}
+            trigger="click"
+            className="ds-pop ds-right"
+          >
+            <Button disabled={!(msgData?.voteCenter?.getLatest() || { isFinished: true }).isFinished}>发起投票</Button>
+          </Popover>
+        </>
+      )}
       <VoteModal stepMsg$={stepMsg$} msgData={msgData} />
     </>
   );

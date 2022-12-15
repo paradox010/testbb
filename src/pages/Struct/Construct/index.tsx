@@ -26,19 +26,43 @@ import styles from './index.module.less';
 import { basicState } from './basicState';
 import Freeze from './Freeze';
 
-const url = `ws://${window.location.host}/api/websocket/product/category`;
+import { specialOpesTypes } from '@/dataType';
+import { Button } from 'antd';
+import Release from './Release';
+
+const url = `${process.env.BASEWS_PFX}://${window.location.host}${
+  process.env.BASEWS || ''
+}/api/websocket/product/category`;
 // const url = 'ws://localhost:3333/api/websocket/product/category?domainId=1001';
 
 // style的资源会浪费，所以在最外层维护,如果不定义则用全局的style维护
 const style = document.createElement('style');
 style.type = 'text/css';
 
+function initTree(socketData, yTree: YTree) {
+  yTree.init(socketData?.content?.currentTree, socketData?.content?.recycleTree);
+  yTree.history.init([...(socketData?.content?.operationLog || [])]);
+  // 执行服务器未完成的操作记录 除了未完成的新增操作之外
+  const opeLists = socketData?.content?.unfinishedLog || [];
+  for (let i = opeLists.length - 1; i >= 0; i--) {
+    yTree.history.push(opeLists[i]);
+    const opeliopt = opeLists[i].operationType;
+    if (opeliopt === 'add' && !opeLists[i].isFinished) {
+      continue;
+    }
+    if (specialOpesTypes.includes(opeliopt)) {
+      continue;
+    }
+    yTree.operation.add(JSON.parse(opeLists[i].param));
+  }
+}
+
 function initSpecialOpes(socketData, state: StepStateType) {
   const opeLists = socketData?.content?.unfinishedLog || [];
   state.specialOpes = [];
   for (let i = opeLists.length - 1; i >= 0; i--) {
     const opeliopt = opeLists[i].operationType;
-    if (opeliopt === 'sync' || opeliopt === 'cover') {
+    if (specialOpesTypes.includes(opeliopt)) {
       const iii = JSON.parse(opeLists[i]?.param).id;
       state.specialOpes.push({
         id: iii,
@@ -79,17 +103,7 @@ export default function Stand() {
         const socketData = JSON.parse(data) as SocketMsgType;
         if (socketData.mesType === 'init') {
           // construct tree new YTree(tree)
-          yTree.init(socketData?.content?.currentTree, socketData?.content?.recycleTree);
-          yTree.history.init([...(socketData?.content?.operationLog || [])]);
-          // 执行服务器未完成的操作记录 除了未完成的新增操作之外
-          const opeLists = socketData?.content?.unfinishedLog || [];
-          for (let i = opeLists.length - 1; i >= 0; i--) {
-            yTree.history.push(opeLists[i]);
-            if (opeLists[i].operationType === 'add' && !opeLists[i].isFinished) {
-              continue;
-            }
-            yTree.operation.add(JSON.parse(opeLists[i].param));
-          }
+          initTree(socketData, yTree);
           basicState.isFreeze = socketData.content.isFreeze;
           initSpecialOpes(socketData, basicState);
           treeMsg$.emit({
@@ -105,7 +119,7 @@ export default function Stand() {
         if (socketData.mesType === 'operation') {
           yTree.operation.add(socketData.content);
           const thoptype = socketData.content;
-          if (thoptype.opeType === 'sync' || thoptype.opeType === 'cover') {
+          if (specialOpesTypes.includes(thoptype.opeType)) {
             // 去掉self
             // if(socketData.content.userId===basic.self.userId){
 
@@ -130,6 +144,9 @@ export default function Stand() {
         if (socketData.mesType === 'reset') {
           basicState.isFreeze = true;
         }
+        if (socketData.mesType === 'publish') {
+          basicState.isFreeze = true;
+        }
       };
       ws.onclose = () => {
         yTree.onDestory();
@@ -142,7 +159,7 @@ export default function Stand() {
 
   treeMsg$.useSubscription((msg) => {
     if (msg.type === 'operation') {
-      if (msg.content.opeType === 'cover' || msg.content.opeType === 'sync') {
+      if (specialOpesTypes.includes(msg.content.opeType)) {
         // 需要进入specialOpes队列
         basicState.specialOpes.push({
           id: 0, // self
@@ -162,15 +179,21 @@ export default function Stand() {
     if (msg.type === 'reset') {
       ws.send(JSON.stringify({ mesType: msg.type }));
     }
+    if (msg.type === 'publish') {
+      ws.send(JSON.stringify({ mesType: msg.type, content: msg.content }));
+    }
   });
 
   return (
-    <>
+    <div id="buildRoot" style={{ width: '100%' }}>
       <AttrRoute treeMsg$={treeMsg$}>
         <Panel>
           <span className={styles.headerTitle}>
             运维版本信息
             <DomainSelect />
+            <div style={{ float: 'right', marginRight: 24 }}>
+              <Release treeMsg$={treeMsg$} />
+            </div>
           </span>
           <Tree treeMsg$={treeMsg$} yTree={yTree} />
           <div>
@@ -216,6 +239,6 @@ export default function Stand() {
       </AttrRoute>
       <YModal treeMsg$={treeMsg$} yTree={yTree} />
       <Freeze />
-    </>
+    </div>
   );
 }

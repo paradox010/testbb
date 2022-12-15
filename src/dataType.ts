@@ -1,3 +1,39 @@
+// 覆盖includes的ts声明
+interface MyReadonlyArray<T> extends ReadonlyArray<T> {
+  /**
+   * Determines whether an array includes a certain element, returning true or false as appropriate.
+   * @param searchElement The element to search for.
+   * @param fromIndex The position in this array at which to begin searching for searchElement.
+   */
+  includes(searchElement: any, fromIndex?: number): searchElement is ReadonlyArray<T>[number];
+}
+
+// specialOpes
+export const specialOpesTypes: MyReadonlyArray<'sync' | 'cover' | 'import'> = ['sync', 'cover', 'import'] as any;
+
+// 评审状态
+export const reviewStatuEnum = [
+  {
+    label: '待评审',
+    value: 0,
+    status: 'Warning',
+  },
+  {
+    label: '正在进行',
+    value: 1,
+    status: 'Processing',
+  },
+  { 
+    label: '已通过',
+    value: 2,
+    status: 'Success',
+  },
+  {
+    label: '未通过',
+    value: 3,
+    status: 'Error'
+  },
+];
 // 域的类型
 export const domainTypeEnum = [
   {

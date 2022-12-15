@@ -60,7 +60,7 @@ const columns: Array<ProColumns<GithubIssueItem>> = [
       0: { text: '全部', status: 'Default' },
       '1': {
         text: '正常运行',
-        status: 'Process',
+        status: 'Processing',
       },
       // run: {
       //   text: '构建中',
@@ -68,7 +68,7 @@ const columns: Array<ProColumns<GithubIssueItem>> = [
       // },
       '3': {
         text: '构建中',
-        status: 'purple',
+        status: 'Success',
       },
       '2': {
         text: '暂停运行',

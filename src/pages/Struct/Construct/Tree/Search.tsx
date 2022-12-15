@@ -2,10 +2,11 @@
 import { useRequest } from 'ahooks';
 import { request } from 'ice';
 import SearchComplete from '@/components/SearchComplete';
+import { getParams } from '@/utils/location';
 
 async function getWords(keywords) {
   const resData = await request({
-    url: `/api/standard/productCategory/search?domainId=1001&keywords=${keywords}`,
+    url: `/api/standard/productCategory/search?domainId=${getParams()?.domainId}&keywords=${keywords}`,
   });
   return resData;
 }
@@ -27,7 +28,7 @@ const Search: React.FC<{
   }));
 
   return (
-    <SearchComplete style={{ width: 300, marginRight: 10 }} onChange={onSearch} onSelect={onSelect} options={tData} />
+    <SearchComplete style={{ width: 250, marginRight: 10 }} onChange={onSearch} onSelect={onSelect} options={tData} />
     // <AutoComplete
     //   onSearch={onSearch}
     //   onSelect={onSelect}

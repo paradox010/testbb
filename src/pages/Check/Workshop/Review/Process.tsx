@@ -24,7 +24,7 @@ const stepItems = [
   { title: '提议讨论', component: Discuss },
   { title: '评审投票', component: Vote },
   { title: '电子签字', component: Sign },
-  { title: '定时发布', component: Release },
+  { title: '版本发布', component: Release },
 ];
 
 const Process: React.FC<StepProps> = ({ stepMsg$, msgData }) => {

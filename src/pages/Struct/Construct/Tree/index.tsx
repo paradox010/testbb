@@ -1,5 +1,5 @@
 import { useRef, useState, useEffect } from 'react';
-import { Button, message } from 'antd';
+import { Button, message, Popconfirm } from 'antd';
 import RcTree from 'rc-tree';
 
 import { EventEmitter } from 'ahooks/lib/useEventEmitter';
@@ -102,7 +102,10 @@ const MyTree: React.FC<TreeProps> = ({ treeMsg$, yTree, type = 'build' }) => {
   const onUpdate = (event: React.MouseEvent<HTMLButtonElement>) => {
     const { index } = event.currentTarget.dataset;
     const node = checkIfValid(index);
-    if (!node) return;
+    if (!node) {
+      message.warn('请选中一个节点');
+      return;
+    }
     if (index === selectedKeys[0]) event.stopPropagation?.();
     treeMsg$.emit({
       type: 'modal',
@@ -113,7 +116,10 @@ const MyTree: React.FC<TreeProps> = ({ treeMsg$, yTree, type = 'build' }) => {
   const onDelete = (event: React.MouseEvent<HTMLButtonElement>) => {
     const { index } = event.currentTarget.dataset;
     const node = checkIfValid(index);
-    if (!node) return;
+    if (!node) {
+      message.warn('请选中一个节点');
+      return;
+    }
     if (index === selectedKeys[0]) event.stopPropagation?.();
     treeMsg$.emit({
       type: 'modal',
@@ -124,7 +130,10 @@ const MyTree: React.FC<TreeProps> = ({ treeMsg$, yTree, type = 'build' }) => {
   const onMove = (event: React.MouseEvent<HTMLButtonElement>) => {
     const { index } = event.currentTarget.dataset;
     const node = checkIfValid(index);
-    if (!node) return;
+    if (!node) {
+      message.warn('请选中一个节点');
+      return;
+    }
     if (index === selectedKeys[0]) event.stopPropagation?.();
     treeMsg$.emit({
       type: 'modal',
@@ -132,10 +141,27 @@ const MyTree: React.FC<TreeProps> = ({ treeMsg$, yTree, type = 'build' }) => {
       modalData: node,
     });
   };
+  const onImport = (event: React.MouseEvent<HTMLButtonElement>) => {
+    const { index } = event.currentTarget.dataset;
+    const node = checkIfValid(index);
+    if (!node) {
+      message.warn('请选中一个节点');
+      return;
+    }
+    if (index === selectedKeys[0]) event.stopPropagation?.();
+    treeMsg$.emit({
+      type: 'modal',
+      open: 'import',
+      modalData: node,
+    });
+  };
   const onDetail = (event: React.MouseEvent<HTMLButtonElement>) => {
     const { index } = event.currentTarget.dataset;
     const node = checkIfValid(index);
-    if (!node) return;
+    if (!node) {
+      message.warn('请选中一个节点');
+      return;
+    }
     if (index === selectedKeys[0]) event.stopPropagation?.();
     treeMsg$.emit({
       type: 'route',
@@ -225,7 +251,10 @@ const MyTree: React.FC<TreeProps> = ({ treeMsg$, yTree, type = 'build' }) => {
   };
 
   const onOutOpe = (ope = 'update') => {
-    if (!selectedKeys?.[0]) return;
+    if (!selectedKeys?.[0]) {
+      message.warn('请选中一个节点');
+      return;
+    }
     if (!yTree.findIfInOriginTree(selectedKeys[0])) return;
     const monitorE = { currentTarget: { dataset: { index: selectedKeys[0] } } } as any;
     if (ope === 'update') {
@@ -243,6 +272,9 @@ const MyTree: React.FC<TreeProps> = ({ treeMsg$, yTree, type = 'build' }) => {
     if (ope === 'delete') {
       onDelete(monitorE);
     }
+    if (ope === 'import') {
+      onImport(monitorE);
+    }
   };
 
   const onSearchSelect = (_, v) => {
@@ -254,11 +286,11 @@ const MyTree: React.FC<TreeProps> = ({ treeMsg$, yTree, type = 'build' }) => {
     });
   };
 
-  const onReset = ()=>{
+  const onReset = () => {
     treeMsg$.emit({
       type: 'reset',
-    })
-  }
+    });
+  };
 
   return (
     <>
@@ -274,20 +306,20 @@ const MyTree: React.FC<TreeProps> = ({ treeMsg$, yTree, type = 'build' }) => {
           查看详情
         </Button>
         <Button icon={<DragOutlined />} onClick={() => onOutOpe('move')}>
-          移动节点
+          移动
         </Button>
         <Button icon={<DeleteOutlined />} onClick={() => onOutOpe('delete')}>
           删除
         </Button>
         {type === 'build' && (
-          <Button icon={<ExportOutlined />} disabled>
+          <Button icon={<ExportOutlined />} onClick={() => onOutOpe('import')}>
             导入
           </Button>
         )}
         {type === 'build' && (
-          <Button icon={<UndoOutlined />} onClick={onReset}>
-            重置
-          </Button>
+          <Popconfirm title="确定是否重置" okText="确定" cancelText="取消" onConfirm={onReset}>
+            <Button icon={<UndoOutlined />}>重置</Button>
+          </Popconfirm>
         )}
       </div>
       <div className="dsTree" style={{ height: 'calc(100% - 76px)' }}>

@@ -35,6 +35,7 @@
   "scripts": {
     "start": "icejs start --port=3334",
     "build": "icejs build",
+    "build:zjxt": "icejs build --mode zjxt",
     "restart": "icejs start -- --force",
     "anyalyzer": "icejs build --  --analyzer",
     "lint": "npm run eslint && npm run stylelint",

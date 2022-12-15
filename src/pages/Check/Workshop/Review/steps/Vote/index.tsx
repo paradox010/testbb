@@ -36,10 +36,17 @@ const Step: React.FC<StepProps> = ({ stepMsg$, msgData }) => {
       content: { ...res, type: 2, isFinished: true },
     });
   };
+  const onRemind = (res) => {
+    stepMsg$.emit({
+      type: 'remind',
+      content: { ...res },
+    });
+  };
 
   return (
     <div className={styles.signContent}>
       <VoteComp
+        onRemind={onRemind}
         modalType="review"
         userType={basic.self.userRole}
         vote={data}
@@ -78,10 +85,14 @@ TypedStep.Title = ({ stepMsg$, msgData }) => {
   return (
     <>
       评审投票
-      <Button type="primary" onClick={goNext}>
-        进入签名
-      </Button>
-      <Button onClick={goBefore}>上一步</Button>
+      {msgData.self.userRole === '1' && (
+        <>
+          <Button type="primary" onClick={goNext}>
+            进入签名
+          </Button>
+          <Button onClick={goBefore}>上一步</Button>
+        </>
+      )}
     </>
   );
 };

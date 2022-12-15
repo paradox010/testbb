@@ -1,4 +1,4 @@
-import { Form, Input, Checkbox, Button } from 'antd';
+import { Form, Input, Button } from 'antd';
 
 import Captcha from './Captcha';
 import LoginWrap from './LoginWrap';
@@ -30,7 +30,8 @@ const Login = () => {
       // if (redirect) {
       //   window.location.assign(redirect);
       // } else {
-        window.location.assign('/');
+      // history?.replace('/').reload();
+      window.location.assign(`${process.env.BASEWS || ''}/`)
       // }
     },
     onError: () => {

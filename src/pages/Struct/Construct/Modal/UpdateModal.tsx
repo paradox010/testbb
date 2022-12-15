@@ -46,7 +46,6 @@ const UpdateForm: React.FC<UpdateFormProps> = ({ open, onOk, onCancel, modalData
           });
       }}
     >
-      <div>节点:{modalData?.name}</div>
       <Form form={form} layout="vertical" name="form_in_modal">
         <Form.Item name="name" label="节点名称" rules={[{ required: true, message: '请输入节点名称' }]}>
           <Input />

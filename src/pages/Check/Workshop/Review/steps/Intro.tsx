@@ -34,7 +34,7 @@ const Step: React.FC<StepProps> = ({ stepMsg$, msgData }) => {
         </Collapse.Panel>
         <Collapse.Panel header="讨论版本介绍" key="2">
           <>
-            <div>本期评选版本7个，入围版本2个</div>
+            <div>本期评选版本-个，入围版本{basic.domain.length}个</div>
             <div className={styles.versionWrap}>
               {basic.domain?.map((v) => (
                 <div key={v.id} className={styles.versionItem}>
@@ -120,10 +120,12 @@ TypedStep.Title = ({ stepMsg$, msgData }) => {
   return (
     <>
       开场介绍
-      <Button type="primary" onClick={goNext}>
-        开始提议介绍
-      </Button>
-      <Button onClick={goBefore}>上一步</Button>
+      {basic.self.userRole === '1' && (
+        <Button type="primary" onClick={goNext}>
+          开始提议介绍
+        </Button>
+      )}
+      {basic.self.userRole === '1' && <Button onClick={goBefore}>上一步</Button>}
     </>
   );
 };

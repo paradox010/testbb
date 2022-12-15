@@ -45,15 +45,15 @@ const CreateForm: React.FC<CreateFormProps> = ({ open, onOk, onCancel, modalData
       onCancel={onCancel}
       onOk={beforeOk}
     >
-      <div>你选择的节点:{modalData?.name}</div>
+      <div style={{ marginBottom: 10 }}>你选择的节点:{modalData?.name}</div>
       <div>
-        {type === 'cover' ? '覆盖节点' : '目标节点'}:
+        {type === 'cover' ? '想覆盖的节点' : '想移动到的上位节点'}:
         <TreeSelect
           showSearch
           treeNodeFilterProp="name"
           style={{ width: '100%' }}
           dropdownStyle={{ maxHeight: 400, overflow: 'auto' }}
-          placeholder="请选择想要移动到的父节点"
+          placeholder={type === 'cover' ? '请选择覆盖节点' : '请选择想要移动到的上位节点'}
           allowClear
           onChange={onChange}
           value={select}

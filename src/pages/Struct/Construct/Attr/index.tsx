@@ -20,7 +20,9 @@ import { AppstoreOutlined, DeleteOutlined, FileTextOutlined, LeftOutlined } from
 import styles from './index.module.less';
 import { getParams } from '@/utils/location';
 
-const url = `ws://${window.location.host}/api/websocket/product/feature`;
+const url = `${process.env.BASEWS_PFX}://${window.location.host}${
+  process.env.BASEWS || ''
+}/api/websocket/product/feature`;
 
 const style = document.createElement('style');
 style.type = 'text/css';
@@ -119,7 +121,7 @@ export default function Content({ id, back }) {
         <LeftOutlined onClick={back} />
         <span>详情</span>
       </span>
-      <div>
+      <div style={{ height: 'auto', overflow: 'auto' }}>
         <Header attrMsg$={attrMsg$} />
         <Table attrMsg$={attrMsg$} yAttr={yAttr} />
       </div>

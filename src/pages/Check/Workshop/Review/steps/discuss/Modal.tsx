@@ -6,10 +6,12 @@ import { StepProps } from '../../msg.d';
 import { VoteItem } from '../../socketClass/VoteCenter';
 
 import styles from './index.module.less';
-import BasicContext from '../../basicContext';
+import BasicContext, { stepState } from '../../basicContext';
+import { useSnapshot } from 'valtio';
 
 const VoteModal: React.FC<StepProps> = ({ stepMsg$, msgData }) => {
   const [data, setData] = useState<VoteItem | undefined>();
+  const { isFreeze } = useSnapshot(stepState);
   const basic = useContext(BasicContext);
 
   stepMsg$.useSubscription((msg) => {
@@ -23,19 +25,22 @@ const VoteModal: React.FC<StepProps> = ({ stepMsg$, msgData }) => {
       if (v?.voteResult?.find((r) => r.userId === msgData.self.userId)) {
         v.isVote = true;
       }
-      setData(v ? { ...v } : v);
+      if (!data) {
+        setData(v ? { ...v } : v);
+        setOpen(!v?.isFinished || false);
+        return;
+      }
       if (!v) {
+        setData(v);
         return;
       }
-      if (!data?.id) {
-        setOpen(true);
+      if (data.id !== v.id) {
+        setData(v ? { ...v } : v);
+        setOpen(!v?.isFinished || false);
         return;
       }
-      if (v.id !== data.id) {
-        setOpen(true);
-        return;
-      }
-      if (v.isFinished && !data.isFinished) {
+      setData(v ? { ...v } : v);
+      if (!v.isFinished && !v.isVote) {
         setOpen(true);
       }
     }
@@ -54,6 +59,12 @@ const VoteModal: React.FC<StepProps> = ({ stepMsg$, msgData }) => {
       content: { ...res, type: 2, isFinished: true },
     });
   };
+  const onRemind = (res) => {
+    stepMsg$.emit({
+      type: 'remind',
+      content: { ...res },
+    });
+  };
   return (
     <>
       <div
@@ -65,14 +76,20 @@ const VoteModal: React.FC<StepProps> = ({ stepMsg$, msgData }) => {
         投票
       </div>
       <Modal
-        open={open}
+        open={!isFreeze && open}
         footer={null}
         width={700}
         onCancel={() => {
           setOpen(false);
         }}
       >
-        <VoteComp userType={basic.self.userRole} vote={data} onVote={onVote} onForcePass={onForcePass} />
+        <VoteComp
+          onRemind={onRemind}
+          userType={basic.self.userRole}
+          vote={data}
+          onVote={onVote}
+          onForcePass={onForcePass}
+        />
       </Modal>
     </>
   );

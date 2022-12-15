@@ -65,7 +65,7 @@ const columns = [
 const AttrTable = ({ data }) => {
   const [radio, setRadio] = useState('1');
   return (
-    <div style={{ padding: '0 24px' }}>
+    <div style={{ padding: '0 24px 20px' }}>
       <Radio.Group style={{ marginBottom: 8 }} value={radio} onChange={(e) => setRadio(e.target.value)}>
         {attrEnum.map((v) => (
           <Radio.Button value={v.value} key={v.value}>

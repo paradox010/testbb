@@ -1,8 +1,14 @@
-import type { RTreeNode, HistoryItem, OpeItem, UserItem } from './Tree/node';
+import { EventEmitter } from 'ahooks/lib/useEventEmitter';
+import type { RTreeNode, HistoryItem, OpeItem, UserItem, YTree } from './Tree/node';
+
+export interface CustomProps {
+  yTree: YTree;
+  treeMsg$: EventEmitter<MsgType>;
+}
 
 interface SpecialOpe {
   id: number;
-  opeType: 'sync' | 'cover';
+  opeType: 'sync' | 'cover' | 'import';
 }
 
 export interface StepStateType {
@@ -51,8 +57,22 @@ interface SocketMoreLog {
 interface SocketReset {
   mesType: 'reset';
 }
+interface SocketPublish {
+  mesType: 'publish';
+  content: {
+    version: string;
+  };
+}
 
-export type SocketMsgType = SocketInit | SocketUser | SocketOpe | SocketLoc | SocketLog | SocketMoreLog | SocketReset;
+export type SocketMsgType =
+  | SocketInit
+  | SocketUser
+  | SocketOpe
+  | SocketLoc
+  | SocketLog
+  | SocketMoreLog
+  | SocketReset
+  | SocketPublish;
 
 // 组件之间通信
 interface refreshTree {
@@ -85,7 +105,7 @@ interface ope {
 
 export type CompModalType = {
   type: 'modal';
-  open: 'add' | 'update' | 'move' | 'delete' | 'move_confirm' | 'sync' | 'cover' | 'domain_drag_confirm';
+  open: 'add' | 'update' | 'move' | 'delete' | 'move_confirm' | 'sync' | 'cover' | 'domain_drag_confirm' | 'import';
   modalData?: {
     id?: string;
     name?: string;
@@ -118,7 +138,14 @@ interface moreLogRes {
 }
 
 interface CompReset {
-  type: 'reset'
+  type: 'reset';
+}
+
+interface CompPublish {
+  type: 'publish';
+  content: {
+    version: string;
+  };
 }
 
 export type MsgType =
@@ -131,4 +158,5 @@ export type MsgType =
   | route
   | user
   | moreLogRes
-  | CompReset;
+  | CompReset
+  | CompPublish;

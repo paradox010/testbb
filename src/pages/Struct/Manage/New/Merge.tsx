@@ -120,7 +120,7 @@ const Merge = () => {
                   baseState.afterMerge = undefined;
                 }}
               >
-                清除
+                回退
               </Button>
               <Button type="primary" onClick={onBuild} loading={buildLoading}>
                 建立

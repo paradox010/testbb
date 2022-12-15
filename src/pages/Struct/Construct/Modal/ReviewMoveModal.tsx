@@ -2,8 +2,8 @@ import { Button, Modal } from 'antd';
 
 export interface CreateFormProps {
   open: boolean;
-  onSyncOk: () => void;
-  onCoverOk: () => void;
+  onSyncOk: (v?:any) => void;
+  onCoverOk: (v?:any) => void;
   onCancel: () => void;
   modalData: any;
 }

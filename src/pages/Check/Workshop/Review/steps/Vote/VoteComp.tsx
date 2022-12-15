@@ -1,4 +1,4 @@
-import { Button, Descriptions, Progress } from 'antd';
+import { Badge, Button, Descriptions, Progress } from 'antd';
 import React, { useContext } from 'react';
 
 import styles from './index.module.less';
@@ -13,8 +13,9 @@ export interface VoteCompProps {
   vote?: VoteItem;
   onForcePass?: (v: VoteItem) => void;
   onVote: (v: any) => void;
+  onRemind?: (v: VoteItem) => void;
 }
-const VoteComp: React.FC<VoteCompProps> = ({ userType, modalType = 'modal', vote, onVote, onForcePass }) => {
+const VoteComp: React.FC<VoteCompProps> = ({ userType, modalType = 'modal', vote, onVote, onForcePass, onRemind }) => {
   if (!vote) return <span>暂无投票</span>;
   if (userType === '1' || userType === '2' || userType === '3') {
     if (!vote.isFinished) {
@@ -26,7 +27,9 @@ const VoteComp: React.FC<VoteCompProps> = ({ userType, modalType = 'modal', vote
     return <Witness data={vote} modalType={modalType} userType={userType} />;
   }
   if (userType === '4') {
-    return <Witness onForcePass={onForcePass} data={vote} modalType={modalType} userType={userType} />;
+    return (
+      <Witness onRemind={onRemind} onForcePass={onForcePass} data={vote} modalType={modalType} userType={userType} />
+    );
   }
   return null;
 };
@@ -76,7 +79,8 @@ export const Witness: React.FC<{
   userType?: string;
   noTitle?: boolean;
   onForcePass?: (v: VoteItem) => void;
-}> = ({ data, modalType, userType = '1', onForcePass, noTitle = false }) => {
+  onRemind?: (v: VoteItem) => void;
+}> = ({ data, modalType, userType = '1', onForcePass, noTitle = false, onRemind }) => {
   const basic = useContext(BasicContext);
   const onForce = () => {
     onForcePass && onForcePass(data);
@@ -119,7 +123,7 @@ export const Witness: React.FC<{
             {userType === '4' && (
               <div className={styles.forceWrap}>
                 <Button type="primary" onClick={onForce} disabled={data.isFinished}>
-                  强制通过
+                  投票截止
                 </Button>
               </div>
             )}
@@ -134,21 +138,43 @@ export const Witness: React.FC<{
         >
           <Descriptions.Item label={<div style={modalType === 'modal' ? { maxWidth: 200 } : {}}>投票信息</div>}>
             <div className={styles.td1}>
-              <Progress strokeLinecap="butt" strokeWidth={14} type="circle" percent={(vote / total) * 100} width={53} />
+              <Progress
+                strokeLinecap="butt"
+                strokeColor="#44A5FF"
+                trailColor="#7BE0B7"
+                strokeWidth={14}
+                type="circle"
+                percent={(vote / total) * 100}
+                width={53}
+              />
               <div style={{ padding: '0 12px' }}>
                 <div>投票总人数</div>
                 <div className={styles.percent}>{total}</div>
               </div>
               <div>
-                <div>已投票人员 {vote}人</div>
-                <div>未投票人员 {total - vote}人</div>
+                <div>
+                  <Badge color="#44A5FF" style={{ marginRight: 5 }} />
+                  已投票人员 {vote}人
+                </div>
+                <div>
+                  <Badge color="#7BE0B7" style={{ marginRight: 5 }} />
+                  未投票人员 {total - vote}人
+                </div>
               </div>
             </div>
           </Descriptions.Item>
           <Descriptions.Item
             label={
               <div style={{ lineHeight: '32px' }}>
-                未投票人员<Button style={{ float: 'right' }} disabled>一键提醒</Button>
+                未投票人员
+                <Button
+                  style={{ float: 'right' }}
+                  onClick={() => {
+                    onRemind && onRemind(data);
+                  }}
+                >
+                  一键提醒
+                </Button>
               </div>
             }
           >

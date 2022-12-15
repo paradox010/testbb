@@ -2,7 +2,17 @@
   "vite": true,
   "outputDir": "dist",
   "define": {
+    "process.env.BASEWS_PFX": "ws",
     "process.env.ANTD_VERSION": "4.24.1"
+  },
+  "modeConfig": {
+    "zjxt": {
+      "define": {
+        "process.env.BASEWS_PFX": "wss",
+        "process.env.BASEWS": "/zjxt"
+      },
+      "publicPath": "/zjxt"
+    }
   },
   "hash": true,
   "proxy": {

@@ -16,7 +16,9 @@ import { LeftOutlined } from '@ant-design/icons';
 
 import TrashAttr from './TrashAttr';
 
-const url = `ws://${window.location.host}/api/websocket/review/feature`;
+const url = `${process.env.BASEWS_PFX}://${window.location.host}${
+  process.env.BASEWS || ''
+}/api/websocket/review/feature`;
 
 const style = document.createElement('style');
 style.type = 'text/css';
@@ -105,7 +107,7 @@ const EditMsg = React.forwardRef<
   });
 
   return (
-    <div>
+    <div style={{ height: 'auto', overflow: 'auto' }}>
       <span className={styles.headerTitle}>
         <LeftOutlined onClick={back} />
         <span>详情</span>

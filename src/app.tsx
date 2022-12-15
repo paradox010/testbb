@@ -1,4 +1,4 @@
-import { runApp, IAppConfig, request, history } from 'ice';
+import { config, runApp, IAppConfig, request, history } from 'ice';
 import { message } from 'antd';
 import { getToken } from './utils/auth';
 // const delay = (time) => new Promise((resolve) => setTimeout(() => resolve(1), time));
@@ -17,6 +17,11 @@ const appConfig: IAppConfig = {
               Token: token,
             },
           });
+          if(resData.isFirstLogin){
+            history?.push({
+              pathname: '/user/newPassword',
+            });
+          }
           return {
             initialStates: {
               user: { ...resData, token },
@@ -45,24 +50,26 @@ const appConfig: IAppConfig = {
   router: {
     type: 'browser',
     fallback: <div>loading....</div>,
+    basename: config.basename,
   },
   request: {
-    baseURL: '/',
+    baseURL: config.baseURL,
+    // baseURL: '/zjxt',
     headers: {},
     // withFullResponse: true,
     interceptors: {
       request: {
-        onConfig: (config) => {
+        onConfig: (cg) => {
           // eslint-disable-next-line no-param-reassign
-          const token = sessionStorage.getItem('token');
+          const token =  getToken();
           if (token) {
-            config.headers = {
-              ...(config.headers || {}),
+            cg.headers = {
+              ...(cg.headers || {}),
               Token: token,
             };
           }
           // config.headers = { a: 1 };
-          return config;
+          return cg;
         },
         onError: (error) => {
           return Promise.reject(error);

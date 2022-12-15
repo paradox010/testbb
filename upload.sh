@@ -1,54 +1,50 @@
-#!/bin/bash
+#!/usr/bin/expect 
 
-# random=$RANDOM
-# echo $random
-prompt=daosheng@121.37.179.208
-password=hzds0822@
-date=$(date "+%Y-%m-%d-%H:%M:%S")
+set timeout 10
+set prompt daosheng@121.37.179.208
+set password hzds0822@
+set systemTime [clock seconds]
+set date [clock format $systemTime -format %Y-%m-%d-%H:%M:%S]
 
-expect <<-EOF
-  set timeout 60
+set dir /data/daosheng/projects/product-knowledge-management_test/web
 
-  spawn ssh $prompt
-  expect {
-    "(yes/no)?"
-    {
-      send "yes\n"
-      expect "*password:" { send "$password\n"}
-    }
-    "*password: "
-    {
-      send "$password\n"
-    }
+spawn ssh $prompt
+
+expect {
+  "(yes/no)? "
+  {
+    send "yes\n"
+    expect "*password: " { send "$password\n"}
   }
-  expect {
-    "*\\$ "
-    {
-      send "cd /data/daosheng/projects/product-knowledge-management_test/web&&ls \r"
-      expect {
-        "*\\$ " {
-          send "mv dist dist$date \r"
-        }
+  "*password: "
+  {
+    send "$password\n"
+  }
+}
+expect {
+  "*\\$ "
+  {
+    send "cd $dir&&ls \r"
+    expect {
+      "*\\$ " {
+        send "mv dist dist$date \r"
       }
     }
   }
-  send "exit 0\r"
+}
+send "exit 0\r"
+expect eof
 
-  expect eof
-
-  spawn scp -r ./dist/ daosheng@121.37.179.208:/data/daosheng/projects/product-knowledge-management_test/web/
-  expect {
-    "(yes/no)?"
-    {
-      send "yes\n"
-      expect "*password: " { send "$password\n"}
-    }
-    "*password: "
-    {
-      send "$password\n"
-    }
+spawn scp -r ./dist/ $prompt:$dir/
+expect {
+  "(yes/no)? "
+  {
+    send "yes\n"
+    expect "*password: " { send "$password\n"}
   }
-  expect eof
-EOF
-# 7777
-
+  "*password: "
+  {
+    send "$password\n"
+  }
+}
+expect eof

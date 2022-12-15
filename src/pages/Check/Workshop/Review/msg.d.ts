@@ -126,6 +126,7 @@ interface SocketStepType {
         processState: 3;
         isFirstProposal?: boolean;
         proposalDomainId: string;
+        proposalStartTime: number;
       }
     | SocketInitStep4Type
     | SocketInitStep5Type
@@ -170,6 +171,10 @@ interface SocketVoteType {
   mesType: 'vote';
   content: SocketVoteItem;
 }
+interface SocketRemindVoteType {
+  mesType: 'remind';
+  content: SocketVoteItem;
+}
 
 interface SocketOpeType {
   mesType: 'operation';
@@ -199,6 +204,7 @@ export type SocketMsgType =
   | SocketRecordType
   | SocketStepType
   | SocketVoteType
+  | SocketRemindVoteType
   | SocketOpeType
   | SocketFreezeType
   | SocketSignType;
@@ -250,6 +256,13 @@ interface CompVoteType {
   content: Omit<VoteStartType, 'createTime' | 'id'> | Omit<VoteEndType, 'voteResult'> | VoteUserType;
 }
 
+interface CompRemindVoteType {
+  type: 'remind';
+  content: {
+    id: string;
+  };
+}
+
 interface OpeType {
   type: 'operation';
   content: OpeItem;
@@ -282,6 +295,7 @@ export type CompMsgType =
   | ProcessType
   | RouteType
   | CompVoteType
+  | CompRemindVoteType
   | OpeType
   | CompModalType
   | CompFreezeType
@@ -290,7 +304,7 @@ export type CompMsgType =
 
 interface SpecialOpe {
   id: number;
-  opeType: 'sync' | 'cover';
+  opeType: 'sync' | 'cover' | 'import';
 }
 // stepState 存储全局的状态 proxy做双向数据绑定
 export interface StepStateType {
@@ -298,6 +312,7 @@ export interface StepStateType {
   member: User[];
   processState: number;
   proposalDomainId?: string;
+  proposalStartTime?: number;
   isFreeze: boolean;
   version?: string;
   isVote?: boolean;

@@ -57,19 +57,21 @@ const Step: React.FC<StepProps> = ({ stepMsg$, msgData }) => {
             {member
               ?.filter((u) => u.userRole === v.value)
               ?.map((u) => (
-                <Checkbox checked={!!u?.isSign} key={u.userId}>
-                  {u.userName}
+                <Checkbox disabled checked={!!u?.isSign} key={u.userId}>
+                  <span style={{ color: '#000000d9' }}>{u.userName}</span>
                 </Checkbox>
               ))}
           </Descriptions.Item>
         ))}
       </Descriptions>
-      <div>
+      <div style={{ padding: '15px 0 20px 0' }}>
         已确认流程规范，请签名
-        <Button onClick={clear}>清除</Button>
-        <Button onClick={submit} type="primary">
-          提交
-        </Button>
+        <div style={{ float: 'right' }}>
+          <Button onClick={clear}>清除</Button>
+          <Button style={{ marginLeft: 10 }} onClick={submit} type="primary">
+            提交
+          </Button>
+        </div>
       </div>
       <div className={styles.signWrapper}>
         <canvas ref={canvasRef} />
@@ -102,10 +104,12 @@ TypedStep.Title = ({ stepMsg$, msgData }) => {
   return (
     <>
       电子签名
-      <Button type="primary" onClick={goNext}>
-        定时发布
-      </Button>
-      <Button onClick={goBefore}>上一步</Button>
+      {msgData.self.userRole === '1' && (
+        <Button type="primary" onClick={goNext}>
+          版本发布
+        </Button>
+      )}
+      {msgData.self.userRole === '1' && <Button onClick={goBefore}>上一步</Button>}
     </>
   );
 };

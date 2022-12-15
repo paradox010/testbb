@@ -5,12 +5,13 @@ import type { MsgType } from '../msg.d';
 
 import type { YTree as YTreeType } from '../Tree/node';
 
-import { Modal } from 'antd';
+import { message, Modal } from 'antd';
 import AddModal from './AddModal';
 import UpdateModal from './UpdateModal';
 import MoveModal from './MoveModal';
 import DeleteModal from './DeleteModal';
 import ReviewMoveModal from './ReviewMoveModal';
+import ImportModal from './ImportModal';
 
 interface TreeProps {
   yTree: YTreeType;
@@ -121,9 +122,16 @@ const MyModal: React.FC<TreeProps> = ({ treeMsg$, yTree }) => {
   //   console.log(index);
   // };
 
-  const onSyncOk = () => {
-    const { id, parentId, domainPubId } = modal.modalData || {};
-    if (!id || !parentId || !domainPubId) return;
+  const onSyncOk = (values?: any) => {
+    const { id, domainPubId } = modal.modalData || {};
+    let { parentId } = modal.modalData || {};
+    if (values) {
+      parentId = values.parentId;
+    }
+    if (!id || !parentId || !domainPubId) {
+      message.warn('缺失节点信息');
+      return;
+    }
     treeMsg$.emit({
       type: 'operation',
       content: {
@@ -135,9 +143,16 @@ const MyModal: React.FC<TreeProps> = ({ treeMsg$, yTree }) => {
     closeModal();
   };
 
-  const onCoverOk  = () => {
-    const { id, parentId, domainPubId } = modal.modalData || {};
-    if (!id || !parentId || !domainPubId) return;
+  const onCoverOk = (values?: any) => {
+    const { id, domainPubId } = modal.modalData || {};
+    let { parentId } = modal.modalData || {};
+    if (values) {
+      parentId = values.parentId;
+    }
+    if (!id || !parentId || !domainPubId) {
+      message.warn('缺失节点信息');
+      return;
+    }
     treeMsg$.emit({
       type: 'operation',
       content: {
@@ -148,6 +163,21 @@ const MyModal: React.FC<TreeProps> = ({ treeMsg$, yTree }) => {
     });
     closeModal();
   };
+
+  const onImportOk = (res) => {
+    if (!modal.modalData?.id) return;
+    if (modal.modalData?.editStatus === -1) return;
+    treeMsg$.emit({
+      type: 'operation',
+      content: {
+        id: new Date().valueOf(),
+        opeType: 'import',
+        newNodes: [{ parentId: modal.modalData.id, ...res }],
+      },
+    });
+    closeModal();
+  };
+  console.log(modal)
 
   return (
     <>
@@ -166,7 +196,7 @@ const MyModal: React.FC<TreeProps> = ({ treeMsg$, yTree }) => {
         onOk={onSyncOk}
         modalData={modal.modalData}
         yTree={yTree}
-        type = 'sync'
+        type="sync"
       />
       <MoveModal
         open={modal.open === 'cover'}
@@ -174,7 +204,7 @@ const MyModal: React.FC<TreeProps> = ({ treeMsg$, yTree }) => {
         onOk={onCoverOk}
         modalData={modal.modalData}
         yTree={yTree}
-        type = 'cover'
+        type="cover"
       />
       <DeleteModal open={modal.open === 'delete'} onCancel={closeModal} onOk={onDelete} modalData={modal.modalData} />
       <Modal title={null} open={modal.open === 'move_confirm'} onCancel={closeModal} onOk={onMoveConfirm}>
@@ -183,12 +213,13 @@ const MyModal: React.FC<TreeProps> = ({ treeMsg$, yTree }) => {
           <span style={{ background: '#c5c5e3', padding: '5px 10px' }}>{modal.modalData?.parentName}</span>下吗？
         </div>
       </Modal>
+      <ImportModal open={modal.open === 'import'} onCancel={closeModal} onOk={onImportOk} modalData={modal.modalData} />
       {/* 提议树 */}
       <ReviewMoveModal
         open={modal.open === 'domain_drag_confirm'}
         onCancel={closeModal}
-        onSyncOk={onSyncOk}
-        onCoverOk={onCoverOk}
+        onSyncOk={()=>onSyncOk()}
+        onCoverOk={()=>onCoverOk()}
         modalData={modal.modalData}
       />
     </>

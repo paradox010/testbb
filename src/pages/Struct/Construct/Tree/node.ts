@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/consistent-type-assertions */
 /* eslint-disable max-lines */
 /* eslint-disable no-param-reassign */
 /*
@@ -36,7 +37,7 @@ export interface OpeItem {
   id: number; // 时间戳
   newNodes?: OpeNode[]; // 这个list的用法暂定是错误的。只支持1个节点，多个节点的shouldReComputeWhenAdd状态无法界定
   // oldNodes?: OpeNode[];
-  opeType?: 'add' | 'update' | 'delete' | 'move' | 'sync' | 'cover';
+  opeType: 'add' | 'update' | 'delete' | 'move' | 'sync' | 'cover' | 'import';
   // isServe?: boolean; // 是否由服务器主动发送
   before?: OpeItem;
   after?: OpeItem;
@@ -76,10 +77,10 @@ function mergeDefaultOpt(opt: InitOpt): InitOpt {
 class Operation {
   start: OpeItem = {
     id: 0,
-  };
+  } as OpeItem;
   last: OpeItem = {
     id: Infinity,
-  };
+  } as OpeItem;;
   store: Store;
   tree: YTree;
   opt: InitOpt;
@@ -115,7 +116,7 @@ class Operation {
     }
 
     // sync 相当于特殊的add操作
-    if (opeItem.opeType === 'add' || opeItem.opeType === 'sync') {
+    if (opeItem.opeType === 'add' || opeItem.opeType === 'sync' || opeItem.opeType === 'import') {
       // 如果后续有和该节点相关的move 或者 shouldwhenadd的move时 则需要重新执行所有的move
       // 否则的话只执行跟add相关的操作
       if (
@@ -175,7 +176,7 @@ class Operation {
 
   // addstore 简单的append
   computeNewState(opeItem: OpeItem, outOrder?: boolean, isUndo?: boolean) {
-    if (opeItem.opeType === 'add' || opeItem.opeType === 'sync') {
+    if (opeItem.opeType === 'add' || opeItem.opeType === 'sync' || opeItem.opeType === 'import') {
       opeItem?.newNodes?.forEach((n) => {
         if (this.store[n.id]) {
           // error 无视处理

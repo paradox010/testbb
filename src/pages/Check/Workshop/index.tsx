@@ -2,6 +2,7 @@ import ProTable from '@ant-design/pro-table';
 import type { ActionType, ProColumns } from '@ant-design/pro-table';
 import { history, request } from 'ice';
 import { useRef } from 'react';
+import {reviewStatuEnum} from '@/dataType';
 
 interface GithubIssueItem {
   url: string;
@@ -15,7 +16,13 @@ interface GithubIssueItem {
   updated_at: string;
   closed_at?: string;
 }
-
+const reviewMap ={};
+reviewStatuEnum.forEach(v=>{
+  reviewMap[v.value] = {
+    text: v.label,
+    status:v.status,
+  }
+})
 const columns: Array<ProColumns<GithubIssueItem>> = [
   {
     title: '标准名称',
@@ -33,15 +40,15 @@ const columns: Array<ProColumns<GithubIssueItem>> = [
   },
   {
     title: '时间',
-    key: 'showTime',
-    dataIndex: 'created_at',
-    valueType: 'date',
+    key: 'startTime',
+    dataIndex: 'startTime',
+    valueType: 'dateTime',
     sorter: true,
     hideInSearch: true,
   },
   {
     title: '时间',
-    dataIndex: 'created_at',
+    dataIndex: 'startTime',
     valueType: 'dateRange',
     hideInTable: true,
     search: {
@@ -57,10 +64,12 @@ const columns: Array<ProColumns<GithubIssueItem>> = [
     title: '评审状态',
     dataIndex: 'status',
     hideInSearch: true,
+    valueType: 'select',
+    valueEnum: reviewMap,
   },
   {
     title: '您的评审角色',
-    dataIndex: 'role',
+    dataIndex: 'roleName',
     hideInSearch: true,
   },
   {

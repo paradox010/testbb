@@ -13,8 +13,10 @@ import type { CompMsgType, MsgDataType, SocketMsgType, StepStateType } from './m
 import { YTree } from '@/pages/Struct/Construct/Tree/node';
 import BasicContext, { stepState } from './basicContext';
 
+import { specialOpesTypes } from '@/dataType';
+
 // 中转站接受服务端消息并转换成组件内部消息通知
-const url = `ws://${window.location.host}/api/websocket/review`;
+const url = `${process.env.BASEWS_PFX}://${window.location.host}${process.env.BASEWS||''}/api/websocket/review`;
 
 // style的资源会浪费，所以在最外层维护,如果不定义则用全局的style维护
 const style = document.createElement('style');
@@ -29,9 +31,6 @@ function initTree(socketData, msgData: MsgDataType) {
     if (opeliopt === 'add' && !opeLists[i].isFinished) {
       continue;
     }
-    if (opeliopt === 'sync' || opeliopt === 'cover') {
-      continue;
-    }
     msgData.yTree.operation.add(JSON.parse(opeLists[i].param));
   }
 }
@@ -41,7 +40,7 @@ function initSpecialOpes(socketData, state: StepStateType) {
   state.specialOpes = [];
   for (let i = opeLists.length - 1; i >= 0; i--) {
     const opeliopt = opeLists[i].operationType;
-    if (opeliopt === 'sync' || opeliopt === 'cover') {
+    if (specialOpesTypes.includes(opeliopt)) {
       const iii = JSON.parse(opeLists[i]?.param).id;
       state.specialOpes.push({
         id: iii,
@@ -81,7 +80,16 @@ export default function Stand() {
       const socketData = JSON.parse(data) as SocketMsgType;
       if (socketData.mesType === 'init') {
         // msgData.usersCenter.init(basic.self, socketData.content.member);
-        ['isFreeze', 'member', 'record', 'reviewVote', 'processState', 'proposalDomainId', 'sign'].forEach((k) => {
+        [
+          'isFreeze',
+          'member',
+          'record',
+          'reviewVote',
+          'processState',
+          'proposalDomainId',
+          'proposalStartTime',
+          'sign',
+        ].forEach((k) => {
           stepState[k] = socketData.content[k];
         });
         const st = socketData.content.processState;
@@ -124,6 +132,7 @@ export default function Stand() {
         stepState.processState = socketData.content.processState;
         if (socketData.content.processState === 3) {
           stepState.proposalDomainId = socketData.content.proposalDomainId;
+          stepState.proposalStartTime = socketData.content.proposalStartTime;
         }
         if (socketData.content.processState === 4) {
           initTree(socketData, msgData);
@@ -131,6 +140,8 @@ export default function Stand() {
           setTimeout(() => {
             stepMsg$.emit({
               type: 'refreshTree',
+              autoExpand: true,
+              ifInit: true,
             });
           });
         }
@@ -154,7 +165,7 @@ export default function Stand() {
       if (socketData.mesType === 'operation') {
         msgData.yTree.operation.add(socketData.content);
         const thoptype = socketData.content;
-        if (thoptype.opeType === 'sync' || thoptype.opeType === 'cover') {
+        if (specialOpesTypes.includes(thoptype.opeType)) {
           // 去掉self
           // if(socketData.content.userId===basic.self.userId){
 
@@ -168,6 +179,11 @@ export default function Stand() {
       if (socketData.mesType === 'freeze') {
         stepState.isFreeze = socketData.content.isFreeze;
       }
+      if (socketData.mesType === 'remind') {
+        stepMsg$.emit({
+          type: 'refreshVote',
+        });
+      }
     };
     ws.onclose = () => {
       msgData.yTree.onDestory();
@@ -178,7 +194,7 @@ export default function Stand() {
   }, []);
 
   stepMsg$.useSubscription((msg) => {
-    if (msg.type === 'check' || msg.type === 'sign' || msg.type === 'freeze') {
+    if (msg.type === 'check' || msg.type === 'sign' || msg.type === 'freeze' || msg.type === 'remind') {
       console.log('send', msg);
       ws.send(JSON.stringify({ mesType: msg.type, content: msg.content }));
     }
@@ -217,7 +233,7 @@ export default function Stand() {
           ],
         };
       }
-      if (msg.content.opeType === 'cover' || msg.content.opeType === 'sync') {
+      if (specialOpesTypes.includes(msg.content.opeType)) {
         // 需要进入specialOpes队列
         stepState.specialOpes.push({
           id: 0, // self
@@ -271,9 +287,9 @@ export default function Stand() {
   });
 
   return (
-    <>
+    <div style={{ height: '100%' }} id="stepRoot">
       <Process stepMsg$={stepMsg$} msgData={msgData} />
       <Freeze stepMsg$={stepMsg$} msgData={msgData} />
-    </>
+    </div>
   );
 }

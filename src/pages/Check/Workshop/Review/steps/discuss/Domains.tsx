@@ -67,7 +67,7 @@ const DomainTree: React.FC<StepProps & { id: string }> = ({ stepMsg$, msgData, i
     stepMsg$.emit({
       type: 'modal',
       open: type,
-      modalData: { id: item.id, name: item.name },
+      modalData: { id: item.id, name: item.name, domainPubId: id},
     });
   };
 
@@ -109,6 +109,7 @@ const DomainTree: React.FC<StepProps & { id: string }> = ({ stepMsg$, msgData, i
           >
             {nodeData.editStatus === 1 ? <span className="ds-tree-title-add">增</span> : null}
             {nodeData.editStatus === 2 ? <span className="ds-tree-title-update">改</span> : null}
+            {nodeData.editStatus === 3 ? <span className="ds-tree-title-delete">删</span> : null}
             <span className="ds-nodeTitle">{nodeData.name}</span>
             <span
               title="覆盖节点"

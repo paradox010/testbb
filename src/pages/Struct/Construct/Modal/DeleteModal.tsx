@@ -11,10 +11,10 @@ export interface CreateFormProps {
   modalData?: AddModalData;
 }
 
-const CreateForm: React.FC<CreateFormProps> = ({ open, onOk, onCancel }) => {
+const CreateForm: React.FC<CreateFormProps> = ({ open, onOk, onCancel,modalData }) => {
   return (
     <Modal open={open} title="删除节点" okText="确定" cancelText="取消" onCancel={onCancel} onOk={onOk}>
-      <div>是否确定删除该节点</div>
+      <div>是否确定删除该节点：{modalData?.name}</div>
     </Modal>
   );
 };

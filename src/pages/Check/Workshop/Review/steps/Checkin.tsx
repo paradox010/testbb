@@ -35,7 +35,7 @@ const Step: React.FC<StepProps> = ({ stepMsg$, msgData }) => {
           style={{ float: 'right' }}
           disabled={member.find((v) => v.userId === msgData.self.userId)?.isCheck}
         >
-         一键签到
+          一键签到
         </Button>
       </div>
       <Descriptions bordered column={1}>
@@ -48,8 +48,8 @@ const Step: React.FC<StepProps> = ({ stepMsg$, msgData }) => {
             {member
               ?.filter((u) => u.userRole === v.value)
               ?.map((u) => (
-                <Checkbox checked={u.isCheck} key={u.userId}>
-                  {u.userName}
+                <Checkbox disabled checked={u.isCheck} key={u.userId}>
+                  <span style={{ color: '#000000d9' }}>{u.userName}</span>
                 </Checkbox>
               ))}
           </Descriptions.Item>

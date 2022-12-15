@@ -49,7 +49,16 @@ const Login = () => {
           <Input.Password placeholder="请输入旧密码" size="large" />
         </Form.Item>
 
-        <Form.Item name="newPassword" rules={[{ required: true, message: '请输入新密码!' }]}>
+        <Form.Item
+          name="newPassword"
+          rules={[
+            { required: true, message: '请输入新密码!' },
+            {
+              pattern: /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[^\w\s]).{8,}$/,
+              message: '请输入至少8位大小写字母+数字+特殊字符的组合',
+            },
+          ]}
+        >
           <Input.Password placeholder="设置密码" size="large" />
         </Form.Item>
 

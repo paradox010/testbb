@@ -1,6 +1,6 @@
 import store from '../store';
 
-const tokenName = 'token';
+const tokenName = 'expectToken';
 
 export function outLogin() {
   setToken('');

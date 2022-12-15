@@ -11,6 +11,8 @@ import { useSnapshot } from 'valtio';
 
 import { StepProps, StepCompType, RTreeNode } from '../msg.d';
 import styles from './rintro.module.less';
+import { getTopKey } from '@/utils/tree';
+import TimeDown from '@/components/TimeDown';
 
 function findNext(list, id) {
   const idx = list.findIndex((v) => v.domainPubId === id);
@@ -32,10 +34,11 @@ async function getTree(params) {
     params,
   });
 }
+
 const Step: React.FC<StepProps> = ({ stepMsg$, msgData }) => {
   const basic = useContext(BasicContext);
 
-  const { proposalDomainId } = useSnapshot(stepState);
+  const { proposalDomainId, proposalStartTime } = useSnapshot(stepState);
 
   const { data } = useRequest(() => getTree({ domainPubId: proposalDomainId }), {
     refreshDeps: [proposalDomainId],
@@ -56,41 +59,75 @@ const Step: React.FC<StepProps> = ({ stepMsg$, msgData }) => {
   };
 
   const nowDomain = findItem(basic.domain, proposalDomainId);
+
+  // const renderFn2 = (nodeData, k?: string[]) => {
+  //   if (!nodeData) return null;
+  //   console.log(k && k.includes(nodeData.id))
+  //   return (
+  //     <RcTree.TreeNode
+  //       isLeaf={!!nodeData.isLeaf}
+  //       id={nodeData.id}
+  //       expanded={k && k.includes(nodeData.id)}
+  //       title={
+  //         <div data-index={nodeData.id}>
+  //           {nodeData.editStatus === 1 ? <span className="ds-tree-title-add">增</span> : null}
+  //           {nodeData.editStatus === 2 ? <span className="ds-tree-title-update">改</span> : null}
+  //           <span className="ds-nodeTitle">{nodeData.name}</span>
+  //           <span title="查看详情" className="ds-opeItem ds-detailOpe" onClick={onDetail} data-index={nodeData.id} />
+  //         </div>
+  //       }
+  //       key={nodeData.id}
+  //     >
+  //       {nodeData.children && nodeData.children.map((v) => renderFn2(v))}
+  //     </RcTree.TreeNode>
+  //   );
+  // };
+
   return (
     <div className={styles.content}>
       <div className={styles.subTitle}>
         <div>当前演讲人：{nowDomain?.userName}</div>
         <div>演讲人公司：{nowDomain?.companyName}</div>
-        <div>演讲时间：</div>
-        <div>下一位演讲人：{findNext(basic.domain, proposalDomainId)?.userName}</div>
+        <div>
+          演讲时间：
+          <TimeDown value={proposalStartTime || new Date().valueOf()} />
+        </div>
+        <div>下一位演讲人：{findNext(basic.domain, proposalDomainId)?.userName || '-'}</div>
       </div>
-      <AttrRoute stepMsg$={stepMsg$} style={{ height: '100%' }}>
+      <AttrRoute stepMsg$={stepMsg$} style={{ height: 'calc(100% - 56px)' }}>
         <div className="dsTree">
-          <RcTree<RTreeNode>
-            fieldNames={{
-              children: 'children',
-              title: 'name',
-              key: 'id',
-            }}
-            // height={treeHeight}
-            // virtual={false}
-            icon={false}
-            treeData={data || []}
-            titleRender={(nodeData) => (
-              <div data-index={nodeData.id}>
-                {nodeData.editStatus === 1 ? <span className="ds-tree-title-add">增</span> : null}
-                {nodeData.editStatus === 2 ? <span className="ds-tree-title-update">改</span> : null}
-                <span className="ds-nodeTitle">{nodeData.name}</span>
-                <span
-                  title="查看详情"
-                  className="ds-opeItem ds-detailOpe"
-                  onClick={onDetail}
-                  data-index={nodeData.id}
-                />
-              </div>
-            )}
-            motion={null}
-          />
+          {data ? (
+            <RcTree<RTreeNode>
+              fieldNames={{
+                children: 'children',
+                title: 'name',
+                key: 'id',
+              }}
+              key={getTopKey(data).join('')}
+              // height={treeHeight}
+              // virtual={false}
+              defaultExpandedKeys={getTopKey(data)}
+              icon={false}
+              treeData={data}
+              titleRender={(nodeData) => (
+                <div data-index={nodeData.id}>
+                  {nodeData.editStatus === 1 ? <span className="ds-tree-title-add">增</span> : null}
+                  {nodeData.editStatus === 2 ? <span className="ds-tree-title-update">改</span> : null}
+                  {nodeData.editStatus === 3 ? <span className="ds-tree-title-delete">删</span> : null}
+                  <span className="ds-nodeTitle">{nodeData.name}</span>
+                  <span
+                    title="查看详情"
+                    className="ds-opeItem ds-detailOpe"
+                    onClick={onDetail}
+                    data-index={nodeData.id}
+                  />
+                </div>
+              )}
+              motion={null}
+            >
+              {/* {data?.map((v) => renderFn2(v,getTopKey(data)))} */}
+            </RcTree>
+          ) : null}
         </div>
       </AttrRoute>
     </div>
@@ -137,13 +174,17 @@ TypedStep.Title = ({ stepMsg$, msgData }) => {
   return (
     <>
       提议介绍
-      <Button type="primary" onClick={goNext}>
-        进入提议讨论
-      </Button>
-      <Button onClick={goNextProp} disabled={!findNext(basic.domain, proposalDomainId)}>
-        下一位演讲人
-      </Button>
-      <Button onClick={goBefore}>上一步</Button>
+      {basic.self.userRole === '1' && (
+        <>
+          <Button type="primary" onClick={goNext}>
+            进入提议讨论
+          </Button>
+          <Button onClick={goNextProp} disabled={!findNext(basic.domain, proposalDomainId)}>
+            下一位演讲人
+          </Button>
+          <Button onClick={goBefore}>上一步</Button>
+        </>
+      )}
     </>
   );
 };
