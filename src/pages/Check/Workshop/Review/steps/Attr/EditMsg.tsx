@@ -29,8 +29,9 @@ const EditMsg = React.forwardRef<
     id: any;
     back: any;
     upData: any;
+    editable?: boolean;
   }
->(({ id, back, upData }, ref) => {
+>(({ id, back, upData, editable=true }, ref) => {
   const basic = useContext(BasicContext);
   const attrMsg$ = useEventEmitter<CompMsgType>();
   // 只在第三步的时候需要用到
@@ -113,7 +114,7 @@ const EditMsg = React.forwardRef<
         <span>详情</span>
       </span>
       <Header attrMsg$={attrMsg$} />
-      <Table attrMsg$={attrMsg$} yAttr={msgData.yTree} />
+      <Table editable={editable} attrMsg$={attrMsg$} yAttr={msgData.yTree} />
     </div>
   );
 });

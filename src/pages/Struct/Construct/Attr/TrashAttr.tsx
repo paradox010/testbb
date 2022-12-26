@@ -5,7 +5,7 @@ import { EventEmitter } from 'ahooks/lib/useEventEmitter';
 import type { MsgType } from '../msg.d';
 
 import type { RTreeNode, YTree as YTreeType } from '../Tree/node';
-import { attrTypeEnum } from '@/dataType';
+import { attrEnum, attrTypeEnum } from '@/dataType';
 
 import styles from './index.module.less';
 
@@ -65,13 +65,16 @@ const TrashAttr: React.FC<TreeProps> = ({ attrMsg$, yTree }) => {
       key: 'value',
     },
     {
+      title: '所属属性域',
+      dataIndex: 'featureDomain',
+      render: (text) => attrEnum.find((v) => v.value === text)?.label,
+    },
+    {
       title: '操作',
       key: 'action',
       render: (_, record) => <a onClick={() => reset(record)}>恢复</a>,
     },
   ];
-  console.log(list);
-
   return (
     <div className={styles.historyList}>
       <Table size="small" columns={columns} dataSource={list} rowKey="id" />

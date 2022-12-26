@@ -24,9 +24,8 @@ interface ModalData {
   editStatus?: number;
   parentId?: string;
   parentName?: string;
-  dropId?: string;
-  dragId?: string;
   domainPubId?: string;
+  hasChildren?: boolean;
 }
 const MyModal: React.FC<TreeProps> = ({ treeMsg$, yTree }) => {
   const [modal, setModal] = useState<{
@@ -52,13 +51,13 @@ const MyModal: React.FC<TreeProps> = ({ treeMsg$, yTree }) => {
   });
 
   const onAdd = (values) => {
-    if (!modal.modalData?.id) return;
+    // if (!modal.modalData?.id) return;
     treeMsg$.emit({
       type: 'operation',
       content: {
         id: new Date().valueOf(),
         opeType: 'add',
-        newNodes: [{ ...values, parentId: modal.modalData.id }],
+        newNodes: [{ ...values, parentId: modal.modalData?.id }],
       },
     });
     // close事件应当挂个定时器去处理
@@ -209,7 +208,7 @@ const MyModal: React.FC<TreeProps> = ({ treeMsg$, yTree }) => {
       <DeleteModal open={modal.open === 'delete'} onCancel={closeModal} onOk={onDelete} modalData={modal.modalData} />
       <Modal title={null} open={modal.open === 'move_confirm'} onCancel={closeModal} onOk={onMoveConfirm}>
         <div style={{ fontSize: 16 }}>
-          确定将<span style={{ background: '#bae7ff', padding: '5px 10px' }}>{modal.modalData?.name}</span>移动到
+          确定将<span style={{ background: '#bae7ff', padding: '5px 10px' }}>{modal.modalData?.name}</span>{modal.modalData?.hasChildren&&'及其下位节点'}移动到
           <span style={{ background: '#c5c5e3', padding: '5px 10px' }}>{modal.modalData?.parentName}</span>下吗？
         </div>
       </Modal>

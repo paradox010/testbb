@@ -34,7 +34,7 @@ export default function Content({ id, back }) {
   const yAttr = useCreation(
     () =>
       new YTree([], [], {
-        userId: user.userId,
+        userId: user.userId || '',
         style,
         prefix: 'attrLoc',
         updateKeys: ['name', 'dataType', 'unit', 'value'],

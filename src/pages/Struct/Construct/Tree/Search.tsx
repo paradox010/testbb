@@ -4,23 +4,28 @@ import { request } from 'ice';
 import SearchComplete from '@/components/SearchComplete';
 import { getParams } from '@/utils/location';
 
-async function getWords(keywords) {
+async function getWords(params) {
   const resData = await request({
-    url: `/api/standard/productCategory/search?domainId=${getParams()?.domainId}&keywords=${keywords}`,
+    url: '/api/standard/productCategory/search',
+    params,
   });
   return resData;
 }
 
 const Search: React.FC<{
   onSelect?: (value: string, option: any) => void;
-}> = ({ onSelect }) => {
+  domainId?: string;
+}> = ({ onSelect, domainId }) => {
   const { data, run } = useRequest(getWords, {
     debounceWait: 400,
     manual: true,
   });
 
   const onSearch = (v) => {
-    run(v);
+    run({
+      keywords: v,
+      domainId: domainId || getParams()?.domainId,
+    });
   };
   const tData = data?.map((v) => ({
     label: v.name,

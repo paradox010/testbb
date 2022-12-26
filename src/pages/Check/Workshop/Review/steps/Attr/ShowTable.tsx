@@ -10,11 +10,11 @@ const columns = [
     width: 80,
     render: (_, __, i) => i + 1,
   },
-  {
-    title: '属性编码',
-    dataIndex: 'featureCode',
-    key: 'featureCode',
-  },
+  // {
+  //   title: '属性编码',
+  //   dataIndex: 'featureCode',
+  //   key: 'featureCode',
+  // },
   {
     title: '属性名称',
     dataIndex: 'name',

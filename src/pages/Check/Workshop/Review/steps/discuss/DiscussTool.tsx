@@ -11,9 +11,9 @@ const DiscussTool: React.FC<StepProps> = ({ stepMsg$, msgData }) => {
 
   stepMsg$.useSubscription((msg) => {
     if (msg.type === 'route') {
-      setTimeout(()=>{
+      setTimeout(() => {
         setTab(msg.path);
-      })
+      });
     }
   });
   return (
@@ -28,7 +28,7 @@ const DiscussTool: React.FC<StepProps> = ({ stepMsg$, msgData }) => {
         noPadding
         title={'修订文件'}
       >
-        <Domains stepMsg$={stepMsg$} msgData={msgData} />
+        <Domains editable={msgData.self.userRole === '1'} stepMsg$={stepMsg$} msgData={msgData} />
       </RND>
       <RND
         text={
@@ -41,7 +41,7 @@ const DiscussTool: React.FC<StepProps> = ({ stepMsg$, msgData }) => {
         title={'回收站'}
         style={tab === 'tree' ? {} : { display: 'none' }}
       >
-        <TrashTree stepMsg$={stepMsg$} msgData={msgData} />
+        <TrashTree editable={msgData.self.userRole === '1'} stepMsg$={stepMsg$} msgData={msgData} />
       </RND>
       {tab === 'attr' && (
         <RND
@@ -54,7 +54,7 @@ const DiscussTool: React.FC<StepProps> = ({ stepMsg$, msgData }) => {
           noPadding
           title={'回收站'}
         >
-          <TrashAttr stepMsg$={msgData?.attrMsg$} msgData={msgData?.attrMsgData} />
+          <TrashAttr editable={msgData.self.userRole === '1'} stepMsg$={msgData?.attrMsg$} msgData={msgData?.attrMsgData} />
         </RND>
       )}
     </>

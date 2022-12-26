@@ -15,6 +15,18 @@ export interface VoteCompProps {
   onVote: (v: any) => void;
   onRemind?: (v: VoteItem) => void;
 }
+
+function roundFun(numberRound:number, roundDigit = 2) {
+  // 四舍五入，保留位数为roundDigit
+  if (numberRound >= 0) {
+    const tempNumber = parseInt(numberRound * Math.pow(10, roundDigit) + 0.5 as any as string, 10) / Math.pow(10, roundDigit);
+    return tempNumber;
+  } else {
+    const numberRound1 = -numberRound;
+    const tempNumber = parseInt(numberRound1 * Math.pow(10, roundDigit) + 0.5 as any as string, 10) / Math.pow(10, roundDigit);
+    return -tempNumber;
+  }
+}
 const VoteComp: React.FC<VoteCompProps> = ({ userType, modalType = 'modal', vote, onVote, onForcePass, onRemind }) => {
   if (!vote) return <span>暂无投票</span>;
   if (userType === '1' || userType === '2' || userType === '3') {
@@ -89,7 +101,7 @@ export const Witness: React.FC<{
   const vote = data?.voteResult?.length;
   const total = basic.member.length - 1;
   const pass = data?.voteResult?.reduce((num, v) => num + (v.isAgree ? 1 : 0), 0) || 0;
-  const passPercent = vote ? (pass / total) * 100 : 0;
+  const passPercent = vote ? (pass / vote) * 100 : 0;
   const refuse = data?.voteResult?.reduce((num, v) => num + (v.isAgree ? 0 : 1), 0) || 0;
   return (
     <>
@@ -114,11 +126,11 @@ export const Witness: React.FC<{
         <div className={styles.vote2}>
           <div className={styles.vote21}>
             <div className={styles.progressWrap}>
-              <Progress strokeLinecap="butt" strokeWidth={14} type="circle" percent={passPercent} width={64} />
+              <Progress strokeLinecap="butt" strokeWidth={14} type="circle" percent={roundFun(passPercent)} width={64} />
             </div>
             <div style={{ padding: '0 12px' }}>
               <div>投票通过率</div>
-              <div className={styles.percent}>{passPercent}%</div>
+              <div className={styles.percent}>{roundFun(passPercent)}%</div>
             </div>
             {userType === '4' && (
               <div className={styles.forceWrap}>
@@ -144,7 +156,7 @@ export const Witness: React.FC<{
                 trailColor="#7BE0B7"
                 strokeWidth={14}
                 type="circle"
-                percent={(vote / total) * 100}
+                percent={roundFun((vote / total) * 100)}
                 width={53}
               />
               <div style={{ padding: '0 12px' }}>

@@ -111,8 +111,9 @@ export type CompModalType = {
     name?: string;
     parentId?: string;
     parentName?: string;
-    description?: string;
+    description?: string; 
     domainPubId?: string;
+    hasChildren?: boolean;
   };
 };
 // router

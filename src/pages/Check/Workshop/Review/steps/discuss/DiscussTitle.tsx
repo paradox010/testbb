@@ -1,4 +1,4 @@
-import { Button, Input, Popover } from 'antd';
+import { Button, Input, message, Popover } from 'antd';
 import type { InputRef } from 'antd';
 import { useRef, useState } from 'react';
 
@@ -57,6 +57,10 @@ const DiscussTitle: React.FC<StepProps> = ({ stepMsg$, msgData }) => {
     });
   };
   const goBefore = () => {
+    if(!(msgData?.voteCenter?.getLatest() || { isFinished: true }).isFinished){
+      message.warn('请结束当前投票后再进入下一阶段');
+      return;
+    }
     stepMsg$.emit({
       type: 'process',
       content: {

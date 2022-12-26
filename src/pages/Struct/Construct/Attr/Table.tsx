@@ -17,13 +17,15 @@ interface DataSourceType {
   unit?: string;
   value?: string;
   editStatus?: number;
+  featureDomain?: string;
 }
 
 interface TreeProps {
   yAttr: YTreeType;
   attrMsg$: EventEmitter<MsgType>;
+  editable?: boolean;
 }
-const TT: React.FC<TreeProps> = ({ attrMsg$, yAttr }) => {
+const TT: React.FC<TreeProps> = ({ attrMsg$, yAttr, editable = true }) => {
   const [editableKeys, setEditableRowKeys] = useState<React.Key[]>([]);
   const [dataSource, setDataSource] = useState<DataSourceType[]>([]);
   const actionRef = useRef<ActionType>();
@@ -33,6 +35,13 @@ const TT: React.FC<TreeProps> = ({ attrMsg$, yAttr }) => {
     if (msg.type === 'refreshTree') {
       setDataSource([...yAttr.getOriginTree()] as any[]);
     }
+    // attr 的history的nodeid没有传
+    // if (msg.type === 'treePos') {
+    //   const node = yAttr.getNode(msg.content.id) as any as DataSourceType;
+    //   if (node && node.featureDomain) {
+    //     setRadio(node.featureDomain);
+    //   }
+    // }
   });
 
   const columns: ProColumns<DataSourceType>[] = [
@@ -83,9 +92,7 @@ const TT: React.FC<TreeProps> = ({ attrMsg$, yAttr }) => {
       valueType: 'select',
       renderFormItem: (_, { record }) => {
         if (record?.dataType === '1') {
-          return (
-            <ValueSelect />
-          );
+          return <ValueSelect />;
         }
         return <Input disabled />;
       },
@@ -99,6 +106,7 @@ const TT: React.FC<TreeProps> = ({ attrMsg$, yAttr }) => {
         if (record.editStatus === -1) {
           return null;
         }
+        if (!editable) return '-';
         return [
           <a
             key="editable"
@@ -141,7 +149,14 @@ const TT: React.FC<TreeProps> = ({ attrMsg$, yAttr }) => {
             <div style={{ marginBottom: 20 }} className="ant-descriptions-title">
               产品属性信息
             </div>
-            <Radio.Group style={{ marginBottom: 8 }} value={radio} onChange={(e) => setRadio(e.target.value)}>
+            <Radio.Group
+              style={{ marginBottom: 8 }}
+              value={radio}
+              onChange={(e) => {
+                // actionRef.current.
+                setRadio(e.target.value);
+              }}
+            >
               {attrEnum.map((v) => (
                 <Radio.Button value={v.value} key={v.value}>
                   {v.label}
@@ -158,11 +173,15 @@ const TT: React.FC<TreeProps> = ({ attrMsg$, yAttr }) => {
         editableFormRef={editableFormRef}
         actionRef={actionRef}
         columns={columns}
-        recordCreatorProps={{
-          position: 'top',
-          record: { id: 'add_self' },
-        }}
-        value={dataSource}
+        recordCreatorProps={
+          editable
+            ? {
+                position: 'top',
+                record: { id: 'add_self' },
+              }
+            : false
+        }
+        value={dataSource?.filter((v) => v.featureDomain === radio) || []}
         // onChange={(v) => {
         //   console.log(v);
         //   setDataSource(v);
@@ -184,7 +203,7 @@ const TT: React.FC<TreeProps> = ({ attrMsg$, yAttr }) => {
                     if (!v[row.id]) {
                       return;
                     }
-                    const newNode = { ...v[row.id], id: row.id };
+                    const newNode = { ...v[row.id], id: row.id, featureDomain: radio };
                     if (newNode.dataType !== '1') {
                       newNode.value = '';
                     }

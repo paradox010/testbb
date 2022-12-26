@@ -23,8 +23,51 @@
   .rc-tree .rc-tree-treenode {
     display: flex;
     align-items: flex-start;
-    padding: 0 0 4px;
+    padding: 3px 0 4px;
     outline: none;
+
+    // draggble
+    .draggable {
+      // color: #333;
+      -moz-user-select: none;
+      -khtml-user-select: none;
+      -webkit-user-select: none;
+      user-select: none;
+      /* Required to make elements draggable in old WebKit */
+      // -khtml-user-drag: element;
+      // -webkit-user-drag: element;
+    }
+
+    &.dragging {
+      background: rgb(186, 231, 255);
+    }
+
+    &.drop-container {
+      > .draggable::after {
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        box-shadow: inset 0 0 0 2px red;
+        content: '';
+        display: none;
+      }
+      & ~ .rc-tree-treenode {
+        border-left: 2px solid chocolate;
+        border: none;
+      }
+    }
+    &.drop-target {
+      background-color: #c5c5e3;
+      & ~ .rc-tree-treenode {
+        border-left: none;
+      }
+    }
+
+    // .ds-draggeble.dragover {
+    //   background: #c5c5e3;
+    // }
   }
 
   .rc-tree .rc-tree-treenode span.rc-tree-checkbox {
@@ -139,12 +182,20 @@
     background-color: #e3f1ff;
   }
 
+  .ds-nodeTitle {
+    pointer-events: none;
+    padding-right: 50px;
+  }
+  
   .rc-tree .rc-tree-treenode .rc-tree-node-content-wrapper {
     line-height: @treeLineHeight;
     height: auto;
-    min-width: 100px;
+    // min-width: 100px;
     padding-right: 10px;
     transition: background-color 0.3s;
+    .ds-nodeTitle {
+      min-width: 60px;
+    }
   }
 
   .rc-tree .rc-tree-treenode span.rc-tree-iconEle {
@@ -153,11 +204,6 @@
   .rc-tree .rc-tree-treenode span.rc-tree-iconEle.rc-tree-icon_loading {
     display: inline-block;
     vertical-align: sub;
-  }
-
-  // draggble
-  .ds-draggeble.dragover {
-    background: #c5c5e3;
   }
 
   .ds-opeItem {
@@ -223,11 +269,6 @@
   .rc-tree-node-selected.rc-tree-node-content-wrapper .ds-opeItem {
     visibility: visible;
     pointer-events: inherit;
-  }
-
-  .ds-nodeTitle {
-    pointer-events: none;
-    padding-right: 50px;
   }
 }
 .ds-tree-title-add {

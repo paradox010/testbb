@@ -5,6 +5,7 @@ import type { YTree as YTreeType } from '../Tree/node';
 export interface AddModalData {
   name?: string;
   id?: string;
+  hasChildren?: boolean;
 }
 export interface CreateFormProps {
   open: boolean;
@@ -45,7 +46,7 @@ const CreateForm: React.FC<CreateFormProps> = ({ open, onOk, onCancel, modalData
       onCancel={onCancel}
       onOk={beforeOk}
     >
-      <div style={{ marginBottom: 10 }}>你选择的节点:{modalData?.name}</div>
+      <div style={{ marginBottom: 10 }}>你选择的节点{modalData?.hasChildren&&'(含有下位节点)'}:{modalData?.name}</div>
       <div>
         {type === 'cover' ? '想覆盖的节点' : '想移动到的上位节点'}:
         <TreeSelect

@@ -80,7 +80,7 @@ class Operation {
   } as OpeItem;
   last: OpeItem = {
     id: Infinity,
-  } as OpeItem;;
+  } as OpeItem;
   store: Store;
   tree: YTree;
   opt: InitOpt;
@@ -649,6 +649,10 @@ class Users {
 // store：记录所有节点的操作
 // setTree => {}
 
+interface TreeProps {
+  selectKeys?: string[];
+  checkedKeys?: string[];
+}
 export class YTree {
   store: Store = {}; // 存储渲染节点
   operation: Operation;
@@ -659,14 +663,31 @@ export class YTree {
   // setTree: Function;
   opt: InitOpt;
 
+  treeProps: {
+    selectKeys: string[];
+    checkedKeys: string[];
+  };
+
   constructor(tree: any[] = [], trashTree: any[] = [], opt: InitOpt = defaultOpt) {
     this.opt = mergeDefaultOpt(opt);
     this.init(tree, trashTree, opt);
     // this.setTree = setTree;
   }
 
+  setTreeProps(params: TreeProps) {
+    this.treeProps = { ...this.treeProps, ...params };
+  }
+  resetTreeProps() {
+    this.treeProps = {
+      selectKeys: [],
+      checkedKeys: [],
+    };
+  }
+
   init(tree: any[], trashTree: any[], opt?: InitOpt) {
     this.opt = opt ? mergeDefaultOpt(opt) : this.opt;
+
+    this.resetTreeProps();
 
     this.originTree = tree;
     this.wrapTrashNode(trashTree);

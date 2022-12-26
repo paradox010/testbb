@@ -4,7 +4,7 @@ import RcTree from 'rc-tree';
 import { StepProps, RTreeNode } from '../../msg.d';
 import { useUpdate } from 'ahooks';
 
-const TrashTree: React.FC<StepProps> = ({ stepMsg$, msgData }) => {
+const TrashTree: React.FC<StepProps & { editable?: boolean }> = ({ stepMsg$, msgData, editable = true }) => {
   const treeRef = useRef<RcTree<RTreeNode>>(null);
   const update = useUpdate();
   stepMsg$.useSubscription((msg) => {
@@ -40,7 +40,7 @@ const TrashTree: React.FC<StepProps> = ({ stepMsg$, msgData }) => {
     <div className="dsTree" style={{ height: '100%' }}>
       <RcTree<RTreeNode>
         ref={treeRef}
-        treeData={msgData?.yTree?.getOriginTrashTree()}
+        treeData={[...(msgData?.yTree?.getOriginTrashTree() || [])]}
         fieldNames={{
           children: 'children',
           title: 'name',
@@ -52,10 +52,12 @@ const TrashTree: React.FC<StepProps> = ({ stepMsg$, msgData }) => {
             onDragEnd={onDragEnd}
             data-index={nodeData.id}
             className="ds_draggeble"
-            draggable={nodeData.editStatus !== -1}
+            draggable={nodeData.editStatus !== -1 && editable}
           >
             <span className="ds-nodeTitle">{nodeData.name}</span>
-            <span title="移动节点" className="ds-opeItem ds-moveOpe" onClick={onMove} data-index={nodeData.id} />
+            {editable && (
+              <span title="移动节点" className="ds-opeItem ds-moveOpe" onClick={onMove} data-index={nodeData.id} />
+            )}
           </div>
         )}
         motion={null}

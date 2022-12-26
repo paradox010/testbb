@@ -21,7 +21,7 @@ const CreateForm: React.FC<CreateFormProps> = ({ open, onOk, onCancel, modalData
   return (
     <Modal
       open={open}
-      title="新增下位节点"
+      title={modalData?.id ? '新增节点' : '新增一级节点'}
       okText="新增"
       cancelText="取消"
       onCancel={onCancel}
@@ -37,7 +37,10 @@ const CreateForm: React.FC<CreateFormProps> = ({ open, onOk, onCancel, modalData
           });
       }}
     >
-      <div style={{ marginBottom: 10 }}>父节点:{modalData?.name}</div>
+      <div style={{ marginBottom: 10 }}>
+        {modalData?.id ? '父节点:' : ''}
+        {modalData?.name}
+      </div>
       <Form form={form} layout="vertical" name="form_in_modal">
         <Form.Item name="name" label="节点名称" rules={[{ required: true, message: '请输入节点名称' }]}>
           <Input />

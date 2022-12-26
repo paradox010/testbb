@@ -39,7 +39,25 @@ const Step: React.FC<StepProps> = ({ stepMsg$, msgData }) => {
         </Button>
       </div>
       <Descriptions bordered column={1}>
-        {reviewUserRoleTypeEnum.map((v) => (
+        <Descriptions.Item label="与会专家" labelStyle={{ width: 150, fontWeight: 500, borderRight: 'none' }}>
+          {member
+            ?.filter((u) => u.userRole !== '4')
+            ?.map((u) => (
+              <Checkbox disabled checked={u.isCheck} key={u.userId}>
+                <span style={{ color: '#000000d9' }}>{u.userName}</span>
+              </Checkbox>
+            ))}
+        </Descriptions.Item>
+        <Descriptions.Item label="听证人" labelStyle={{ width: 150, fontWeight: 500, borderRight: 'none' }}>
+          {member
+            ?.filter((u) => u.userRole === '4')
+            ?.map((u) => (
+              <Checkbox disabled checked={u.isCheck} key={u.userId}>
+                <span style={{ color: '#000000d9' }}>{u.userName}</span>
+              </Checkbox>
+            ))}
+        </Descriptions.Item>
+        {/* {reviewUserRoleTypeEnum.map((v) => (
           <Descriptions.Item
             key={v.value}
             label={v.label}
@@ -53,7 +71,7 @@ const Step: React.FC<StepProps> = ({ stepMsg$, msgData }) => {
                 </Checkbox>
               ))}
           </Descriptions.Item>
-        ))}
+        ))} */}
       </Descriptions>
     </div>
   );

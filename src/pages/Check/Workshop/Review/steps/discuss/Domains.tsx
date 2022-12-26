@@ -6,6 +6,7 @@ import BasicContext from '../../basicContext';
 import { StepProps, RTreeNode } from '../../msg.d';
 import RcTree from 'rc-tree';
 import Attr from '../Attr/Show';
+import { getTopKey } from '@/utils/tree';
 
 async function getTree(params) {
   return await request({
@@ -14,7 +15,7 @@ async function getTree(params) {
   });
 }
 
-const Domains: React.FC<StepProps> = ({ stepMsg$, msgData }) => {
+const Domains: React.FC<StepProps & { editable?: boolean }> = ({ stepMsg$, msgData, editable = true }) => {
   const { domain } = useContext(BasicContext);
   const [select, setSelect] = useState(domain?.[0] ? domain[0].id : '');
   return (
@@ -35,17 +36,17 @@ const Domains: React.FC<StepProps> = ({ stepMsg$, msgData }) => {
           key={v.domainPubId}
           style={{ display: select === v.domainPubId ? 'block' : 'none', height: 'calc(100% - 52px)' }}
         >
-          <DomainTree stepMsg$={stepMsg$} msgData={msgData} id={v.domainPubId} />
+          <DomainTree stepMsg$={stepMsg$} msgData={msgData} id={v.domainPubId} editable={editable} />
         </div>
       ))}
     </>
   );
 };
 
-const DomainTree: React.FC<StepProps & { id: string }> = ({ stepMsg$, msgData, id }) => {
+const DomainTree: React.FC<StepProps & { id: string; editable?: boolean }> = ({ stepMsg$, msgData, id, editable }) => {
   const { data } = useRequest(() => getTree({ domainPubId: id }));
   const onDragStart = (event) => {
-    const { index, name } = event.currentTarget.dataset;
+    const { index, name, haschildren } = event.currentTarget.dataset;
     event.dataTransfer.setData('drag_id', index);
     event.dataTransfer.setData('drag_from', 'domain');
     event.dataTransfer.setData(
@@ -53,6 +54,7 @@ const DomainTree: React.FC<StepProps & { id: string }> = ({ stepMsg$, msgData, i
       JSON.stringify({
         name,
         domainPubId: id,
+        hasChildren: Boolean(Number(haschildren)),
       }),
     );
     event.target.classList.add('dragging');
@@ -67,7 +69,7 @@ const DomainTree: React.FC<StepProps & { id: string }> = ({ stepMsg$, msgData, i
     stepMsg$.emit({
       type: 'modal',
       open: type,
-      modalData: { id: item.id, name: item.name, domainPubId: id},
+      modalData: { id: item.id, name: item.name, domainPubId: id },
     });
   };
 
@@ -88,51 +90,60 @@ const DomainTree: React.FC<StepProps & { id: string }> = ({ stepMsg$, msgData, i
 
   return (
     <div className="dsTree">
-      <RcTree<RTreeNode>
-        fieldNames={{
-          children: 'children',
-          title: 'name',
-          key: 'id',
-        }}
-        // height={treeHeight}
-        // virtual={false}
-        icon={false}
-        treeData={data || []}
-        titleRender={(nodeData) => (
-          <div
-            data-index={nodeData.id}
-            data-name={nodeData.name}
-            onDragStart={onDragStart}
-            onDragEnd={onDragEnd}
-            draggable={nodeData.editStatus !== -1}
-            className="ds_draggeble"
-          >
-            {nodeData.editStatus === 1 ? <span className="ds-tree-title-add">增</span> : null}
-            {nodeData.editStatus === 2 ? <span className="ds-tree-title-update">改</span> : null}
-            {nodeData.editStatus === 3 ? <span className="ds-tree-title-delete">删</span> : null}
-            <span className="ds-nodeTitle">{nodeData.name}</span>
-            <span
-              title="覆盖节点"
-              className="ds-opeItem ds-coverOpe"
-              onClick={() => onMove(nodeData, 'cover')}
+      {data && (
+        <RcTree<RTreeNode>
+          fieldNames={{
+            children: 'children',
+            title: 'name',
+            key: 'id',
+          }}
+          // height={treeHeight}
+          // virtual={false}
+          icon={false}
+          treeData={data}
+          defaultExpandedKeys={getTopKey(data)}
+          titleRender={(nodeData) => (
+            <div
               data-index={nodeData.id}
-            />
-            <span
-              title="移动节点"
-              className="ds-opeItem ds-moveOpe"
-              onClick={() => onMove(nodeData)}
-              data-index={nodeData.id}
-            />
-            <span
-              title="查看详情"
-              className="ds-opeItem ds-detailOpe"
-              onClick={() => onDetail(nodeData)}
-              data-index={nodeData.id}
-            />
-          </div>
-        )}
-        motion={null}
-      />
+              data-name={nodeData.name}
+              data-haschildren={(nodeData.children?.length || 0) > 0 ? 1 : 0}
+              onDragStart={onDragStart}
+              onDragEnd={onDragEnd}
+              draggable={nodeData.editStatus !== -1 && editable}
+              className="ds_draggeble"
+            >
+              {nodeData.editStatus === 1 ? <span className="ds-tree-title-add">增</span> : null}
+              {nodeData.editStatus === 2 ? <span className="ds-tree-title-update">改</span> : null}
+              {nodeData.editStatus === 3 ? <span className="ds-tree-title-delete">删</span> : null}
+              <span className="ds-nodeTitle">{nodeData.name}</span>
+              {editable && (
+                <>
+                  <span
+                    title="覆盖节点"
+                    className="ds-opeItem ds-coverOpe"
+                    onClick={() => onMove(nodeData, 'cover')}
+                    data-index={nodeData.id}
+                  />
+                  <span
+                    title="移动节点"
+                    className="ds-opeItem ds-moveOpe"
+                    onClick={() => onMove(nodeData)}
+                    data-index={nodeData.id}
+                  />
+                </>
+              )}
+
+              <span
+                title="查看详情"
+                className="ds-opeItem ds-detailOpe"
+                onClick={() => onDetail(nodeData)}
+                data-index={nodeData.id}
+              />
+            </div>
+          )}
+          motion={null}
+        />
+      )}
       <Modal
         onCancel={() => {
           setD({ open: false });

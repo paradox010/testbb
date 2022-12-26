@@ -15,7 +15,7 @@ const Step: React.FC<StepProps> = ({ stepMsg$, msgData }) => {
         <Tree stepMsg$={stepMsg$} msgData={msgData} />
       </div>
       {/* attrRoute内部处理id&back msgData 非常丑陋的实现方式 */}
-      <EditMsg id back upData={msgData} />
+      <EditMsg id back upData={msgData} editable={msgData.self.userRole === '1'} />
     </AttrRoute>
   );
 };
