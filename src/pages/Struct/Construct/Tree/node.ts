@@ -27,7 +27,9 @@ export interface OpeNode {
   name?: string;
   description?: string;
   parentId?: string;
+  offset?: number;
   oldPIDWhenMove?: string;
+  oldOffsetWhenMove?: number;
   oldPID?: string; // 废弃 --只有当老节点和父节点一致的时候才会执行移动操作?
   domainPubId?: string;
   children?: RTreeNode[];
@@ -153,6 +155,7 @@ class Operation {
             return {
               id: v.id,
               parentId: v.oldPIDWhenMove,
+              offset: v.oldOffsetWhenMove,
             };
           });
           this.computeNewState(
@@ -281,6 +284,7 @@ class Operation {
         }
         if (!isUndo) {
           n.oldPIDWhenMove = node.parentId;
+          n.oldOffsetWhenMove = (this.tree.getNodeOffset(node.id) || -1) - 1;
         }
         node.parentId = 'trash';
         trashTree.unshift(node);
@@ -296,10 +300,20 @@ class Operation {
           return;
         }
 
-        if (node.parentId === n.parentId && node.parentId !== undefined) {
-          console.warn('无移动');
-          return;
+        // if (node.parentId === n.parentId && node.parentId !== undefined) {
+        //   console.warn('无移动');
+        //   return;
+        // }
+        let dropToGap = false;
+        const dropOffset = n.offset as number;
+        const sameParent = node.parentId === n.parentId;
+        if (dropOffset || dropOffset === 0) {
+          dropToGap = true;
         }
+        // if (node.parentId === n.parentId && !dropToGap) {
+        //   console.warn('无移动');
+        //   return;
+        // }
         // if (n.oldPID !== node.parentId) {
         //   console.error('节点的父节点和目标节点不一致');
         //   return;
@@ -329,27 +343,37 @@ class Operation {
           return;
         }
         // move
-        if (newPID === node.parentId) {
-          console.error('节点已经移动到目标位');
-          return;
+        // offset
+        const oldOffsetWhenMove = this.tree.getNodeOffset(node.id) || -1;
+        if (sameParent) {
+          if (dropOffset === oldOffsetWhenMove) {
+            console.warn('移动前后offset相同');
+            return;
+          }
         }
         if (!this.cutNode(node, opeItem)) {
           return;
         }
+
         if (!isUndo) {
           n.oldPIDWhenMove = node.parentId;
+          n.oldOffsetWhenMove = oldOffsetWhenMove;
         }
 
         node.parentId = newPID;
         if (newPNode) {
-          if (this.opt.reverseOrder) {
+          if (dropToGap) {
+            newPNode.children.splice(dropOffset, 0, node);
+          } else if (this.opt.reverseOrder) {
             newPNode.children = [node, ...(newPNode.children || [])];
           } else {
             newPNode.children = [...(newPNode.children || []), node];
           }
         } else {
           // eslint-disable-next-line no-lonely-if
-          if (this.opt.reverseOrder) {
+          if (dropToGap) {
+            this.tree.originTree.splice(dropOffset, 0, node);
+          }else if (this.opt.reverseOrder) {
             this.tree.originTree.unshift(node);
           } else {
             this.tree.originTree.push(node);
@@ -727,6 +751,17 @@ export class YTree {
     if (!id) return;
     return this.store[id]?.state;
   }
+  getNodeOffset(id?: string) {
+    if (!id) return;
+    if (!this.store[id]) return;
+    const node = this.store[id].state;
+    if (node.parentId) {
+      const pNode = this.store[node.parentId].state;
+      return pNode.children?.findIndex((v) => v.id === node.id);
+    } else {
+      return this.originTree.findIndex((v) => v.id === node.id);
+    }
+  }
   getPIds(id?: string) {
     if (!id) return;
     const ids: string[] = [];
@@ -742,9 +777,13 @@ export class YTree {
   getTowLevelKeys() {
     const keys: string[] = [];
     this.originTree.forEach((v) => {
-      keys.push(v.id);
+      if(v.children?.length>0){
+        keys.push(v.id);
+      }
       v?.children?.forEach((vc) => {
-        keys.push(vc.id);
+        if(vc.children?.length>0){
+          keys.push(vc.id);
+        }
         // vc?.children?.forEach((vcc) => {
         //   keys.push(vcc.id);
         //   vcc?.children?.forEach((vccc) => {

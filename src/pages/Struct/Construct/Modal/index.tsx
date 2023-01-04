@@ -1,7 +1,7 @@
 import { useState } from 'react';
 
 import { EventEmitter } from 'ahooks/lib/useEventEmitter';
-import type { MsgType } from '../msg.d';
+import type { MsgType, ModalDataType } from '../msg.d';
 
 import type { YTree as YTreeType } from '../Tree/node';
 
@@ -17,16 +17,7 @@ interface TreeProps {
   yTree: YTreeType;
   treeMsg$: EventEmitter<MsgType>;
 }
-interface ModalData {
-  id?: string;
-  name?: string;
-  description?: string;
-  editStatus?: number;
-  parentId?: string;
-  parentName?: string;
-  domainPubId?: string;
-  hasChildren?: boolean;
-}
+type ModalData = ModalDataType;
 const MyModal: React.FC<TreeProps> = ({ treeMsg$, yTree }) => {
   const [modal, setModal] = useState<{
     open: string;
@@ -102,14 +93,15 @@ const MyModal: React.FC<TreeProps> = ({ treeMsg$, yTree }) => {
     closeModal();
   };
   const onMoveConfirm = () => {
-    const { id, parentId, name } = modal.modalData || {};
-    if (!id || !parentId) return;
+    const { id, parentId, name, offset } = modal.modalData || {};
+   
+    if (!id) return;
     treeMsg$.emit({
       type: 'operation',
       content: {
         id: new Date().valueOf(),
         opeType: 'move',
-        newNodes: [{ parentId, id, name }],
+        newNodes: [{ parentId, id, name, offset }],
       },
     });
     closeModal();
@@ -176,7 +168,7 @@ const MyModal: React.FC<TreeProps> = ({ treeMsg$, yTree }) => {
     });
     closeModal();
   };
-  console.log(modal)
+  console.log(modal);
 
   return (
     <>
@@ -208,8 +200,18 @@ const MyModal: React.FC<TreeProps> = ({ treeMsg$, yTree }) => {
       <DeleteModal open={modal.open === 'delete'} onCancel={closeModal} onOk={onDelete} modalData={modal.modalData} />
       <Modal title={null} open={modal.open === 'move_confirm'} onCancel={closeModal} onOk={onMoveConfirm}>
         <div style={{ fontSize: 16 }}>
-          确定将<span style={{ background: '#bae7ff', padding: '5px 10px' }}>{modal.modalData?.name}</span>{modal.modalData?.hasChildren&&'及其下位节点'}移动到
-          <span style={{ background: '#c5c5e3', padding: '5px 10px' }}>{modal.modalData?.parentName}</span>下吗？
+          确定将<span style={{ background: '#bae7ff', padding: '5px 10px' }}>{modal.modalData?.name}</span>
+          {modal.modalData?.hasChildren && '及其下位节点'}移动到
+          <span style={{ background: '#c5c5e3', padding: '5px 10px' }}>{modal.modalData?.parentName}</span>下
+          {modal.modalData?.dropToGap ? (
+            <span>
+              ，<span style={{ background: '#c5c5e3', padding: '5px 10px' }}>{modal.modalData.dropName}</span>
+              同层
+            </span>
+          ) : (
+            ''
+          )}
+          吗？
         </div>
       </Modal>
       <ImportModal open={modal.open === 'import'} onCancel={closeModal} onOk={onImportOk} modalData={modal.modalData} />
@@ -217,8 +219,8 @@ const MyModal: React.FC<TreeProps> = ({ treeMsg$, yTree }) => {
       <ReviewMoveModal
         open={modal.open === 'domain_drag_confirm'}
         onCancel={closeModal}
-        onSyncOk={()=>onSyncOk()}
-        onCoverOk={()=>onCoverOk()}
+        onSyncOk={() => onSyncOk()}
+        onCoverOk={() => onCoverOk()}
         modalData={modal.modalData}
       />
     </>

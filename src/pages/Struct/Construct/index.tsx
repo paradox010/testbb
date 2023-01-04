@@ -118,6 +118,14 @@ export default function Stand() {
           });
         }
         if (socketData.mesType === 'operation') {
+          // if (socketData.content.opeType === 'move') {
+          //   socketData?.content?.newNodes?.forEach((n) => {
+          //     if (typeof n.offset === 'number') {
+          //       // eslint-disable-next-line no-param-reassign
+          //       n.offset -= 1;
+          //     }
+          //   });
+          // }
           yTree.operation.add(socketData.content);
           const thoptype = socketData.content;
           if (specialOpesTypes.includes(thoptype.opeType)) {
@@ -167,6 +175,17 @@ export default function Stand() {
           opeType: msg.content.opeType,
         });
       }
+      // if (msg.content.opeType === 'move') {
+      //   const newNodes = JSON.parse(JSON.stringify(msg.content.newNodes));
+      //   newNodes.forEach((n) => {
+      //     if (typeof n.offset === 'number') {
+      //       // eslint-disable-next-line no-param-reassign
+      //       n.offset += 1;
+      //     }
+      //   });
+      //   ws.send(JSON.stringify({ mesType: msg.type, content: { ...msg.content, newNodes } }));
+      //   return;
+      // }
       ws.send(JSON.stringify({ mesType: msg.type, content: msg.content }));
     }
 

@@ -216,7 +216,7 @@ class InternalTreeNode extends React.Component<InternalTreeNodeProps, TreeNodeSt
   };
 
   // Disabled item still can be switch
-  onExpand: React.MouseEventHandler<HTMLDivElement> = e => {
+  onExpand: React.MouseEventHandler<HTMLDivElement> = (e) => {
     const {
       loading,
       context: { onNodeExpand },
@@ -226,7 +226,7 @@ class InternalTreeNode extends React.Component<InternalTreeNodeProps, TreeNodeSt
   };
 
   // Drag usage
-  setSelectHandle = node => {
+  setSelectHandle = (node) => {
     this.selectHandle = node;
   };
 
@@ -286,7 +286,7 @@ class InternalTreeNode extends React.Component<InternalTreeNodeProps, TreeNodeSt
   };
 
   // Load data to avoid default expanded tree without data
-  syncLoadData = props => {
+  syncLoadData = (props) => {
     const { expanded, loading, loaded } = props;
     const {
       context: { loadData, onNodeLoad },
@@ -335,9 +335,7 @@ class InternalTreeNode extends React.Component<InternalTreeNodeProps, TreeNodeSt
       context: { draggable, prefixCls },
     } = this.props;
 
-    return draggable?.icon ? (
-      <span className={`${prefixCls}-draggable-icon`}>{draggable.icon}</span>
-    ) : null;
+    return draggable?.icon ? <span className={`${prefixCls}-draggable-icon`}>{draggable.icon}</span> : null;
   };
 
   // ====================== Render: Switcher ======================
@@ -367,9 +365,7 @@ class InternalTreeNode extends React.Component<InternalTreeNodeProps, TreeNodeSt
       const switcherIconDom = this.renderSwitcherIconDom(true);
 
       return switcherIconDom !== false ? (
-        <span className={classNames(`${prefixCls}-switcher`, `${prefixCls}-switcher-noop`)}>
-          {switcherIconDom}
-        </span>
+        <span className={classNames(`${prefixCls}-switcher`, `${prefixCls}-switcher-noop`)}>{switcherIconDom}</span>
       ) : null;
     }
 
@@ -515,9 +511,7 @@ class InternalTreeNode extends React.Component<InternalTreeNodeProps, TreeNodeSt
     const rootDraggable = !!draggable;
     // allowDrop is calculated in Tree.tsx, there is no need for calc it here
     const showIndicator = !disabled && rootDraggable && dragOverNodeKey === eventKey;
-    return showIndicator
-      ? dropIndicatorRender({ dropPosition, dropLevelOffset, indent, prefixCls, direction })
-      : null;
+    return showIndicator ? dropIndicatorRender({ dropPosition, dropLevelOffset, indent, prefixCls, direction }) : null;
   };
 
   // =========================== Render ===========================
@@ -545,14 +539,7 @@ class InternalTreeNode extends React.Component<InternalTreeNodeProps, TreeNodeSt
       ...otherProps
     } = this.props;
     const {
-      context: {
-        prefixCls,
-        filterTreeNode,
-        keyEntities,
-        dropContainerKey,
-        dropTargetKey,
-        draggingNodeKey,
-      },
+      context: { prefixCls, filterTreeNode, keyEntities, dropContainerKey, dropTargetKey, draggingNodeKey },
     } = this.props;
     const disabled = this.isDisabled();
     const dataOrAriaAttributeProps = pickAttrs(otherProps, { aria: true, data: true });
@@ -588,10 +575,6 @@ class InternalTreeNode extends React.Component<InternalTreeNodeProps, TreeNodeSt
           'filter-node': filterTreeNode && filterTreeNode(convertNodePropsToEventData(this.props)),
         })}
         style={style}
-        // Draggable config
-        draggable={draggableWithoutDisabled}
-        aria-grabbed={dragging}
-        onDragStart={draggableWithoutDisabled ? this.onDragStart : undefined}
         // Drop config
         onDragEnter={mergedDraggable ? this.onDragEnter : undefined}
         onDragOver={mergedDraggable ? this.onDragOver : undefined}
@@ -606,16 +589,21 @@ class InternalTreeNode extends React.Component<InternalTreeNodeProps, TreeNodeSt
         {this.renderDragHandler()}
         {this.renderSwitcher()}
         {this.renderCheckbox()}
-        {this.renderSelector()}
+        <span 
+          // Draggable config
+          draggable={draggableWithoutDisabled}
+          aria-grabbed={dragging}
+          onDragStart={draggableWithoutDisabled ? this.onDragStart : undefined}
+        >
+          {this.renderSelector()}
+        </span>
       </div>
     );
   }
 }
 
-const ContextTreeNode: React.FC<TreeNodeProps> = props => (
-  <TreeContext.Consumer>
-    {context => <InternalTreeNode {...props} context={context} />}
-  </TreeContext.Consumer>
+const ContextTreeNode: React.FC<TreeNodeProps> = (props) => (
+  <TreeContext.Consumer>{(context) => <InternalTreeNode {...props} context={context} />}</TreeContext.Consumer>
 );
 
 ContextTreeNode.displayName = 'TreeNode';

@@ -39,7 +39,7 @@
     }
 
     &.dragging {
-      background: rgb(186, 231, 255);
+      background: rgba(186, 231, 255, .0);
     }
 
     &.drop-container {
@@ -63,6 +63,24 @@
       & ~ .rc-tree-treenode {
         border-left: none;
       }
+      &.drag-over-gap-bottom {
+        background-color: transparent;
+      }
+      &.drag-over-gap-top {
+        background-color: transparent;
+      }
+    }
+
+    .ds-drop-indicator:after {
+      content: '';
+      position: absolute;
+      top: -6px;
+      left: -16px;
+      width: 16px;
+      height: 16px;
+      background-image: url('@/assets/tree.png');
+      background-size: 113px;
+      background-position: -49px -41px;
     }
 
     // .ds-draggeble.dragover {
@@ -186,7 +204,7 @@
     pointer-events: none;
     padding-right: 50px;
   }
-  
+
   .rc-tree .rc-tree-treenode .rc-tree-node-content-wrapper {
     line-height: @treeLineHeight;
     height: auto;

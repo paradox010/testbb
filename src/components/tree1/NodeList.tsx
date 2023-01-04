@@ -52,6 +52,7 @@ const MotionFlattenData: FlattenNode = {
 export interface NodeListRef {
   scrollTo: ScrollTo;
   getIndentWidth: () => number;
+  getIndentOffset: () => number;
 }
 
 interface NodeListProps<TreeDataType extends BasicDataNode> {
@@ -173,6 +174,7 @@ const NodeList = React.forwardRef<NodeListRef, NodeListProps<any>>((props, ref) 
     scrollTo: scroll => {
       listRef.current.scrollTo(scroll);
     },
+    getIndentOffset: ()=> indentMeasurerRef.current?.getBoundingClientRect().left,
     getIndentWidth: () => indentMeasurerRef.current.offsetWidth,
   }));
 

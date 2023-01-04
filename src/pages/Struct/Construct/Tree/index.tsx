@@ -3,7 +3,7 @@ import { Button, message, Popconfirm } from 'antd';
 // import RcTree from 'rc-tree';
 import RcTree from '@/components/tree1';
 import { EventEmitter } from 'ahooks/lib/useEventEmitter';
-import type { MsgType } from '../msg.d';
+import type { MsgType, ModalDataType } from '../msg.d';
 
 import type { RTreeNode, YTree as YTreeType } from './node';
 
@@ -39,6 +39,7 @@ const MyTree: React.FC<TreeProps> = ({ treeMsg$, yTree, type = 'build', domainId
     if (msg.type === 'refreshTree') {
       setTree([...yTree.getOriginTree()]);
       if (msg.autoExpand) {
+        console.log(yTree.getTowLevelKeys())
         setExpandedKeys(yTree.getTowLevelKeys());
       }
       if (msg.ifInit) {
@@ -188,10 +189,10 @@ const MyTree: React.FC<TreeProps> = ({ treeMsg$, yTree, type = 'build', domainId
   //   });
   // };
 
-  const onDragStart = ({ event }) => {
+  const onDragStart = ({ event, node }) => {
     const { index } = event.currentTarget.dataset;
-    event.dataTransfer.setData('drag_id', index);
-    event.target.classList.add('dragging');
+    event.dataTransfer.setData('drag_id', index || node.key);
+    // event.target.classList.add('dragging');
   };
   const onDragEnd = (event) => {
     event.target.classList.remove('dragging');
@@ -211,7 +212,7 @@ const MyTree: React.FC<TreeProps> = ({ treeMsg$, yTree, type = 'build', domainId
       event.target.classList.remove('dragover');
     }
   };
-  const onDrop = ({ event, node }) => {
+  const onDrop = ({ event, node, dropToGap, dropPosition }) => {
     event.preventDefault();
     // if (!event.target?.classList?.contains('ds-draggeble')) {
     //   return;
@@ -223,8 +224,53 @@ const MyTree: React.FC<TreeProps> = ({ treeMsg$, yTree, type = 'build', domainId
     if (!node.key) return;
     const dragkey = event.dataTransfer.getData('drag_id');
     const dropKey = node.key;
-    // 提议树那边移动过来的点
     const dropNode = yTree.getNode(dropKey);
+
+    if (!dropNode) return;
+    let offset: number;
+    let realDropKey = dropKey;
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+    const realParams = {
+      parentId: dropNode.id,
+      parentName: dropNode.name,
+      dropToGap: false,
+      dropName: '',
+      // offset: -1,
+    } as ModalDataType;
+    if (dropToGap) {
+      realParams.dropToGap = true;
+      realDropKey = dropNode?.parentId;
+      realParams.dropName = dropNode.name;
+      if (realDropKey) {
+        realParams.parentId = yTree.getNode(realDropKey)?.id as string;
+        realParams.parentName = yTree.getNode(realDropKey)?.name as string;
+      } else {
+        realParams.parentId = undefined as any;
+        realParams.parentName = '根节点';
+      }
+      offset = yTree.getNodeOffset(dropKey) as number;
+      // sameParent
+      if (yTree.getNode(dragkey)?.parentId === dropNode.parentId) {
+        // 从上往下挪动 去掉本身节点
+        if ((yTree.getNodeOffset(dragkey) as number) < offset) {
+          offset -= 1;
+        }
+      }
+      // 移动到节点的边缘，即附近节点
+      if (dropPosition === -1) {
+        // 上方
+        // offset -= 1;
+      } else {
+        // 下方
+        offset +=1;
+      }
+      // offset -1:节点上方，即第一个节点，服务器数据为0
+      // offset n: 节点的下方位置插入。
+      // 和后台的接入数据相差1
+      // 后台只接收移动后的offset
+      realParams.offset = offset;
+    }
+    // 提议树那边移动过来的点
     if (event.dataTransfer.getData('drag_from') === 'domain') {
       const oth = JSON.parse(event.dataTransfer.getData('drag_content'));
       treeMsg$.emit({
@@ -232,8 +278,9 @@ const MyTree: React.FC<TreeProps> = ({ treeMsg$, yTree, type = 'build', domainId
         open: 'domain_drag_confirm',
         modalData: {
           id: dragkey,
-          parentId: dropKey,
-          parentName: dropNode?.name,
+          ...realParams,
+          // parentId: dropKey,
+          // parentName: dropNode?.name,
           ...oth,
         },
       });
@@ -253,8 +300,9 @@ const MyTree: React.FC<TreeProps> = ({ treeMsg$, yTree, type = 'build', domainId
       modalData: {
         id: dragNode?.id,
         name: dragNode?.name,
-        parentId: dropNode?.id,
-        parentName: dropNode?.name,
+        ...realParams,
+        // parentId: dropNode?.id,
+        // parentName: dropNode?.name,
         hasChildren: (dragNode?.children?.length || 0) > 0,
       },
     });
@@ -314,7 +362,7 @@ const MyTree: React.FC<TreeProps> = ({ treeMsg$, yTree, type = 'build', domainId
             data-index={nodeData.id}
             dragOver={nodeData.editStatus !== -1}
             title={
-              <div data-index={nodeData.id}>
+              <div>
                 <span className="ds-nodeTitle">{nodeData.name}</span>
                 {editable && (
                   <>

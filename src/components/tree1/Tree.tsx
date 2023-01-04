@@ -475,7 +475,7 @@ class Tree<TreeDataType extends DataNode | BasicDataNode = DataNode> extends Rea
       y: event.clientY,
     };
 
-    const newExpandedKeys = arrDel(expandedKeys, eventKey||'');
+    const newExpandedKeys = arrDel(expandedKeys, eventKey || '');
 
     this.setState({
       draggingNodeKey: eventKey,
@@ -524,12 +524,16 @@ class Tree<TreeDataType extends DataNode | BasicDataNode = DataNode> extends Rea
       dragOverNodeKey,
     } = calcDropPosition<TreeDataType>(
       event,
-      undefined,
-      // dragNode, // dswork 暂时去掉containerkey的影响
+      // undefined,
+      dragNode, // dswork 暂时去掉containerkey的影响
       node,
       indent,
-      null,
-      // this.dragStartMousePosition, // dswork
+      // null,
+      dragNode
+        ? this.dragStartMousePosition
+        : {
+            x: (this.listRef.current?.getIndentOffset() || 0) + 100,
+          }, // dswork
       allowDrop,
       flattenNodes,
       keyEntities,
@@ -628,12 +632,16 @@ class Tree<TreeDataType extends DataNode | BasicDataNode = DataNode> extends Rea
       dragOverNodeKey,
     } = calcDropPosition(
       event,
-      undefined,
-      // dragNode, // dswork
+      // undefined,
+      dragNode, // dswork
       node,
       indent,
-      null,
-     // this.dragStartMousePosition, // dswork
+      // null,
+      dragNode
+        ? this.dragStartMousePosition
+        : {
+            x: (this.listRef.current?.getIndentOffset() || 0) + 100,
+          }, // dswork
       allowDrop,
       flattenNodes,
       keyEntities,
@@ -759,7 +767,7 @@ class Tree<TreeDataType extends DataNode | BasicDataNode = DataNode> extends Rea
       event,
       node: convertNodePropsToEventData(abstractDropNodeProps),
       dragNode: this.dragNode ? convertNodePropsToEventData(this.dragNode.props) : null,
-      dragNodesKeys: this.dragNode?[this.dragNode.props.eventKey].concat(dragChildrenKeys):[],
+      dragNodesKeys: this.dragNode ? [this.dragNode.props.eventKey].concat(dragChildrenKeys) : [],
       dropToGap: dropPosition !== 0,
       dropPosition: dropPosition + Number(posArr[posArr.length - 1]),
     };
@@ -787,15 +795,15 @@ class Tree<TreeDataType extends DataNode | BasicDataNode = DataNode> extends Rea
     const { draggingNodeKey } = this.state;
     // dswork
     // if (draggingNodeKey !== null) {
-      this.setState({
-        draggingNodeKey: null,
-        dropPosition: null,
-        dropContainerKey: null,
-        dropTargetKey: null,
-        dropLevelOffset: null,
-        dropAllowed: true,
-        dragOverNodeKey: null,
-      });
+    this.setState({
+      draggingNodeKey: null,
+      dropPosition: null,
+      dropContainerKey: null,
+      dropTargetKey: null,
+      dropLevelOffset: null,
+      dropAllowed: true,
+      dragOverNodeKey: null,
+    });
     // }
     this.dragStartMousePosition = null;
     this.currentMouseOverDroppableNodeKey = null;

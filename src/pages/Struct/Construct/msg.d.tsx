@@ -103,18 +103,23 @@ interface ope {
 }
 // 弹窗
 
+export interface ModalDataType {
+  id?: string;
+  name?: string;
+  dropName?: string;
+  dropToGap?: boolean;
+  offset?: number;
+  parentId?: string;
+  parentName?: string;
+  description?: string;
+  domainPubId?: string;
+  hasChildren?: boolean;
+  editStatus?: number;
+}
 export type CompModalType = {
   type: 'modal';
   open: 'add' | 'update' | 'move' | 'delete' | 'move_confirm' | 'sync' | 'cover' | 'domain_drag_confirm' | 'import';
-  modalData?: {
-    id?: string;
-    name?: string;
-    parentId?: string;
-    parentName?: string;
-    description?: string; 
-    domainPubId?: string;
-    hasChildren?: boolean;
-  };
+  modalData?: ModalDataType;
 };
 // router
 interface route {
