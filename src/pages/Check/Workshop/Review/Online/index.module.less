@@ -13,4 +13,34 @@
 .user {
   padding: 10px;
   border-bottom: 1px solid #eee;
+  display: flex;
+  align-items: center;
+  :global {
+    .anticon-idcard {
+      font-size: 17px;
+      padding: 4px 10px;
+      cursor: pointer;
+      &:hover {
+        color: #1890ff;
+      }
+    }
+  }
+}
+.userList {
+  :global {
+    .ant-message {
+      top: inherit;
+      bottom: 0;
+    }
+    .ant-message-notice {
+      // padding: 8px 14px !important;
+      text-align: right;
+    }
+    .ant-message-notice-content {
+      box-shadow: none;
+      background-color: #000000b3;
+      color: #fff;
+      padding: 4px 10px;
+    }
+  }
 }

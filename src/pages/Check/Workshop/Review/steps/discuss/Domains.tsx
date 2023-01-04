@@ -17,7 +17,7 @@ async function getTree(params) {
 
 const Domains: React.FC<StepProps & { editable?: boolean }> = ({ stepMsg$, msgData, editable = true }) => {
   const { domain } = useContext(BasicContext);
-  const [select, setSelect] = useState(domain?.[0] ? domain[0].id : '');
+  const [select, setSelect] = useState(domain?.[0] ? domain[0].domainPubId : '');
   return (
     <>
       <div style={{ padding: '10px 20px' }}>

@@ -1,4 +1,4 @@
-import { SmileOutlined, ProjectOutlined, ApiOutlined, ReconciliationOutlined } from '@ant-design/icons';
+import { SmileOutlined, ProjectOutlined, ApiOutlined, AuditOutlined } from '@ant-design/icons';
 
 const asideMenuConfig = [
   {
@@ -38,7 +38,7 @@ const asideMenuConfig = [
   {
     name: '知识评审',
     path: '/kcheck',
-    icon: ReconciliationOutlined,
+    icon: AuditOutlined,
     routes: [
       { name: '流程构建', hideInMenu: true, path: '/kcheck/createProcess' },
       {

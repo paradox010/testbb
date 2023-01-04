@@ -1,5 +1,5 @@
 import RND from '@/pages/Struct/Construct/RND';
-import { FileTextOutlined } from '@ant-design/icons';
+import { TeamOutlined, VideoCameraOutlined } from '@ant-design/icons';
 import Online from '../Online';
 import Record from '../Record';
 
@@ -9,7 +9,7 @@ export default ({ stepMsg$, msgData }) => {
       <RND
         text={
           <>
-            <FileTextOutlined style={{ fontSize: 20 }} />
+            <VideoCameraOutlined style={{ fontSize: 20 }} />
             <div>会议直播</div>
           </>
         }
@@ -25,7 +25,7 @@ export default ({ stepMsg$, msgData }) => {
         defaultHeight={400}
         text={
           <>
-            <FileTextOutlined style={{ fontSize: 20 }} />
+            <TeamOutlined style={{ fontSize: 20 }} />
             <div>参与人员</div>
           </>
         }

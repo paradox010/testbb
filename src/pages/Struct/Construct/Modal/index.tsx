@@ -9,6 +9,7 @@ import { message, Modal } from 'antd';
 import AddModal from './AddModal';
 import UpdateModal from './UpdateModal';
 import MoveModal from './MoveModal';
+import MoveConfirmModal from './MoveConfirmModal';
 import DeleteModal from './DeleteModal';
 import ReviewMoveModal from './ReviewMoveModal';
 import ImportModal from './ImportModal';
@@ -94,7 +95,7 @@ const MyModal: React.FC<TreeProps> = ({ treeMsg$, yTree }) => {
   };
   const onMoveConfirm = () => {
     const { id, parentId, name, offset } = modal.modalData || {};
-   
+
     if (!id) return;
     treeMsg$.emit({
       type: 'operation',
@@ -198,8 +199,9 @@ const MyModal: React.FC<TreeProps> = ({ treeMsg$, yTree }) => {
         type="cover"
       />
       <DeleteModal open={modal.open === 'delete'} onCancel={closeModal} onOk={onDelete} modalData={modal.modalData} />
-      <Modal title={null} open={modal.open === 'move_confirm'} onCancel={closeModal} onOk={onMoveConfirm}>
-        <div style={{ fontSize: 16 }}>
+      <MoveConfirmModal open={modal.open === 'move_confirm'} onCancel={closeModal} onOk={onMoveConfirm} modalData={modal.modalData} />
+      {/* <Modal title={null} open={modal.open === 'move_confirm'} onCancel={closeModal} onOk={onMoveConfirm}>
+        <div style={{ fontSize: 16, lineHeight: 2, paddingTop: 26 }}>
           确定将<span style={{ background: '#bae7ff', padding: '5px 10px' }}>{modal.modalData?.name}</span>
           {modal.modalData?.hasChildren && '及其下位节点'}移动到
           <span style={{ background: '#c5c5e3', padding: '5px 10px' }}>{modal.modalData?.parentName}</span>下
@@ -213,7 +215,7 @@ const MyModal: React.FC<TreeProps> = ({ treeMsg$, yTree }) => {
           )}
           吗？
         </div>
-      </Modal>
+      </Modal> */}
       <ImportModal open={modal.open === 'import'} onCancel={closeModal} onOk={onImportOk} modalData={modal.modalData} />
       {/* 提议树 */}
       <ReviewMoveModal

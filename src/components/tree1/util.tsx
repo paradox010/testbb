@@ -155,8 +155,8 @@ export function calcDropPosition<TreeDataType extends BasicDataNode = DataNode>(
 
   if (
     isFirstChild(abstractDropNodeEntity) &&
-    abstractDropNodeEntity.level === 0 &&
-    clientY < top + height / 2 &&
+    // abstractDropNodeEntity.level === 0 && 
+    // clientY < top + height / 2 &&
     allowDrop({
       dragNode: abstractDragDataNode,
       dropNode: abstractDropDataNode,

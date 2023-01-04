@@ -35,6 +35,14 @@ export function useMember({ watch }: { watch?: (v: StepStateType['member']) => v
   return member;
 }
 
+interface DomainType {
+  domainName: string;
+  domainPubId: string;
+  userName: string;
+  categoryCount: number;
+  featureCount: number;
+}
+
 export interface BasicContextProps {
   id: string;
   name: string;
@@ -42,7 +50,7 @@ export interface BasicContextProps {
   domainName: string;
   member: User[];
   process: any[];
-  domain: any[];
+  domain: DomainType[];
   regulation: any[];
   userRole: string;
   self: User;

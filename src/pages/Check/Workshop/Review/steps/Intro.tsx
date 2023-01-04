@@ -37,7 +37,7 @@ const Step: React.FC<StepProps> = ({ stepMsg$, msgData }) => {
             <div>本期评选版本-个，入围版本{basic.domain.length}个</div>
             <div className={styles.versionWrap}>
               {basic.domain?.map((v) => (
-                <div key={v.id} className={styles.versionItem}>
+                <div key={v.domainPubId} className={styles.versionItem}>
                   <div className={styles.titleWrap}>{v.domainName}</div>
                   <div className={styles.subTitle}>演讲人：{v.userName}</div>
                   <div style={{ display: 'flex' }}>
@@ -105,7 +105,7 @@ TypedStep.Title = ({ stepMsg$, msgData }) => {
       content: {
         processState: 3,
         isFirstProposal: true,
-        proposalDomainId: basic.domain?.[0]?.id,
+        proposalDomainId: basic.domain?.[0]?.domainPubId,
       },
     });
   };

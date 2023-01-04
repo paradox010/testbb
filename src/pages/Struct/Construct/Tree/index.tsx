@@ -1,3 +1,4 @@
+/* eslint-disable max-lines */
 import { useRef, useState, useEffect, useCallback, useMemo } from 'react';
 import { Button, message, Popconfirm } from 'antd';
 // import RcTree from 'rc-tree';
@@ -9,15 +10,20 @@ import type { RTreeNode, YTree as YTreeType } from './node';
 
 import {
   DeleteOutlined,
+  DownSquareOutlined,
   DragOutlined,
   ExportOutlined,
   FileOutlined,
   FormOutlined,
   PlusSquareOutlined,
   UndoOutlined,
+  UpSquareOutlined,
 } from '@ant-design/icons';
 
 import Search from './Search';
+
+import { getChildrenKeysWithNoLeaf, getChildrenKeys } from '@/utils/tree';
+import difference from 'lodash/difference';
 
 import styles from './index.module.less';
 
@@ -39,7 +45,6 @@ const MyTree: React.FC<TreeProps> = ({ treeMsg$, yTree, type = 'build', domainId
     if (msg.type === 'refreshTree') {
       setTree([...yTree.getOriginTree()]);
       if (msg.autoExpand) {
-        console.log(yTree.getTowLevelKeys())
         setExpandedKeys(yTree.getTowLevelKeys());
       }
       if (msg.ifInit) {
@@ -86,12 +91,12 @@ const MyTree: React.FC<TreeProps> = ({ treeMsg$, yTree, type = 'build', domainId
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedKeys]);
 
-  const checkIfValid = (index, noNeed = false) => {
+  const checkIfValid = (index, noNeed = false, withChildren = false) => {
     if (!index) {
       message.warn('请选中一个节点');
       return;
     }
-    const { id, name, description, editStatus, children } = yTree.getNode(index) || {};
+    const { id, editStatus, children, ...rest } = yTree.getNode(index) || {};
     if (!id) {
       message.warn('该节点不在树上');
       return;
@@ -100,7 +105,11 @@ const MyTree: React.FC<TreeProps> = ({ treeMsg$, yTree, type = 'build', domainId
       message.warn('该节点无法编辑');
       return;
     }
-    return { id, name, description, hasChildren: (children?.length || 0) > 0 };
+
+    if (withChildren) {
+      return { id, hasChildren: (children?.length || 0) > 0, children, ...rest };
+    }
+    return { id, hasChildren: (children?.length || 0) > 0, ...rest };
   };
 
   const onAdd = (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -173,45 +182,12 @@ const MyTree: React.FC<TreeProps> = ({ treeMsg$, yTree, type = 'build', domainId
     });
   };
 
-  // const onDrop = (info) => {
-  //   const dropKey = info.node.props.eventKey;
-  //   const dragkey = info.dragNode.props.eventKey;
-  //   const dropNode = yTree.getNode(dropKey);
-  //   const dragNode = yTree.getNode(dragkey);
-  //   if (dragNode?.editStatus === -1) {
-  //     message.warn('该节点无法编辑');
-  //     return;
-  //   }
-  //   treeMsg$.emit({
-  //     type: 'modal',
-  //     open: 'move_confirm',
-  //     modalData: { id: dragNode?.id, name: dragNode?.name, parentId: dropNode?.id, parentName: dropNode?.name },
-  //   });
-  // };
-
   const onDragStart = ({ event, node }) => {
     const { index } = event.currentTarget.dataset;
     event.dataTransfer.setData('drag_id', index || node.key);
     // event.target.classList.add('dragging');
   };
-  const onDragEnd = (event) => {
-    event.target.classList.remove('dragging');
-  };
 
-  // drop targets
-  const onDragOver = (event) => {
-    event.preventDefault();
-  };
-  const onDragEnter = (event) => {
-    if (event.target.classList.contains('ds-draggeble')) {
-      event.target.classList.add('dragover');
-    }
-  };
-  const onDragLeave = (event) => {
-    if (event.target.classList.contains('ds-draggeble')) {
-      event.target.classList.remove('dragover');
-    }
-  };
   const onDrop = ({ event, node, dropToGap, dropPosition }) => {
     event.preventDefault();
     // if (!event.target?.classList?.contains('ds-draggeble')) {
@@ -262,7 +238,7 @@ const MyTree: React.FC<TreeProps> = ({ treeMsg$, yTree, type = 'build', domainId
         // offset -= 1;
       } else {
         // 下方
-        offset +=1;
+        offset += 1;
       }
       // offset -1:节点上方，即第一个节点，服务器数据为0
       // offset n: 节点的下方位置插入。
@@ -346,6 +322,32 @@ const MyTree: React.FC<TreeProps> = ({ treeMsg$, yTree, type = 'build', domainId
     });
   };
 
+  const onExpandAll = (event?: React.MouseEvent<HTMLSpanElement>) => {
+    const index = event?.currentTarget?.dataset?.index;
+    if (!index) {
+      // expandall
+      setExpandedKeys(Object.keys(yTree.store));
+      return;
+    }
+    const node = checkIfValid(index, false, true);
+    if (!node) return;
+    if (index === yTree.treeProps.selectKeys?.[0]) event.stopPropagation?.();
+    const res = getChildrenKeysWithNoLeaf([node]);
+    setExpandedKeys((prev) => Array.from(new Set([...prev, ...res])));
+  };
+  const onCollapseAll = (event?: React.MouseEvent<HTMLSpanElement>) => {
+    const index = event?.currentTarget?.dataset?.index;
+    if (!index) {
+      setExpandedKeys([]);
+      return;
+    }
+    const node = checkIfValid(index, false, true);
+    if (!node) return;
+    if (index === yTree.treeProps.selectKeys?.[0]) event.stopPropagation?.();
+    const res = getChildrenKeys([node]);
+    setExpandedKeys((prev) => difference(prev, res));
+  };
+
   const onReset = () => {
     treeMsg$.emit({
       type: 'reset',
@@ -372,7 +374,12 @@ const MyTree: React.FC<TreeProps> = ({ treeMsg$, yTree, type = 'build', domainId
                       onClick={onUpdate}
                       data-index={nodeData.id}
                     />
-                    <span title="新增节点" className="ds-opeItem ds-addOpe" onClick={onAdd} data-index={nodeData.id} />
+                    <span
+                      title="新增下位节点"
+                      className="ds-opeItem ds-addOpe"
+                      onClick={onAdd}
+                      data-index={nodeData.id}
+                    />
                   </>
                 )}
                 <span
@@ -397,6 +404,18 @@ const MyTree: React.FC<TreeProps> = ({ treeMsg$, yTree, type = 'build', domainId
                     />
                   </>
                 )}
+                <span
+                  title="一键展开"
+                  className="ds-opeItem ds-expandAllOpe"
+                  onClick={onExpandAll}
+                  data-index={nodeData.id}
+                />
+                <span
+                  title="一键收起"
+                  className="ds-opeItem ds-collapseAllOpe"
+                  onClick={onCollapseAll}
+                  data-index={nodeData.id}
+                />
               </div>
             }
           >
@@ -408,12 +427,6 @@ const MyTree: React.FC<TreeProps> = ({ treeMsg$, yTree, type = 'build', domainId
     return loop(treeData);
   }, [treeData]);
 
-  const expandAll = () => {
-    setExpandedKeys(Object.keys(yTree.store));
-  };
-  const collapseAll = () => {
-    setExpandedKeys([]);
-  };
   return (
     <>
       <div className={styles.treeTool}>
@@ -423,8 +436,17 @@ const MyTree: React.FC<TreeProps> = ({ treeMsg$, yTree, type = 'build', domainId
             <Button icon={<FormOutlined />} onClick={() => onOutOpe()}>
               编辑
             </Button>
+          </>
+        )}
+        {type === 'build' && (
+          <Button icon={<ExportOutlined />} onClick={() => onOutOpe('import')}>
+            导入
+          </Button>
+        )}
+        {editable && (
+          <>
             <Button icon={<PlusSquareOutlined />} onClick={() => onOutOpe('add')}>
-              {selectedKeys?.[0] ? '新增节点' : '新增一级节点'}
+              {selectedKeys?.[0] ? '新增下位节点' : '新增一级节点'}
             </Button>
           </>
         )}
@@ -434,18 +456,19 @@ const MyTree: React.FC<TreeProps> = ({ treeMsg$, yTree, type = 'build', domainId
         {editable && (
           <>
             <Button icon={<DragOutlined />} onClick={() => onOutOpe('move')}>
-              移动
+              移动节点
             </Button>
             <Button icon={<DeleteOutlined />} onClick={() => onOutOpe('delete')}>
               删除
             </Button>
           </>
         )}
-        {type === 'build' && (
-          <Button icon={<ExportOutlined />} onClick={() => onOutOpe('import')}>
-            导入
-          </Button>
-        )}
+        <Button onClick={onExpandAll} icon={<DownSquareOutlined />}>
+          一键展开
+        </Button>
+        <Button onClick={onCollapseAll} icon={<UpSquareOutlined />}>
+          一键收起
+        </Button>
         {type === 'build' && (
           <Popconfirm
             title={
@@ -461,43 +484,15 @@ const MyTree: React.FC<TreeProps> = ({ treeMsg$, yTree, type = 'build', domainId
             <Button icon={<UndoOutlined />}>重置</Button>
           </Popconfirm>
         )}
-        <Button onClick={expandAll}>展开</Button>
-        <Button onClick={collapseAll}>收起</Button>
       </div>
       <div className="dsTree" style={{ height: 'calc(100% - 76px)' }}>
         <RcTree<RTreeNode>
           ref={treeRef}
-          // fieldNames={{
-          // children: 'children',
-          // title: 'name',
-          // key: 'id',
-          // }}
           icon={false}
           expandedKeys={expandedKeys}
           onExpand={setExpandedKeys}
           selectedKeys={selectedKeys}
           onSelect={setSelectedKeys}
-          // treeData={treeData}
-          // titleRender={(nodeData) => (
-          //   <div
-          //     onDragOver={onDragOver}
-          //     onDragEnter={onDragEnter}
-          //     onDragLeave={onDragLeave}
-          //     onDrop={onDrop}
-          //     onDragStart={onDragStart}
-          //     onDragEnd={onDragEnd}
-          //     data-index={nodeData.id}
-          //     className="ds-draggeble"
-          //     draggable={nodeData.editStatus !== -1}
-          //   >
-          //     <span className="ds-nodeTitle">{nodeData.name}</span>
-          //     <span title="编辑节点" className="ds-opeItem ds-editOpe" onClick={onUpdate} data-index={nodeData.id} />
-          //     <span title="新增节点" className="ds-opeItem ds-addOpe" onClick={onAdd} data-index={nodeData.id} />
-          //     <span title="查看详情" className="ds-opeItem ds-detailOpe" onClick={onDetail} data-index={nodeData.id} />
-          //     <span title="移动节点" className="ds-opeItem ds-moveOpe" onClick={onMove} data-index={nodeData.id} />
-          //     <span title="删除节点" className="ds-opeItem ds-deleteOpe" onClick={onDelete} data-index={nodeData.id} />
-          //   </div>
-          // )}
           motion={null}
           virtual={false}
           // height={800}

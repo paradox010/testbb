@@ -39,7 +39,7 @@
     }
 
     &.dragging {
-      background: rgba(186, 231, 255, .0);
+      background: rgba(186, 231, 255, 0);
     }
 
     &.drop-container {
@@ -275,6 +275,18 @@
       background-position: -96px -20px;
     }
   }
+  .ds-expandAllOpe {
+    background-position: 0 -140px;
+    &:hover {
+      background-position: -24px -140px;
+    }
+  }
+  .ds-collapseAllOpe {
+    background-position: -48px -140px;
+    &:hover {
+      background-position: -72px -140px;
+    }
+  }
 
   .rc-tree-node-content-wrapper .ds-opeItem {
     visibility: hidden;
@@ -324,4 +336,16 @@
   border-radius: 2px;
   margin-right: 5px;
   color: #e45730;
+}
+.ds-moveTextDes {
+  background-color: #bae7ff;
+  padding: 5px 10px;
+  margin: 0 5px;
+  white-space: nowrap;
+}
+.ds-dropTextDes {
+  background-color: #c5c5e3;
+  padding: 5px 10px;
+  margin: 0 5px;
+  white-space: nowrap;
 }

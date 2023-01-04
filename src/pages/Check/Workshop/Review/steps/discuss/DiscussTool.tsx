@@ -1,5 +1,5 @@
 import RND from '@/pages/Struct/Construct/RND';
-import { FileTextOutlined } from '@ant-design/icons';
+import { DeleteOutlined, FolderOpenOutlined } from '@ant-design/icons';
 import { StepProps } from '../../msg.d';
 import TrashTree from './TrashTree';
 import TrashAttr from '../Attr/TrashAttr';
@@ -21,7 +21,7 @@ const DiscussTool: React.FC<StepProps> = ({ stepMsg$, msgData }) => {
       <RND
         text={
           <>
-            <FileTextOutlined style={{ fontSize: 20 }} />
+            <FolderOpenOutlined style={{ fontSize: 20 }} />
             <div>修订文件</div>
           </>
         }
@@ -33,7 +33,7 @@ const DiscussTool: React.FC<StepProps> = ({ stepMsg$, msgData }) => {
       <RND
         text={
           <>
-            <FileTextOutlined style={{ fontSize: 20 }} />
+            <DeleteOutlined style={{ fontSize: 20 }} />
             <div>回收站</div>
           </>
         }
@@ -47,14 +47,18 @@ const DiscussTool: React.FC<StepProps> = ({ stepMsg$, msgData }) => {
         <RND
           text={
             <>
-              <FileTextOutlined style={{ fontSize: 20 }} />
+              <DeleteOutlined style={{ fontSize: 20 }} />
               <div>回收站</div>
             </>
           }
           noPadding
           title={'回收站'}
         >
-          <TrashAttr editable={msgData.self.userRole === '1'} stepMsg$={msgData?.attrMsg$} msgData={msgData?.attrMsgData} />
+          <TrashAttr
+            editable={msgData.self.userRole === '1'}
+            stepMsg$={msgData?.attrMsg$}
+            msgData={msgData?.attrMsgData}
+          />
         </RND>
       )}
     </>
