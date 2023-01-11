@@ -2,7 +2,8 @@
 // 建立websocket链接 获取评审的基本信息
 import store from '@/store';
 import { useRequest, useUnmount } from 'ahooks';
-import { useParams, request } from 'ice';
+import { Button, Result } from 'antd';
+import { useParams, request, history } from 'ice';
 import BasicContext, { BasicContextProps, init } from './basicContext';
 import MsgCenter from './MsgCenter';
 
@@ -17,8 +18,10 @@ function transData(data, user) {
   if (!data) return;
   const item = data?.member?.find((v) => v.userId === user.userId);
   if (!item) return;
+  if (data?.self.isRemoved) return;
+  const { member, ...rest } = data;
   return {
-    ...data,
+    ...rest,
     self: { ...user, ...(data?.self || {}) },
     userRole: item.userRole,
   };
@@ -31,7 +34,11 @@ const Review = () => {
   useUnmount(() => {
     init();
   });
-  
+
+  const goBack = () => {
+    history?.push('/kcheck/workshop');
+  };
+
   return transData(data, user) ? (
     <BasicContext.Provider value={transData(data, user) as BasicContextProps}>
       <MsgCenter />
@@ -39,7 +46,16 @@ const Review = () => {
   ) : loading ? (
     'loading'
   ) : (
-    'need reload'
+    <Result
+      status="403"
+      title="403"
+      subTitle="抱歉，您没有权限访问该会议，请联系管理员"
+      extra={
+        <Button type="primary" onClick={goBack}>
+          返回评审工作台
+        </Button>
+      }
+    />
   );
 };
 

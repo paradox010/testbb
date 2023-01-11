@@ -4,11 +4,14 @@ import styles from './intro.module.less';
 
 import { StepProps, StepCompType } from '../msg.d';
 import { useContext } from 'react';
-import BasicContext from '../basicContext';
+import BasicContext, { stepState } from '../basicContext';
 import dayjs from 'dayjs';
+import { useSnapshot } from 'valtio';
 
 const Step: React.FC<StepProps> = ({ stepMsg$, msgData }) => {
   const basic = useContext(BasicContext);
+  const { member } = useSnapshot(stepState);
+
   return (
     <div className={styles.introContent}>
       <Collapse defaultActiveKey={['1', '2', '3', '4']}>
@@ -17,13 +20,15 @@ const Step: React.FC<StepProps> = ({ stepMsg$, msgData }) => {
             <div className={styles.roleItem} key={v.value}>
               <div className={styles.roleTitle}>{v.label}</div>
               <div style={{ display: 'flex' }}>
-                {basic.member
+                {member
                   .filter((u) => u.userRole === v.value)
                   ?.map((u) => (
                     <div className={styles.userItem} key={u.userId}>
                       <div className={styles.userPic}>pic</div>
                       <div style={{ flex: '1' }}>
-                        <div className={styles.userName}>{u.userName}</div>
+                        <div className={styles.userName} style={u.isRemoved ? { color: '#9d9d9d', textDecoration:'line-through' } : {}}>
+                          {u.userName}
+                        </div>
                         <div className={styles.userDes}>中国纺织工业联合会副会长、中国针织工业协会会长</div>
                       </div>
                     </div>

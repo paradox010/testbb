@@ -16,3 +16,30 @@
   display: flex;
   flex-direction: column;
 }
+
+.objectionList {
+  .item {
+    min-height: 30px;
+    padding: 10px 24px;
+    border-bottom: 1px solid #eee;
+    color: #314659;
+  }
+  .man {
+    font-size: 15px;
+    :global(.anticon) {
+      float: right;
+      font-size: 18px;
+      cursor: pointer;
+      &:hover {
+        color: #1890ff;
+      }
+    }
+    :global(.ant-badge) {
+      margin-left: 5px;
+      vertical-align: -4px;
+    }
+  }
+  .content {
+    color: #314659a6;
+  }
+}

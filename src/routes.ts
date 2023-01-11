@@ -19,6 +19,8 @@ const CreateProcess = lazy(() => import('@/pages/Check/CreateProcess'));
 const Workshop = lazy(() => import('@/pages/Check/Workshop'));
 const Review = lazy(() => import('@/pages/Check/Workshop/Review'));
 
+const Test = lazy(() => import('@/pages/YtreeTest'));
+
 // const Dashboard = lazy(() => import('@/pages/Dashboard'));
 // layout不能作为lazy => <Suspense fallback={<div>loading</div>}><Comp/></Suspense>
 // const Home = import('@/pages/Home');
@@ -136,6 +138,10 @@ const routerConfig: DRouterConfig[] = [
             redirect: '/kcheck/workshop',
           },
         ],
+      },
+      {
+        path: '/test',
+        component: Test,
       },
       {
         path: '/',

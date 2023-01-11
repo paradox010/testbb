@@ -1,7 +1,8 @@
 import RND from '@/pages/Struct/Construct/RND';
-import { DeleteOutlined, FolderOpenOutlined } from '@ant-design/icons';
+import { DeleteOutlined, FolderOpenOutlined, CommentOutlined } from '@ant-design/icons';
 import { StepProps } from '../../msg.d';
 import TrashTree from './TrashTree';
+import Objection from './Objection';
 import TrashAttr from '../Attr/TrashAttr';
 import Domains from './Domains';
 import { useState } from 'react';
@@ -59,6 +60,20 @@ const DiscussTool: React.FC<StepProps> = ({ stepMsg$, msgData }) => {
             stepMsg$={msgData?.attrMsg$}
             msgData={msgData?.attrMsgData}
           />
+        </RND>
+      )}
+      {msgData.self.userRole === '4' && (
+        <RND
+          text={
+            <>
+              <CommentOutlined style={{ fontSize: 20 }} />
+              <div>异议列表</div>
+            </>
+          }
+          noPadding
+          title={'异议列表'}
+        >
+          <Objection stepMsg$={stepMsg$} msgData={msgData} />
         </RND>
       )}
     </>

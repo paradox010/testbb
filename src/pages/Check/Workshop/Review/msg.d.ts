@@ -1,6 +1,5 @@
 import React from 'react';
-import { UserItem, YTree } from '@/pages/Struct/Construct/Tree/node';
-// import type UsersCenter from './socketClass/UsersCenter';
+import { YTree } from '@/pages/Struct/Construct/Tree/node';
 import type VoteCenter from './socketClass/VoteCenter';
 
 import type { OpeItem, CompModalType } from '@/pages/Struct/Construct/msg.d';
@@ -19,6 +18,9 @@ export interface User {
   token?: string;
   isSign?: boolean; // 签名
   sign?: string;
+  isRemoved?: boolean;
+  phone?: string;
+  emergencyContact?: string;
 }
 interface Vote {
   title: string; // 投票的内容
@@ -37,7 +39,7 @@ interface Pos {
 // init
 interface SocketBasicContent {
   isFreeze?: boolean;
-  record: any[];
+  record: RecordType[];
   member: User[];
   proposalDomainId?: string;
 }
@@ -52,13 +54,14 @@ interface SocketInitStep4Type extends SocketBasicContent {
   currentTree: any[];
   recycleTree: any[];
   unfinishedLog: any[];
+  objection: ObjectionType[];
   isVote: boolean;
   reviewVote: VoteBasicType;
 }
 interface SocketInitStep5Type extends SocketBasicContent {
   isFreeze?: boolean;
   processState: 5;
-  record: any[];
+  record: RecordType[];
   member: User[];
   isVote: boolean;
   reviewVote: VoteBasicType;
@@ -70,6 +73,8 @@ interface SocketInitStep6Type extends SocketBasicContent {
 interface SocketInitStep7Type extends SocketBasicContent {
   processState: 7;
   version?: string;
+  isVote: boolean;
+  reviewVote: VoteBasicType;
 }
 
 interface SocketInitStepType {
@@ -99,21 +104,37 @@ interface SocketCheckType {
     isCheck: boolean;
   };
 }
-// 会议消息
+// 剔除用户
+interface SocketRemoveType {
+  mesType: 'remove';
+  content: {
+    userId: string;
+    isRemoved: true;
+    removeReason: string;
+  };
+}
+// 会议记录消息
 interface RecordOnlineType extends User {
   recordType: 'system';
   receiveTime: number;
   content: string;
+  id: string;
 }
 interface RecordOpeType extends User {
   recordType: 'operation';
+  receiveTime: number;
   content: string;
-  id?: string;
+  id: string;
 }
+type RecordType = RecordOnlineType | RecordOpeType;
 interface SocketRecordType {
   mesType: 'record';
-  date: number;
-  content: RecordOnlineType;
+  content: RecordType;
+}
+
+interface SocketObjectionType {
+  mesType: 'objection',
+  content: ObjectionType,
 }
 
 interface SocketStepType {
@@ -141,9 +162,10 @@ interface SocketStepType {
 interface VoteBasicType {
   id: string;
   content: string;
-  isFinished?: boolean;
   createTime: number;
+  isFinished?: boolean;
   voteResult?: UserVoteRes[];
+  result?: boolean;
 }
 interface VoteStartType extends VoteBasicType {
   // 创建投票 / 结束投票
@@ -152,10 +174,12 @@ interface VoteStartType extends VoteBasicType {
 export interface UserVoteRes {
   userId: string;
   isAgree: boolean;
+  isRemoved?: boolean;
 }
 interface VoteEndType extends VoteBasicType {
   // 创建投票 / 结束投票
   type: 2;
+  result: boolean; // 通过或者未通过
   isFinished: true;
   createTime: number;
   voteResult: UserVoteRes[];
@@ -197,11 +221,14 @@ interface SocketSignType {
   };
 }
 
+
 export type SocketMsgType =
   | SocketInitStepType
   | SocketCheckType
+  | SocketRemoveType
   | SocketOnlineType
   | SocketRecordType
+  | SocketObjectionType
   | SocketStepType
   | SocketVoteType
   | SocketRemindVoteType
@@ -289,6 +316,21 @@ interface CompTreePosType {
   };
 }
 
+interface CompBackType {
+  type: 'back';
+}
+
+interface CompObjectionType {
+  type: 'objection';
+  content: {
+    recordId: string;
+  }
+}
+
+type CompRemoveType = Omit<SocketRemoveType, 'mesType'> & {
+  type: 'remove';
+};
+
 export type CompMsgType =
   | RefreshType
   | UserCheckType
@@ -300,15 +342,25 @@ export type CompMsgType =
   | CompModalType
   | CompFreezeType
   | CompSignType
+  | CompBackType
+  | CompObjectionType
+  | CompRemoveType
   | CompTreePosType;
 
 interface SpecialOpe {
   id: number;
   opeType: 'sync' | 'cover' | 'import';
 }
+interface ObjectionType {
+  id: string;
+  userName: string;
+  recordContent: string;
+  objectionCount: number;
+}
 // stepState 存储全局的状态 proxy做双向数据绑定
 export interface StepStateType {
-  record: any[];
+  objection: ObjectionType[];
+  record: RecordType[];
   member: User[];
   processState: number;
   proposalDomainId?: string;
@@ -326,9 +378,7 @@ export interface StepStateType {
 // stepComp & msgData
 export interface MsgDataType {
   yTree: YTree;
-  // usersCenter: UsersCenter;
   voteCenter: VoteCenter;
-  record: any[];
   self: User;
   attrMsg$?: EventEmitter<CompMsgType>;
   attrMsgData?: MsgDataType;

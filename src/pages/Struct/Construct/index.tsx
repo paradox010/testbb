@@ -199,6 +199,9 @@ export default function Stand() {
     if (msg.type === 'reset') {
       ws.send(JSON.stringify({ mesType: msg.type }));
     }
+    if (msg.type === 'back') {
+      ws.send(JSON.stringify({ mesType: msg.type, content:{} }));
+    }
     if (msg.type === 'publish') {
       ws.send(JSON.stringify({ mesType: msg.type, content: msg.content }));
     }

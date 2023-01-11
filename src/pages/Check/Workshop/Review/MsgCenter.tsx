@@ -61,7 +61,6 @@ export default function Stand() {
         userId: basic.self.userId,
         style,
       }),
-      // usersCenter: new UsersCenter(basic.self, basic.member),
       voteCenter: new VoteCenter(),
       record: [],
       self: basic.self,
@@ -79,22 +78,22 @@ export default function Stand() {
       console.log('ws');
       const socketData = JSON.parse(data) as SocketMsgType;
       if (socketData.mesType === 'init') {
-        // msgData.usersCenter.init(basic.self, socketData.content.member);
         [
           'isFreeze',
           'member',
           'record',
+          'objection',
           'reviewVote',
           'processState',
           'proposalDomainId',
           'proposalStartTime',
           'sign',
-          'version'
+          'version',
         ].forEach((k) => {
           stepState[k] = socketData.content[k];
         });
         const st = socketData.content.processState;
-        if (st === 4 || st === 5) {
+        if (st === 4 || st === 5 || st === 7) {
           if (socketData.content.reviewVote?.id) {
             msgData.voteCenter.push(socketData.content.reviewVote, socketData.content.isVote, basic.self.userId);
             setTimeout(() => {
@@ -116,7 +115,12 @@ export default function Stand() {
           });
         }
       }
-      if (socketData.mesType === 'user' || socketData.mesType === 'check' || socketData.mesType === 'sign') {
+      if (
+        socketData.mesType === 'user' ||
+        socketData.mesType === 'check' ||
+        socketData.mesType === 'sign' ||
+        socketData.mesType === 'remove'
+      ) {
         const { userId, ...rest } = socketData.content;
         const item = stepState.member.find((v) => v.userId === userId);
         if (item) {
@@ -125,9 +129,16 @@ export default function Stand() {
             item[k] = rest[k];
           }
         }
+        if (userId === basic.self.userId && (rest as any).isRemoved === true) {
+          // 被踢出会议
+          window.location.reload();
+        }
       }
       if (socketData.mesType === 'record') {
         pushRecord(stepState.record, socketData.content);
+      }
+      if (socketData.mesType === 'objection') {
+        stepState.objection.unshift(socketData.content);
       }
       if (socketData.mesType === 'stage') {
         stepState.processState = socketData.content.processState;
@@ -136,6 +147,7 @@ export default function Stand() {
           stepState.proposalStartTime = socketData.content.proposalStartTime;
         }
         if (socketData.content.processState === 4) {
+          stepState.objection = socketData.content.objection;
           initTree(socketData, msgData);
           initSpecialOpes(socketData, stepState);
           setTimeout(() => {
@@ -200,7 +212,14 @@ export default function Stand() {
   }, []);
 
   stepMsg$.useSubscription((msg) => {
-    if (msg.type === 'check' || msg.type === 'sign' || msg.type === 'freeze' || msg.type === 'remind') {
+    if (
+      msg.type === 'check' ||
+      msg.type === 'sign' ||
+      msg.type === 'freeze' ||
+      msg.type === 'remind' ||
+      msg.type === 'remove' ||
+      msg.type === 'objection'
+    ) {
       console.log('send', msg);
       ws.send(JSON.stringify({ mesType: msg.type, content: msg.content }));
     }
@@ -211,6 +230,9 @@ export default function Stand() {
     if (msg.type === 'compVote') {
       console.log('vote', msg);
       ws.send(JSON.stringify({ mesType: 'vote', content: msg.content }));
+    }
+    if (msg.type === 'back') {
+      ws.send(JSON.stringify({ mesType: msg.type, content: {} }));
     }
     if (msg.type === 'operation') {
       console.log('ope', msg);

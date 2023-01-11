@@ -38,7 +38,7 @@ const UpdateForm: React.FC<UpdateFormProps> = ({ open, onOk, onCancel, modalData
         form
           .validateFields()
           .then((values) => {
-            form.resetFields();
+            // form.resetFields();
             onOk(values);
           })
           .catch((info) => {

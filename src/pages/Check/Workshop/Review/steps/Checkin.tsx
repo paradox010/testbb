@@ -1,12 +1,12 @@
-import { Button, Checkbox, Descriptions } from 'antd';
-import { reviewUserRoleTypeEnum } from '@/dataType';
+import { Button, Checkbox, Descriptions, Statistic } from 'antd';
 import styles from './checkin.module.less';
 import checkImgUrl from '@/assets/checkIn.png';
 
 import { StepProps, StepCompType } from '../msg.d';
 
-import { stepState } from '../basicContext';
+import BasicContext, { stepState } from '../basicContext';
 import { useSnapshot } from 'valtio';
+import { useContext } from 'react';
 
 const Step: React.FC<StepProps> = ({ stepMsg$, msgData }) => {
   const onCheck = () => {
@@ -18,12 +18,11 @@ const Step: React.FC<StepProps> = ({ stepMsg$, msgData }) => {
       },
     });
   };
-
   const { member } = useSnapshot(stepState);
-
+  const basic = useContext(BasicContext);
   return (
     <div className={styles.checkContent}>
-      <div className={styles.checkPic}>
+      <div className={styles.checkPic} >
         <img src={checkImgUrl} />
         <div className={styles.checkText}>
           <div className={styles.upText}>线上签到</div>
@@ -37,6 +36,14 @@ const Step: React.FC<StepProps> = ({ stepMsg$, msgData }) => {
         >
           一键签到
         </Button>
+        <div style={{ position: 'absolute', bottom: 5, right: 34 }}>
+          <span>签到截止倒计时：  </span>
+          <Statistic.Countdown
+            style={{ display: 'inline-block' }}
+            value={basic.startTime + 60 * 1000 * 15}
+            format="mm:ss"
+          />
+        </div>
       </div>
       <Descriptions bordered column={1}>
         <Descriptions.Item label="与会专家" labelStyle={{ width: 150, fontWeight: 500, borderRight: 'none' }}>

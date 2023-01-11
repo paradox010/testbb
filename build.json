@@ -26,6 +26,7 @@
       "target": "http://121.37.179.208:8001/"
     }
   },
+  "babelPresets": ["@babel/preset-typescript"],
   "plugins": [
     [
       "build-plugin-moment-locales",

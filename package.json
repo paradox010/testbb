@@ -20,6 +20,7 @@
     "valtio": "^1.7.6"
   },
   "devDependencies": {
+    "@babel/preset-typescript": "^7.18.6",
     "@iceworks/spec": "^1.6.0",
     "@types/react": "^17.0.52",
     "@types/react-dom": "^17.0.18",
@@ -30,6 +31,8 @@
     "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-valtio": "^0.6.1",
     "ice.js": "^2.6.6",
+    "jest": "^29.3.1",
+    "jest-environment-jsdom": "^29.3.1",
     "stylelint": "^14.0.0",
     "stylelint-config-recommended-less": "^1.0.4"
   },
@@ -41,7 +44,8 @@
     "anyalyzer": "icejs build --  --analyzer",
     "lint": "npm run eslint && npm run stylelint",
     "eslint": "eslint --cache --ext .js,.jsx ./",
-    "stylelint": "stylelint ./**/*.less"
+    "stylelint": "stylelint ./**/*.less",
+    "test": "icejs test"
   },
   "repository": {
     "type": "git",

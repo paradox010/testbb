@@ -2,9 +2,7 @@ import { VoteBasicType, SocketVoteItem, UserVoteRes } from '../msg';
 
 // isFinished的时候需要传递所有的投票结果，以这次投票结果为准；
 
-export interface VoteItem {
-  id: string;
-  content?: string;
+export interface VoteItem extends VoteBasicType {
   isFinished?: boolean;
   voteResult: UserVoteRes[];
   createTime: number;

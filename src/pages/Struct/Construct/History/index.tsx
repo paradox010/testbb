@@ -102,7 +102,10 @@ const History: React.FC<TreeProps> = ({ treeMsg$, yTree, categoryId }) => {
                 操作人
                 <span className={`ds_history_tag ${v.operationType}_tag`} />
               </div>
-              <div>{v.content}</div>
+              <div>
+                {v.content}
+                <span style={{ color: 'red' }}>{!v.isValid && '无效操作'}</span>
+              </div>
             </div>
           </div>
         ))}

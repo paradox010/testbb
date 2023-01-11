@@ -74,29 +74,123 @@ const Online: React.FC<StepProps> = ({ stepMsg$, msgData }) => {
       });
     }
   };
+
+  const onRemove = (userId, reason) => {
+    stepMsg$.emit({
+      type: 'remove',
+      content: {
+        userId,
+        isRemoved: true,
+        removeReason: reason === '其他原因' ? value || reason : reason,
+      },
+    });
+    handleClickChange(false, userId);
+  };
   return (
     <div className={styles.online}>
       <div className={styles.header}>
         <span>
           <Badge status="success" />
-          在线人员({member?.filter((v) => v.isOnline).length})
+          在线人员({member?.filter((v) => !v.isRemoved).filter((v) => v.isOnline).length})
         </span>
         <span>
           <Badge status="error" />
-          离线人员({member?.filter((v) => !v.isOnline).length})
+          离线人员({member?.filter((v) => !v.isRemoved).filter((v) => !v.isOnline).length})
+        </span>
+        <span>
+          <Badge status="default" />
+          剔除({member?.filter((v) => v.isRemoved).length})
         </span>
       </div>
       <div className={styles.userList} style={{ padding: '0 12px' }} ref={ref}>
-        {member?.map((v) => (
-          <div key={v.userId} className={styles.user}>
-            <Badge status={v.isOnline ? 'success' : 'error'} />
-            <Avatar
-              size={28}
-              style={{ backgroundColor: v.isOnline ? '#87d068' : 'lightgrey', marginRight: 5 }}
-              icon={<UserOutlined />}
-            />
-            <span style={{ flex: '1' }}>{v.userName}</span>
-            {/* {msgData.self.userRole === '4' && ( */}
+        {member
+          ?.filter((v) => !v.isRemoved)
+          .map((v) => (
+            <div key={v.userId} className={styles.user}>
+              <Badge status={v.isOnline ? 'success' : 'error'} />
+              <Avatar
+                size={28}
+                style={{ backgroundColor: v.isOnline ? '#87d068' : 'lightgrey', marginRight: 5 }}
+                icon={<UserOutlined />}
+              />
+              <span style={{ flex: '1' }}>{v.userName}</span>
+              {/* {msgData.self.userRole === '4' && ( */}
+              <Popover
+                title={v.userName}
+                open={hovered[v.userId]}
+                onOpenChange={(open) => handleHoverChange(open, v.userId)}
+                content={
+                  <>
+                    <div>联系方式</div>
+                    {v.phone?.split('；').map((p, i) => (
+                      <div key={i} style={{ paddingLeft: 10 }}>
+                        手机号：{p}
+                      </div>
+                    ))}
+                    <div style={{ marginTop: 10 }}>紧急联系人</div>
+                    {v.emergencyContact?.split('；').map((p, i) => (
+                      <div key={i} style={{ paddingLeft: 10 }}>
+                        手机号：{p}
+                      </div>
+                    ))}
+                    <Popover
+                      trigger="click"
+                      open={clicked[v.userId]}
+                      onOpenChange={(open) => handleClickChange(open, v.userId)}
+                      placement="left"
+                      content={
+                        <>
+                          <div className={styles.upTextTitle}>请输入剔除原因</div>
+                          <Select
+                            value={select}
+                            onChange={setSelect}
+                            style={{ width: 250, marginBottom: 10 }}
+                            defaultValue="未签到"
+                            options={defaultReason.map((k) => ({ label: k, value: k }))}
+                          />
+                          <div>
+                            <Input.TextArea
+                              placeholder="手动输入其他原因"
+                              disabled={select !== '其他原因'}
+                              onChange={(e) => setValue(e.target.value)}
+                              value={value}
+                              autoSize={{ minRows: 2, maxRows: 2 }}
+                              allowClear
+                            />
+                          </div>
+                          <div className={styles.buttons}>
+                            <Button onClick={() => handleClickChange(false, v.userId)}>取消</Button>
+                            <Button type="primary" onClick={() => onRemove(v.userId, select)}>
+                              确定剔除
+                            </Button>
+                          </div>
+                        </>
+                      }
+                    >
+                      <div style={{ marginTop: 20, textAlign: 'center' }}>
+                        <Button>剔除会议</Button>
+                      </div>
+                    </Popover>
+                  </>
+                }
+              >
+                <IdcardOutlined />
+              </Popover>
+              {/* )} */}
+            </div>
+          ))}
+        {member
+          ?.filter((v) => v.isRemoved)
+          .map((v) => (
+            <div key={v.userId} className={styles.user}>
+              <Badge status="default" />
+              <Avatar
+                size={28}
+                style={{ backgroundColor: v.isOnline ? '#87d068' : 'lightgrey', marginRight: 5 }}
+                icon={<UserOutlined />}
+              />
+              <span style={{ flex: '1', textDecoration: 'line-through' }}>{v.userName}</span>
+              {/* {msgData.self.userRole === '4' && ( */}
               <Popover
                 title={v.userName}
                 open={hovered[v.userId]}
@@ -107,48 +201,14 @@ const Online: React.FC<StepProps> = ({ stepMsg$, msgData }) => {
                     <div>手机号：</div>
                     <div>紧急联系人：</div>
                     <div>手机号：</div>
-                    <Popover
-                      trigger="click"
-                      open={clicked[v.userId]}
-                      onOpenChange={(open) => handleClickChange(open, v.userId)}
-                      placement="left"
-                      content={
-                        <>
-                          <div>请输入剔除原因</div>
-                          <Select
-                            value={select}
-                            onChange={setSelect}
-                            style={{ width: 150 }}
-                            defaultValue="未签到"
-                            options={defaultReason.map((k) => ({ label: k, value: k }))}
-                          />
-                          <div>
-                            <Input.TextArea
-                              placeholder="手动输入其他原因"
-                              disabled={select !== '其他原因'}
-                              onChange={(e) => setValue(e.target.value)}
-                              value={value}
-                              autoSize={{ minRows: 3, maxRows: 10 }}
-                              allowClear
-                            />
-                          </div>
-                          <div>
-                            <Button onClick={() => handleClickChange(false, v.userId)}>取消</Button>
-                            <Button type="primary">确定剔除</Button>
-                          </div>
-                        </>
-                      }
-                    >
-                      <Button>剔除会议</Button>
-                    </Popover>
                   </>
                 }
               >
                 <IdcardOutlined />
               </Popover>
-            {/* )} */}
-          </div>
-        ))}
+              {/* )} */}
+            </div>
+          ))}
       </div>
     </div>
   );

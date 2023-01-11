@@ -143,6 +143,10 @@ interface moreLogRes {
   };
 }
 
+interface CompBack {
+  type: 'back';
+}
+
 interface CompReset {
   type: 'reset';
 }
@@ -165,4 +169,5 @@ export type MsgType =
   | user
   | moreLogRes
   | CompReset
+  | CompBack
   | CompPublish;

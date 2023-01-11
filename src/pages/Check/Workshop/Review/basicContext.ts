@@ -7,6 +7,7 @@ import { subscribeKey } from 'valtio/utils';
 const initState: StepStateType = {
   member: [],
   record: [],
+  objection: [],
   processState: 0,
   // proposalDomainId: undefined,
   isFreeze: false,
@@ -48,12 +49,13 @@ export interface BasicContextProps {
   name: string;
   domainId: string;
   domainName: string;
-  member: User[];
+  // member: User[]; // 初始化member由于后续有剔除的逻辑，member都由socket当中的member维护
   process: any[];
   domain: DomainType[];
   regulation: any[];
   userRole: string;
   self: User;
+  startTime: number;
 }
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-assertions

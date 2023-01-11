@@ -1,10 +1,11 @@
 import { Badge, Button, Descriptions, Progress } from 'antd';
-import React, { useContext } from 'react';
+import React from 'react';
 
 import styles from './index.module.less';
 
 import type { VoteItem } from '../../socketClass/VoteCenter';
-import BasicContext from '../../basicContext';
+import { stepState } from '../../basicContext';
+import { useSnapshot } from 'valtio';
 
 type ModalType = 'modal' | 'review';
 export interface VoteCompProps {
@@ -16,14 +17,16 @@ export interface VoteCompProps {
   onRemind?: (v: VoteItem) => void;
 }
 
-function roundFun(numberRound:number, roundDigit = 2) {
+function roundFun(numberRound: number, roundDigit = 2) {
   // 四舍五入，保留位数为roundDigit
   if (numberRound >= 0) {
-    const tempNumber = parseInt(numberRound * Math.pow(10, roundDigit) + 0.5 as any as string, 10) / Math.pow(10, roundDigit);
+    const tempNumber =
+      parseInt((numberRound * Math.pow(10, roundDigit) + 0.5) as any as string, 10) / Math.pow(10, roundDigit);
     return tempNumber;
   } else {
     const numberRound1 = -numberRound;
-    const tempNumber = parseInt(numberRound1 * Math.pow(10, roundDigit) + 0.5 as any as string, 10) / Math.pow(10, roundDigit);
+    const tempNumber =
+      parseInt((numberRound1 * Math.pow(10, roundDigit) + 0.5) as any as string, 10) / Math.pow(10, roundDigit);
     return -tempNumber;
   }
 }
@@ -93,16 +96,19 @@ export const Witness: React.FC<{
   onForcePass?: (v: VoteItem) => void;
   onRemind?: (v: VoteItem) => void;
 }> = ({ data, modalType, userType = '1', onForcePass, noTitle = false, onRemind }) => {
-  const basic = useContext(BasicContext);
-  const onForce = () => {
-    onForcePass && onForcePass(data);
-  };
 
-  const vote = data?.voteResult?.length;
-  const total = basic.member.length - 1;
-  const pass = data?.voteResult?.reduce((num, v) => num + (v.isAgree ? 1 : 0), 0) || 0;
+  const onForce = (vres) => {
+    onForcePass && onForcePass({ ...data, ...vres });
+  };
+  const { member } = useSnapshot(stepState);
+  const voteMember = member.filter((v) => !v.isRemoved);
+  const voteResult = (data?.voteResult || []).filter((v) => !v.isRemoved);
+
+  const vote = voteResult.length;
+  const total = voteMember.length - 1;
+  const pass = voteResult.reduce((num, v) => num + (v.isAgree ? 1 : 0), 0) || 0;
   const passPercent = vote ? (pass / vote) * 100 : 0;
-  const refuse = data?.voteResult?.reduce((num, v) => num + (v.isAgree ? 0 : 1), 0) || 0;
+  const refuse = voteResult.reduce((num, v) => num + (v.isAgree ? 0 : 1), 0) || 0;
   return (
     <>
       {modalType === 'modal' && !noTitle && <div className={styles.voteResTitle}>投票信息</div>}
@@ -126,19 +132,36 @@ export const Witness: React.FC<{
         <div className={styles.vote2}>
           <div className={styles.vote21}>
             <div className={styles.progressWrap}>
-              <Progress strokeLinecap="butt" strokeWidth={14} type="circle" percent={roundFun(passPercent)} width={64} />
+              <Progress
+                strokeLinecap="butt"
+                strokeWidth={14}
+                type="circle"
+                percent={roundFun(passPercent)}
+                width={64}
+              />
             </div>
             <div style={{ padding: '0 12px' }}>
               <div>投票通过率</div>
               <div className={styles.percent}>{roundFun(passPercent)}%</div>
             </div>
-            {userType === '4' && (
-              <div className={styles.forceWrap}>
-                <Button type="primary" onClick={onForce} disabled={data.isFinished}>
-                  投票截止
-                </Button>
-              </div>
-            )}
+            <div className={styles.forceWrap}>
+              {data.isFinished && <div>投票结果：{data.result ? '通过' : '不通过'}</div>}
+              {userType === '4' && !data.isFinished && (
+                <>
+                  <Button type="primary" onClick={() => onForce({ result: true })} disabled={data.isFinished}>
+                    投票通过
+                  </Button>
+                  <Button
+                    style={{ marginLeft: 10 }}
+                    type="primary"
+                    onClick={() => onForce({ result: false })}
+                    disabled={data.isFinished}
+                  >
+                    投票不通过
+                  </Button>
+                </>
+              )}
+            </div>
           </div>
         </div>
       </div>
@@ -191,7 +214,7 @@ export const Witness: React.FC<{
             }
           >
             <div>
-              {basic.member
+              {voteMember
                 .filter((v) => !data?.voteResult?.find((k) => k.userId === v.userId))
                 .filter((v) => v.userRole !== '4')
                 ?.map((v) => v.userName)

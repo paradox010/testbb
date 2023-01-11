@@ -19,9 +19,9 @@ export default ({ stepMsg$, msgData }) => {
         <Record stepMsg$={stepMsg$} msgData={msgData} />
       </RND>
       <RND
-        defaultPosX={-270}
+        defaultPosX={-275}
         defaultPosY={70}
-        defaultWidth={310}
+        defaultWidth={320}
         defaultHeight={400}
         text={
           <>

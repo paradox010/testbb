@@ -37,20 +37,20 @@ export interface OpeNode {
 // 操作记录原子化 move是特殊的修改(parentId) 需要记录原信息做特殊处理
 export interface OpeItem {
   id: number; // 时间戳
-  newNodes?: OpeNode[]; // 这个list的用法暂定是错误的。只支持1个节点，多个节点的shouldReComputeWhenAdd状态无法界定
+  newNodes?: OpeNode[]; // 这个list的用法暂定是错误的
   // oldNodes?: OpeNode[];
   opeType: 'add' | 'update' | 'delete' | 'move' | 'sync' | 'cover' | 'import';
   // isServe?: boolean; // 是否由服务器主动发送
   before?: OpeItem;
   after?: OpeItem;
-  shouldReComputeWhenAdd?: boolean; // add操作位插入的时候是否需要重新执行, 涉及到新节点内容
-  moveOk?: boolean;
+  executeOk?: boolean;
+  isFail?: boolean; // 该操作服务器判定无效，如果成功执行了该操作需要回退。
 }
 // 如何存储单个节点的操作记录和原始引用，不涉及到move的话只需要对节点的操作就可以恢复文档
 interface Store {
   [key: string]: {
     state: RTreeNode;
-    opes: OpeItem[]; // 暂定不存放新增操作，存放更新操作用来解决更新的冲突问题
+    opes: Array<Omit<OpeItem, 'opeType'> & { opeType: 'update' | 'cover' }>; // 存放更新操作用来解决更新的冲突问题
   };
 }
 
@@ -101,86 +101,96 @@ class Operation {
   // 插入操作原子 执行操作原子
   insertBuildOpe(opeItem: OpeItem) {
     const locNode = this.findLoc(opeItem);
-    this.split(opeItem, locNode);
-
-    if (locNode === this.last.before || opeItem.opeType === 'update' || opeItem.opeType === 'cover') {
-      this.computeNewState(opeItem);
+    if (opeItem.id === locNode.id && !opeItem.isFail) {
+      console.error('重复的操作入栈');
       return;
     }
 
+    const thisOpeIsFail = opeItem.id === locNode.id;
+
+    let locOpeItem = opeItem;
+    if (!thisOpeIsFail) {
+      this.insertOpeItemAfter(opeItem, locNode);
+    } else {
+      locOpeItem = locNode;
+    }
+    // update/cover 更新的数据不影响其他节点，其中因顺序造成的冲突在节点内部解决。
+    if (locOpeItem === this.last.before) {
+      if (thisOpeIsFail) {
+        locOpeItem.isFail = true;
+      }
+      this.computeNewState(locOpeItem);
+      return;
+    }
+
+    if (locOpeItem.opeType === 'update' || locOpeItem.opeType === 'cover') {
+      if (thisOpeIsFail) {
+        locOpeItem.isFail = true;
+      }
+      this.computeNewState(locOpeItem);
+      return;
+    }
+
+    // other opeType
     // 需要将关联节点的操作回滚再覆盖/或者计算出merge
-    // add和move的冲突
-    let nowLoc = opeItem;
+    let nowLoc = locOpeItem;
     const computeOpes: OpeItem[] = [];
     while (nowLoc !== this.last) {
       computeOpes.push(nowLoc);
       nowLoc = nowLoc.after as OpeItem;
     }
 
-    // sync 相当于特殊的add操作
-    if (opeItem.opeType === 'add' || opeItem.opeType === 'sync' || opeItem.opeType === 'import') {
-      // 如果后续有和该节点相关的move 或者 shouldwhenadd的move时 则需要重新执行所有的move
-      // 否则的话只执行跟add相关的操作
-      if (
-        computeOpes.find((v) => {
-          if (v.shouldReComputeWhenAdd) {
-            return true;
-          }
-          if (v.newNodes?.find((n) => opeItem.newNodes?.map((k) => k.id).includes(n.id))) {
-            return true;
-          }
-          return false;
-        })
-      ) {
-        computeOpes.forEach((v) => {
-          this.computeNewState(v, true);
-        });
-      } else {
-        computeOpes
-          .filter((v, idx) => idx === 0 || v.shouldReComputeWhenAdd)
-          .forEach((v) => {
-            this.computeNewState(v, true);
-          });
+    // reverse 回滚move和delete操作
+    for (let i = computeOpes.length - 1; i >= 0; i--) {
+      const ope = computeOpes[i];
+      if (!ope.executeOk || ope.isFail) {
+        continue;
+      }
+      this.reverseOpe(ope);
+    }
+
+    if (thisOpeIsFail) {
+      if (computeOpes[0]) {
+        computeOpes[0].isFail = true;
       }
     }
-    if (opeItem.opeType === 'move' || opeItem.opeType === 'delete') {
-      // reverse except 0
-      for (let i = computeOpes.length - 1; i > 0; i--) {
-        const ope = computeOpes[i];
-        if (!ope.moveOk) {
-          continue;
-        }
-        if (ope.opeType === 'move' || ope.opeType === 'delete') {
-          const newOpeNodes = ope.newNodes?.map((v) => {
-            return {
-              id: v.id,
-              parentId: v.oldPIDWhenMove,
-              offset: v.oldOffsetWhenMove,
-            };
-          });
-          this.computeNewState(
-            {
-              id: -1,
-              opeType: 'move',
-              newNodes: newOpeNodes,
-            },
-            false,
-            true,
-          );
-        }
-      }
-      computeOpes
-        .filter((v) => v.opeType === 'move' || v.opeType === 'delete')
-        .forEach((v) => {
-          this.computeNewState(v, true);
-        });
+
+    computeOpes
+      .filter((v, idx) => idx === 0 || !v.executeOk || v.opeType === 'move' || v.opeType === 'delete')
+      .forEach((v) => {
+        this.computeNewState(v);
+      });
+  }
+
+  // 回撤一个操作，反向操作
+  reverseOpe(ope: OpeItem) {
+    if (ope.opeType === 'move' || ope.opeType === 'delete') {
+      const newOpeNodes = ope.newNodes?.map((v) => {
+        return {
+          id: v.id,
+          parentId: v.oldPIDWhenMove,
+          offset: v.oldOffsetWhenMove,
+        };
+      });
+      this.computeNewState(
+        {
+          id: -1,
+          opeType: 'move',
+          newNodes: newOpeNodes,
+        },
+        true,
+      );
     }
   }
 
   // addstore 简单的append
-  computeNewState(opeItem: OpeItem, outOrder?: boolean, isUndo?: boolean) {
+  computeNewState(opeItem: OpeItem, isUndo?: boolean) {
+    if (opeItem.isFail && opeItem.opeType !== 'update' && opeItem.opeType !== 'cover') {
+      return;
+    }
     if (opeItem.opeType === 'add' || opeItem.opeType === 'sync' || opeItem.opeType === 'import') {
       opeItem?.newNodes?.forEach((n) => {
+        opeItem.executeOk = false;
         if (this.store[n.id]) {
           // error 无视处理
           console.error('新增节点已经存在于节点树上');
@@ -200,7 +210,6 @@ class Operation {
         } else {
           if (!this.store[n.parentId]) {
             // 游离节点的处理
-            opeItem.shouldReComputeWhenAdd = true;
             console.error('没有找到新增节点的父节点');
             return;
           }
@@ -217,32 +226,40 @@ class Operation {
         // 修改state和store
         this.store[n.id] = {
           state: n as RTreeNode,
-          opes: [],
+          opes: [] as any,
         };
-        opeItem.shouldReComputeWhenAdd = false;
+        opeItem.executeOk = true;
       });
     }
     if (opeItem.opeType === 'update' || opeItem.opeType === 'cover') {
       opeItem?.newNodes?.forEach((n) => {
+        opeItem.executeOk = false;
         const { state: node, opes = [] } = this.checkNodeWithEditPipeline(n.id, opeItem) || {};
         if (!node) {
           return;
         }
         const updatePackage = {};
         const updateKeys = this.opt.updateKeys || [];
-        for (const k of updateKeys) {
-          if (k in n) {
-            updatePackage[k] = n[k];
+        if (!opeItem.isFail) {
+          for (const k of updateKeys) {
+            if (k in n) {
+              updatePackage[k] = n[k];
+            }
           }
         }
+
         // 更新冲突应该如何解决 记录更新操作 当乱序时计算最终更新包
-        const locIndex = this.addToStoreOpes(opes, opeItem);
-        if (outOrder) {
-          // 重新执行已经执行过的update操作来计算更新包
-          for (let i = locIndex + 2; i < opes.length; i++) {
+        const { locIndex, isSame, shouldReUpdate } = this.addUpdateToStoreOpes(opes, opeItem, node);
+
+        if (isSame || shouldReUpdate) {
+          // 整条链路重新执行
+          for (let i = 0; i < opes.length; i++) {
             if (opes[i].opeType === 'update' || opes[i].opeType === 'cover') {
               const middleNode = opes[i].newNodes?.find((x) => x.id === n.id);
               if (!middleNode) {
+                continue;
+              }
+              if (opes[i].isFail) {
                 continue;
               }
               for (const k of updateKeys) {
@@ -259,12 +276,12 @@ class Operation {
             node[k] = updatePackage[k];
           }
         }
-        opeItem.shouldReComputeWhenAdd = false;
+        opeItem.executeOk = true;
       });
     }
     if (opeItem.opeType === 'delete') {
       opeItem?.newNodes?.forEach((n) => {
-        opeItem.moveOk = false;
+        opeItem.executeOk = false;
         const { state: node } = this.checkNodeWithEditPipeline(n.id, opeItem) || {};
         if (!node) {
           return;
@@ -288,14 +305,13 @@ class Operation {
         }
         node.parentId = 'trash';
         trashTree.unshift(node);
-        opeItem.shouldReComputeWhenAdd = false;
-        opeItem.moveOk = true;
+        opeItem.executeOk = true;
       });
     }
     if (opeItem.opeType === 'move') {
       opeItem?.newNodes?.forEach((n) => {
         const { state: node } = this.checkNodeWithEditPipeline(n.id, opeItem) || {};
-        opeItem.moveOk = false;
+        opeItem.executeOk = false;
         if (!node) {
           return;
         }
@@ -338,7 +354,6 @@ class Operation {
         // const { state: newPNode } = newPID ? this.store[newPID] || {} : {};
         if (newPID && !newPNode) {
           // add后置位需要重新执行
-          opeItem.shouldReComputeWhenAdd = true;
           console.error('目标节点缺失');
           return;
         }
@@ -373,15 +388,14 @@ class Operation {
           // eslint-disable-next-line no-lonely-if
           if (dropToGap) {
             this.tree.originTree.splice(dropOffset, 0, node);
-          }else if (this.opt.reverseOrder) {
+          } else if (this.opt.reverseOrder) {
             this.tree.originTree.unshift(node);
           } else {
             this.tree.originTree.push(node);
           }
         }
 
-        opeItem.shouldReComputeWhenAdd = false;
-        opeItem.moveOk = true;
+        opeItem.executeOk = true;
       });
     }
   }
@@ -422,7 +436,6 @@ class Operation {
     }
     const { state: pNode } = this.store[node.parentId as string] || {};
     if (!pNode) {
-      opeItem.shouldReComputeWhenAdd = true;
       console.warn('父节点不在编辑树中？没想到这种场景出现的时间');
       return 0;
     } else {
@@ -435,35 +448,58 @@ class Operation {
     if (node.parentId === 'trash') return 2;
     return 1;
   }
-  // 在store中插入opeItem return 位置索引
-  addToStoreOpes(opes: OpeItem[], opeItem: OpeItem) {
+  // 在store中插入update opeItem return 位置索引
+  addUpdateToStoreOpes(opes: OpeItem[], opeItem: OpeItem, node: RTreeNode) {
     let locIndex = -1;
+    let isSame = false;
     for (let i = opes.length - 1; i >= 0; i--) {
+      if (opes[i].id === opeItem.id) {
+        isSame = true;
+        locIndex = i;
+        break;
+      }
       if (opes[i].id < opeItem.id) {
         locIndex = i;
         break;
       }
     }
-    opes.splice(locIndex + 1, 0, opeItem);
-    return locIndex;
+    locIndex = isSame ? locIndex : locIndex + 1;
+    // 相同数据舍弃
+    if (!isSame) {
+      opes.splice(locIndex, 0, opeItem);
+      // 插入原始包
+      if (locIndex === 0) {
+        const updateKeys = this.opt.updateKeys || [];
+        const tempNode = { id: node.id };
+        for (const k of updateKeys) {
+          tempNode[k] = node[k];
+        }
+        // 插入原始包
+        opes.splice(0, 0, { id: 0, opeType: 'update', newNodes: [tempNode] });
+        locIndex += 1;
+      }
+    } else if (opeItem.isFail) {
+      opes[locIndex].isFail = true;
+    }
+
+    return { locIndex, isSame, shouldReUpdate: locIndex < opes.length - 1 };
   }
   // 检查节点是否存在和是否可以编辑的管道 只有存在和允许编辑才可以被加入单节点的记录里
   checkNodeWithEditPipeline(id: string, opeItem: OpeItem) {
     const storeNode = this.store[id];
     if (!storeNode) {
-      opeItem.shouldReComputeWhenAdd = true;
       console.error('节点不在树上');
       return;
     }
     if (storeNode.state.editStatus === -1) {
-      opeItem.shouldReComputeWhenAdd = false;
       console.error('节点无法编辑');
       return;
     }
     return storeNode;
   }
 
-  split(opeItem: OpeItem, locNode: OpeItem) {
+  // insert opeItem after locNode
+  insertOpeItemAfter(opeItem: OpeItem, locNode: OpeItem) {
     if (!locNode.after) {
       console.error('非法插入');
       return;
@@ -485,6 +521,8 @@ class Operation {
     }
   }
 
+  // 1,2,4 findLoc(3) return 2
+  // 1,2,4 findLoc(2) return 2
   findLoc(opeItem: OpeItem) {
     let locNode = this.last;
     while (locNode && locNode.before && opeItem.id < locNode.id) {
@@ -513,10 +551,11 @@ export function loopNode(node, nodeMap: Store, parentNode?: any) {
 export interface HistoryItem {
   id: number; // 时间戳
   categoryId: string;
-  operationType: 'add' | 'update' | 'move' | 'delete' | 'sync' | 'cover';
+  operationType: 'add' | 'update' | 'move' | 'delete' | 'sync' | 'cover' | 'import';
   receiveTime: number;
   isComplete: boolean;
   content: string;
+  isValid?: boolean;
 }
 
 class History {
@@ -590,6 +629,7 @@ function hasChild(ss) {
     head.appendChild(ss);
   }
 }
+// if test
 const globalStyle = document.createElement('style');
 globalStyle.type = 'text/css';
 
@@ -777,11 +817,11 @@ export class YTree {
   getTowLevelKeys() {
     const keys: string[] = [];
     this.originTree.forEach((v) => {
-      if(v.children?.length>0){
+      if (v.children?.length > 0) {
         keys.push(v.id);
       }
       v?.children?.forEach((vc) => {
-        if(vc.children?.length>0){
+        if (vc.children?.length > 0) {
           keys.push(vc.id);
         }
         // vc?.children?.forEach((vcc) => {

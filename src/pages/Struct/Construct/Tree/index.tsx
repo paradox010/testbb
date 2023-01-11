@@ -348,6 +348,12 @@ const MyTree: React.FC<TreeProps> = ({ treeMsg$, yTree, type = 'build', domainId
     setExpandedKeys((prev) => difference(prev, res));
   };
 
+  const onReverseOpe = ()=>{
+    treeMsg$.emit({
+      type: 'back',
+    });
+  }
+
   const onReset = () => {
     treeMsg$.emit({
       type: 'reset',
@@ -469,6 +475,13 @@ const MyTree: React.FC<TreeProps> = ({ treeMsg$, yTree, type = 'build', domainId
         <Button onClick={onCollapseAll} icon={<UpSquareOutlined />}>
           一键收起
         </Button>
+        {editable && (
+          <>
+            <Button icon={<DeleteOutlined />} onClick={onReverseOpe}>
+              撤回
+            </Button>
+          </>
+        )}
         {type === 'build' && (
           <Popconfirm
             title={

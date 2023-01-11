@@ -5,7 +5,7 @@ import type { MsgType, ModalDataType } from '../msg.d';
 
 import type { YTree as YTreeType } from '../Tree/node';
 
-import { message, Modal } from 'antd';
+import { message } from 'antd';
 import AddModal from './AddModal';
 import UpdateModal from './UpdateModal';
 import MoveModal from './MoveModal';
@@ -55,9 +55,18 @@ const MyModal: React.FC<TreeProps> = ({ treeMsg$, yTree }) => {
     // close事件应当挂个定时器去处理
     closeModal();
   };
-  const onUpdate = (values) => {
+  const onUpdate = (values: Object) => {
     if (!modal.modalData?.id) return;
-    if (modal.modalData?.editStatus === -1) return;
+    const newVal = {};
+    for (const k in values) {
+      if (values[k] !== modal.modalData[k]) {
+        newVal[k] = values[k];
+      }
+    }
+    if (Object.keys(newVal).length < 1) {
+      message.warn('节点无修改');
+      return;
+    }
     treeMsg$.emit({
       type: 'operation',
       content: {
@@ -70,7 +79,6 @@ const MyModal: React.FC<TreeProps> = ({ treeMsg$, yTree }) => {
   };
   const onDelete = () => {
     if (!modal.modalData?.id) return;
-    if (modal.modalData?.editStatus === -1) return;
     treeMsg$.emit({
       type: 'operation',
       content: {
@@ -158,7 +166,6 @@ const MyModal: React.FC<TreeProps> = ({ treeMsg$, yTree }) => {
 
   const onImportOk = (res) => {
     if (!modal.modalData?.id) return;
-    if (modal.modalData?.editStatus === -1) return;
     treeMsg$.emit({
       type: 'operation',
       content: {
@@ -199,7 +206,12 @@ const MyModal: React.FC<TreeProps> = ({ treeMsg$, yTree }) => {
         type="cover"
       />
       <DeleteModal open={modal.open === 'delete'} onCancel={closeModal} onOk={onDelete} modalData={modal.modalData} />
-      <MoveConfirmModal open={modal.open === 'move_confirm'} onCancel={closeModal} onOk={onMoveConfirm} modalData={modal.modalData} />
+      <MoveConfirmModal
+        open={modal.open === 'move_confirm'}
+        onCancel={closeModal}
+        onOk={onMoveConfirm}
+        modalData={modal.modalData}
+      />
       {/* <Modal title={null} open={modal.open === 'move_confirm'} onCancel={closeModal} onOk={onMoveConfirm}>
         <div style={{ fontSize: 16, lineHeight: 2, paddingTop: 26 }}>
           确定将<span style={{ background: '#bae7ff', padding: '5px 10px' }}>{modal.modalData?.name}</span>
