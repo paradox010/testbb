@@ -240,7 +240,7 @@ export default function Stand() {
                 </>
               }
               noPadding
-              defaultPosY={100}
+              defaultPosY={0}
               title={'回收站'}
             >
               <TrashTree treeMsg$={treeMsg$} yTree={yTree} />

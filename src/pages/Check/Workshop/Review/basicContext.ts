@@ -42,6 +42,7 @@ interface DomainType {
   userName: string;
   categoryCount: number;
   featureCount: number;
+  version: string;
 }
 
 export interface BasicContextProps {
@@ -52,6 +53,9 @@ export interface BasicContextProps {
   // member: User[]; // 初始化member由于后续有剔除的逻辑，member都由socket当中的member维护
   process: any[];
   domain: DomainType[];
+  domainPreferred: DomainType[];
+  domainCount: number;
+  domainPreferredCount: number;
   regulation: any[];
   userRole: string;
   self: User;

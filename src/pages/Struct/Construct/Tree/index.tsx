@@ -17,6 +17,7 @@ import {
   FormOutlined,
   PlusSquareOutlined,
   UndoOutlined,
+  RedoOutlined,
   UpSquareOutlined,
 } from '@ant-design/icons';
 
@@ -477,7 +478,7 @@ const MyTree: React.FC<TreeProps> = ({ treeMsg$, yTree, type = 'build', domainId
         </Button>
         {editable && (
           <>
-            <Button icon={<DeleteOutlined />} onClick={onReverseOpe}>
+            <Button icon={<UndoOutlined />} onClick={onReverseOpe}>
               撤回
             </Button>
           </>
@@ -494,7 +495,7 @@ const MyTree: React.FC<TreeProps> = ({ treeMsg$, yTree, type = 'build', domainId
             cancelText="取消"
             onConfirm={onReset}
           >
-            <Button icon={<UndoOutlined />}>重置</Button>
+            <Button icon={<RedoOutlined />}>重置</Button>
           </Popconfirm>
         )}
       </div>

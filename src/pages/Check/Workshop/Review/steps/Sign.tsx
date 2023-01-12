@@ -109,7 +109,7 @@ TypedStep.Title = ({ stepMsg$, msgData }) => {
           版本发布
         </Button>
       )}
-      {msgData.self.userRole === '1' && <Button onClick={goBefore}>上一步</Button>}
+      {process.env.NODE_ENV === 'development' && <Button onClick={goBefore}>上一步</Button>}
     </>
   );
 };

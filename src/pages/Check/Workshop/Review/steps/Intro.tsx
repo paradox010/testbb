@@ -39,9 +39,9 @@ const Step: React.FC<StepProps> = ({ stepMsg$, msgData }) => {
         </Collapse.Panel>
         <Collapse.Panel header="讨论版本介绍" key="2">
           <>
-            <div>本期评选版本-个，入围版本{basic.domain.length}个</div>
+            <div>本期评选版本{basic.domainCount}个，入围版本{basic.domainPreferredCount}个</div>
             <div className={styles.versionWrap}>
-              {basic.domain?.map((v) => (
+              {basic.domainPreferred?.map((v) => (
                 <div key={v.domainPubId} className={styles.versionItem}>
                   <div className={styles.titleWrap}>{v.domainName}</div>
                   <div className={styles.subTitle}>演讲人：{v.userName}</div>
@@ -110,7 +110,7 @@ TypedStep.Title = ({ stepMsg$, msgData }) => {
       content: {
         processState: 3,
         isFirstProposal: true,
-        proposalDomainId: basic.domain?.[0]?.domainPubId,
+        proposalDomainId: basic.domainPreferred?.[0]?.domainPubId,
       },
     });
   };
@@ -130,7 +130,7 @@ TypedStep.Title = ({ stepMsg$, msgData }) => {
           开始提议介绍
         </Button>
       )}
-      {basic.self.userRole === '1' && <Button onClick={goBefore}>上一步</Button>}
+      {process.env.NODE_ENV === 'development' && <Button onClick={goBefore}>上一步</Button>}
     </>
   );
 };

@@ -38,20 +38,20 @@ const AvatarDropdown: React.FC<GlobalHeaderRightProps> = ({ menu = true }) => {
 
   const onMenuClick = (event: MenuInfo) => {
     const { key } = event;
-    const { search, pathname } = window.location;
+    // const { search, pathname } = window.location;
     const urlParams = new URL(window.location.href).searchParams;
     /** 此方法会跳转到 redirect 参数所在的位置 */
-    const redirect = urlParams.get('redirect');
+    // const redirect = urlParams.get('redirect');
 
     if (key === 'logout') {
       loginOut();
       return;
     }
-    history?.replace({
+    history?.push({
       pathname: `/user/${key}`,
-      search: stringify({
-        redirect: pathname + search,
-      }),
+      // search: stringify({
+      //   redirect: pathname + search,
+      // }),
     });
   };
 

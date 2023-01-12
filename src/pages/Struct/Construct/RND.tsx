@@ -86,7 +86,7 @@ const RndWrap = ({
         }}
         ref={rndRef}
         style={onOpenStyle()}
-        bounds={'body'}
+        bounds={'window'}
         onMouseDown={onClickLayerUp}
         resizeHandleComponent={{ bottomRight: <BottomRightHandle /> }}
       >

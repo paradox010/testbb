@@ -27,7 +27,7 @@ const Domains: React.FC<StepProps & { editable?: boolean }> = ({ stepMsg$, msgDa
           onSelect={setSelect}
           options={domain?.map((v) => ({
             value: v.domainPubId,
-            label: v.domainName,
+            label: `${v.domainName} V${v.version}`,
           }))}
         />
       </div>

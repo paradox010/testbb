@@ -1,5 +1,5 @@
 import { EditableProTable, ProColumns, EditableFormInstance, ActionType } from '@ant-design/pro-table';
-import { Input, Select, Radio } from 'antd';
+import { Input, Select, Radio, Button } from 'antd';
 import React, { useRef, useState } from 'react';
 
 import { EventEmitter } from 'ahooks/lib/useEventEmitter';
@@ -137,7 +137,11 @@ const TT: React.FC<TreeProps> = ({ attrMsg$, yAttr, editable = true }) => {
       },
     },
   ];
-
+  const onReverseOpe = () => {
+    attrMsg$.emit({
+      type: 'back',
+    });
+  };
   const [radio, setRadio] = useState('1');
 
   return (
@@ -148,6 +152,9 @@ const TT: React.FC<TreeProps> = ({ attrMsg$, yAttr, editable = true }) => {
           <div>
             <div style={{ marginBottom: 20 }} className="ant-descriptions-title">
               产品属性信息
+              <Button style={{ position: 'absolute', right: 24 }} onClick={onReverseOpe}>
+                撤回
+              </Button>
             </div>
             <Radio.Group
               style={{ marginBottom: 8 }}

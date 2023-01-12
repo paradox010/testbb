@@ -58,7 +58,7 @@ const Step: React.FC<StepProps> = ({ stepMsg$, msgData }) => {
     });
   };
 
-  const nowDomain = findItem(basic.domain, proposalDomainId);
+  const nowDomain = findItem(basic.domainPreferred, proposalDomainId);
 
   // const renderFn2 = (nodeData, k?: string[]) => {
   //   if (!nodeData) return null;
@@ -92,7 +92,7 @@ const Step: React.FC<StepProps> = ({ stepMsg$, msgData }) => {
           演讲时间：
           <TimeDown value={proposalStartTime || new Date().valueOf()} />
         </div>
-        <div>下一位演讲人：{findNext(basic.domain, proposalDomainId)?.userName || '-'}</div>
+        <div>下一位演讲人：{findNext(basic.domainPreferred, proposalDomainId)?.userName || '-'}</div>
       </div>
       <AttrRoute stepMsg$={stepMsg$} style={{ height: 'calc(100% - 56px)' }}>
         <div className="dsTree">
@@ -152,7 +152,7 @@ TypedStep.Title = ({ stepMsg$, msgData }) => {
   const { proposalDomainId } = useSnapshot(stepState);
 
   const goNextProp = () => {
-    const item = findNext(basic.domain, proposalDomainId);
+    const item = findNext(basic.domainPreferred, proposalDomainId);
     if (!item) return;
     stepMsg$.emit({
       type: 'process',
@@ -179,10 +179,10 @@ TypedStep.Title = ({ stepMsg$, msgData }) => {
           <Button type="primary" onClick={goNext}>
             进入提议讨论
           </Button>
-          <Button onClick={goNextProp} disabled={!findNext(basic.domain, proposalDomainId)}>
+          <Button onClick={goNextProp} disabled={!findNext(basic.domainPreferred, proposalDomainId)}>
             下一位演讲人
           </Button>
-          <Button onClick={goBefore}>上一步</Button>
+          {process.env.NODE_ENV === 'development' && <Button onClick={goBefore}>上一步</Button>}
         </>
       )}
     </>

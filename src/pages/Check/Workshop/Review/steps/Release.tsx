@@ -103,7 +103,7 @@ const Title: React.FC<StepProps> = ({ stepMsg$, msgData }) => {
           <Button type="primary" onClick={onSubmit}>
             确认
           </Button>
-          <Button onClick={goBefore}>上一步</Button>
+          {process.env.NODE_ENV === 'development' && <Button onClick={goBefore}>上一步</Button>}
         </>
       )}
     </>

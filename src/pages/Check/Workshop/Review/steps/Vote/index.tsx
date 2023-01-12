@@ -90,7 +90,7 @@ TypedStep.Title = ({ stepMsg$, msgData }) => {
           <Button type="primary" onClick={goNext}>
             进入签名
           </Button>
-          <Button onClick={goBefore}>上一步</Button>
+          {process.env.NODE_ENV === 'development' && <Button onClick={goBefore}>上一步</Button>}
         </>
       )}
     </>

@@ -106,6 +106,9 @@ export default function Content({ id, back }) {
     if (msg.type === 'operation') {
       ws.send(JSON.stringify({ mesType: msg.type, content: msg.content }));
     }
+    if (msg.type === 'back') {
+      ws.send(JSON.stringify({ mesType: msg.type, content:{} }));
+    }
     if (msg.type === 'user') {
       // 记录一下本用户的最近一次选中操作，
       if (msg.content.location) {
@@ -146,7 +149,7 @@ export default function Content({ id, back }) {
             </>
           }
           noPadding
-          defaultPosY={100}
+          defaultPosY={0}
           title={'回收站'}
         >
           <TrashAttr attrMsg$={attrMsg$} yTree={yAttr} />
@@ -155,11 +158,11 @@ export default function Content({ id, back }) {
           text={
             <>
               <AppstoreOutlined style={{ fontSize: 20 }} />
-              <div>功能列表</div>
+              <div>智能辅助</div>
             </>
           }
-          defaultPosY={130}
-          title={'功能列表'}
+          defaultPosY={20}
+          title={'智能辅助'}
         >
           <Tool />
         </RND>

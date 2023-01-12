@@ -57,16 +57,14 @@ const DiscussTitle: React.FC<StepProps> = ({ stepMsg$, msgData }) => {
     });
   };
   const goBefore = () => {
-    if(!(msgData?.voteCenter?.getLatest() || { isFinished: true }).isFinished){
+    if (!(msgData?.voteCenter?.getLatest() || { isFinished: true }).isFinished) {
       message.warn('请结束当前投票后再进入下一阶段');
       return;
     }
     stepMsg$.emit({
       type: 'process',
       content: {
-        processState: 3,
-        isFirstProposal: true,
-        proposalDomainId: 1,
+        processState: 2,
       },
     });
   };
@@ -99,9 +97,7 @@ const DiscussTitle: React.FC<StepProps> = ({ stepMsg$, msgData }) => {
           <Button type="primary" onClick={goNext}>
             编辑结束
           </Button>
-          <Button type="primary" onClick={goBefore}>
-            上一步
-          </Button>
+          {process.env.NODE_ENV === 'development' && <Button onClick={goBefore}>上一步</Button>}
         </>
       )}
       {msgData.self.userRole === '4' && (
